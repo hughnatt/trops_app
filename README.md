@@ -1,6 +1,6 @@
-# trops_app
+# TROP'S Flutter Mobile App
+This is the repository for the TROP'S mobile app. The app is based on the [Flutter](https://flutter.dev) framework.
 
-A new Flutter application.
 
 ## Getting Started
 
