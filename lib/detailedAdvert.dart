@@ -79,8 +79,8 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
                 width: MediaQuery.of(context).size.width,
                 child: Carousel(
                   images: [
-                    NetworkImage('https://img.phonandroid.com/2019/12/leboncoin-arnaque-sms.jpg'),
-                    NetworkImage('https://img.phonandroid.com/2019/12/leboncoin-arnaque-sms.jpg'),
+                    NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
+                    NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
                   ],
                   autoplay: false,
                   dotSize: 4,
