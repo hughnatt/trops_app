@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:carousel_pro/carousel_pro.dart';
 
 class DetailedAdvertPage extends StatefulWidget {
 
@@ -73,7 +74,19 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
       body: Column(
           //mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Image.network("https://img.phonandroid.com/2019/12/leboncoin-arnaque-sms.jpg"),
+            SizedBox(
+                height: 250.0,
+                width: MediaQuery.of(context).size.width,
+                child: Carousel(
+                  images: [
+                    NetworkImage('https://img.phonandroid.com/2019/12/leboncoin-arnaque-sms.jpg'),
+                    NetworkImage('https://img.phonandroid.com/2019/12/leboncoin-arnaque-sms.jpg'),
+                  ],
+                  autoplay: false,
+                  dotSize: 4,
+                  dotBgColor: Colors.grey[800].withOpacity(0),
+                )
+            ),
             titleSection,
             textSection,
             buttonSection,
