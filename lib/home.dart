@@ -66,6 +66,12 @@ class _HomePageState extends State<HomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.account_circle),
+              onPressed: (){
+                Navigator.pushNamed(context, '/profile');
+              },
+            ),
             Text(
               'You have pushed the button this many times:',
             ),
