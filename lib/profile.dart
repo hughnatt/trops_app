@@ -30,8 +30,8 @@ class _ProfilePageState extends State<ProfilePage>{
   Widget build(BuildContext context) {
 
     return Scaffold(
-        body: Center(
-          child: ProfileOverview(),
+        body: SingleChildScrollView(
+            child: ProfileOverview(),
         ),
         floatingActionButton: Visibility(
           visible: _isFabVisible,
@@ -70,18 +70,82 @@ class ProfileOverview extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(20),
+            child : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Icon(Icons.accessibility_new),
+                Material(
+                  elevation: 4.0,
+                  shape: CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  color: Colors.transparent,
+                  child: Ink.image(
+                    image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg"),
+                    fit: BoxFit.cover,
+                    width: 120.0,
+                    height: 120.0,
+                    child: InkWell(
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+                Icon(Icons.access_alarms),
+              ],
+            ),
+          ),
+         
           Text(
               "Nom d'utilisateur",
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.center,
               textScaleFactor: 2.0,
               style: TextStyle(fontWeight: FontWeight.bold)
           ),
           Text(
             "Email",
-            textAlign: TextAlign.left,
+            textAlign: TextAlign.center,
           ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Mes locations",
+              textAlign: TextAlign.left,
+              textScaleFactor: 1.5,
+            ),
+          ),
+          SizedBox(
+            height: 300,
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: 15,
+              itemBuilder: (BuildContext context, int index) => Card(
+                child: Center(child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg")),
+              ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "Mes annonces",
+              textAlign: TextAlign.left,
+              textScaleFactor: 1.5,
+            ),
+          ),
+          SizedBox(
+            height: 300,
+            child: ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: 15,
+              itemBuilder: (BuildContext context, int index) => Card(
+              child: Center(child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg")),
+              ),
+            ),
+          ),
+
         ],
       ),
     );
