@@ -71,7 +71,9 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
       ),
     );
     return Scaffold(
-      body: Column(
+      body: SingleChildScrollView(
+        child:
+        Column(
           //mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(
@@ -93,6 +95,7 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
 
           ],
         ),
+      )
     );
   }
 
