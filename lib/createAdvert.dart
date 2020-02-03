@@ -12,13 +12,14 @@ class CreateAdvertPage extends StatefulWidget {
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
-  List<File> imageFile = [null,null,null,null];
+  List<File> imageFile = List(4);
 
   _openGallery(BuildContext context, int index) async{
     var picture = await ImagePicker.pickImage(source: ImageSource.gallery);
     this.setState((){
       this.imageFile[index] = picture;
     });
+    Navigator.of(context).pop();
   }
 
   _openCamera(BuildContext context,int index) async{
@@ -26,6 +27,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     this.setState((){
       this.imageFile[index] = picture;
     });
+    Navigator.of(context).pop();
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index){
