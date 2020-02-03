@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState(){
+    super.initState();
     loadAdverts();
   }
 
@@ -149,20 +150,19 @@ class _HomePageState extends State<HomePage> {
   Widget _categoryItemWidget(index) {
 
     return Center(
-      child: Container(
-        padding: EdgeInsets.only(left: 10.0),
-        child: Material(
-          elevation: 2.0,
-          borderRadius: BorderRadius.all(Radius.circular(25.0)),
-          child: Container(
-            padding: EdgeInsets.only(left: 12.0,top: 7.0,bottom: 7.0,right: 12.0),
-            color: Colors.blue,
-            child: Text(_categories[index]),
+      child: Padding(
+        padding: EdgeInsets.only(left: 10),
+        child: RaisedButton(
+          onPressed: () {},
+          color: Colors.blue,
+          textColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25.0),
           ),
+          child: Text(_categories[index]),
         ),
       ),
     );
-
 
   }
 
@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     Widget searchBar = Container(
-      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 10),
+      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0),
       child: new Material(
         borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
         elevation: 2.0,
@@ -223,7 +223,7 @@ class _HomePageState extends State<HomePage> {
           children: <Widget>[
             searchBar,
             SizedBox(
-              height: 35,
+              height: 50,
               child: _getListCategories(),
             ),
             Expanded(
