@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/tools/advert.dart';
 
@@ -13,6 +14,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   List<Advert> _adverts = new List<Advert>();
+  List<String> _categories = [
+    "Ski",
+    "Surf",
+    "Foot",
+    "Rugby",
+    "Tennis",
+    "Basket",
+    "Volley",
+    "Hand",
+    "Badminton",
+    "Pétanque",
+    "Danse"
+  ];
 
   @override
   void initState(){
@@ -117,6 +131,41 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _getListCategories(){
+
+    ListView _listCategories = ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: _categories.length,
+      itemBuilder: (context, index) {
+        return _categoryItemWidget(index);
+      }
+    );
+
+    return Container(
+      child: _listCategories,
+    );
+  }
+
+  Widget _categoryItemWidget(index) {
+
+    return Center(
+      child: Container(
+        padding: EdgeInsets.only(left: 10.0),
+        child: Material(
+          elevation: 2.0,
+          borderRadius: BorderRadius.all(Radius.circular(25.0)),
+          child: Container(
+            padding: EdgeInsets.only(left: 12.0,top: 7.0,bottom: 7.0,right: 12.0),
+            color: Colors.blue,
+            child: Text(_categories[index]),
+          ),
+        ),
+      ),
+    );
+
+
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -138,8 +187,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     Widget searchBar = Container(
-      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 20.0),
-      margin: const EdgeInsets.only(),
+      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 10),
       child: new Material(
         borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
         elevation: 2.0,
@@ -158,7 +206,8 @@ class _HomePageState extends State<HomePage> {
                           color: Theme.of(context).accentColor,
                         ),
                         border: InputBorder.none),
-                  ))
+                  )
+              )
             ],
           ),
         ),
@@ -170,8 +219,12 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: <Widget>[
             searchBar,
+            SizedBox(
+              height: 35,
+              child: _getListCategories(),
+            ),
             Expanded(
-              child: _getListViewWidget()
+              child: _getListViewWidget(),
             )
           ],
         ),
