@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     Widget searchBar = Container(
-      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
+      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 20.0),
       margin: const EdgeInsets.only(),
       child: new Material(
         borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
@@ -57,38 +57,77 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
+    List<Container> cardBuilder(int length){
+      
+      List<Container> cards = List.generate(length, (int index) =>
 
-
-    List<Card> cardBuilder(int length){
-      List<Card> cards = List.generate(length, (int index) =>
-        Card(
-          child: InkWell(
-            splashColor: Colors.blue.withAlpha(50),
-            onTap: () {},
-            child: ListTile(
-              leading: Image.network("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FDEMFOeYtrAo%2Fmaxresdefault.jpg&f=1&nofb=1",
-                  fit: BoxFit.cover),
-              title: Text("Le titre de l'annonce"),
-              subtitle: Text("Bonjour, je suis une description sur 2 lignes."),
-              isThreeLine: true,
+        Container(
+            margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 0),
+          child: Material(
+            borderRadius: BorderRadius.circular(10.0),
+            elevation: 2.0,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
+                  child: FadeInImage.assetNetwork(
+                    placeholder: "",
+                    image: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FDEMFOeYtrAo%2Fmaxresdefault.jpg&f=1&nofb=1",
+                    height: 100,
+                    width: 100,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Column(
+                  children: <Widget>[
+                    Text(
+                      "Titre de l'annonce",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    Text(
+                      "10€",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.orange
+                      ),
+                    ),
+                    Text(
+                      "Je suis une description",
+                      maxLines: 2,
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    )
+                  ],
+                )
+              ],
             ),
-          ),
-        ),
+          )
+        )
+
       );
+
       return cards;
     }
 
     return Scaffold(
-      body: Column(
-        children: <Widget>[
-          searchBar,
-          Expanded(
-            child: ListView(
-              children: cardBuilder(12),
-            ),
-          )
-        ],
+      body: SafeArea(
+        child: Column(
+          children: <Widget>[
+            searchBar,
+            Expanded(
+              child: ListView(
+                children: cardBuilder(12),
+              ),
+            )
+          ],
+        ),
       ),
+
 
       bottomNavigationBar: bottomBar,
       floatingActionButton: FloatingActionButton(
