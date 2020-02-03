@@ -176,11 +176,14 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            IconButton(icon: Icon(Icons.star), onPressed: () {}),
-            IconButton(icon: Icon(Icons.star), onPressed: () {}),
-            SizedBox(width: 40,),
-            IconButton(icon: Icon(Icons.star), onPressed: () {}),
-            IconButton(icon: Icon(Icons.star), onPressed: () {}),
+            SizedBox(width: 1),
+            IconButton(icon: Icon(Icons.home), onPressed : () {}),
+            IconButton(icon: Icon(Icons.search), onPressed: () {},),
+            SizedBox(width: 40), // The dummy child
+            IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+            IconButton(icon: Icon(Icons.message), onPressed: () {}),
+            SizedBox(width: 1),
+
           ],
         ),
       ),
