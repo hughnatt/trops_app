@@ -58,19 +58,42 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  Widget _buildMultilineTextField(int nbLines, String label) {
-    return TextField(
-      maxLines: nbLines,
-      textCapitalization: TextCapitalization.sentences,
-      decoration: InputDecoration(
-        counterText: ' ',
-        labelText: label,
-        hintText: 'Type something...',
-        border: OutlineInputBorder(),
-      ),
-      onChanged: (text) => setState(() {}),
+  Widget _buildMultilineTextField(int nbLines, String label, IconData iconName) {
+    return Container(
+        padding: EdgeInsets.only(top: 50),
+        child : 
+          TextField(
+              maxLines: nbLines,
+              decoration: InputDecoration(
+                icon: Icon(iconName),
+                labelText: label,
+                hintText: 'Type something...',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                ),
+              )
+          )
     );
   }
+
+  Widget _buildValuePicker(){
+    return Container(
+      padding: EdgeInsets.only(top: 50),
+      child:
+        TextField(
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            icon: Icon(Icons.euro_symbol),
+            labelText: 'Enter an integer:',
+            contentPadding: EdgeInsets.all(10.0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            ),
+          ),
+        ),
+    );
+  }
+
 
   Widget _buildPictureGrild(){
     return GridView.count(
@@ -99,18 +122,38 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 Widget _boxContent(int index){
     if(imageFile[index] == null){
-      return Text(
-        'Picture ' + (index+1).toString(),
-        style: Theme.of(context).textTheme.headline,
+      return Icon(
+          Icons.camera_enhance,
+          size: 50,
       );
     }
     else{
       return Image.file(imageFile[index],fit: BoxFit.cover);
     }
-
 }
 
-  @override
+Widget _createBottomBar(){
+  return BottomAppBar(
+    shape: const CircularNotchedRectangle(),
+    child: Container(
+      height: 50.0,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          SizedBox(width: 1),
+          IconButton(icon: Icon(Icons.home), onPressed : () {}),
+          IconButton(icon: Icon(Icons.search), onPressed: () {},),
+          SizedBox(width: 40), // The dummy child
+          IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+          IconButton(icon: Icon(Icons.message), onPressed: () {}),
+          SizedBox(width: 1),
+        ],
+      ),
+    ),
+  );
+}
+
+  /*@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -143,8 +186,57 @@ Widget _boxContent(int index){
             )
       ),
     );
+  }*/
 
 
+  @override
+  Widget build(BuildContext context) {
 
+    return Scaffold(
+        body:
+          SafeArea(
+            child:
+              DefaultTabController(
+                length: 3,
+                child: Builder(
+                  builder: (BuildContext context) => Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: <Widget>[
+                        TabPageSelector(),
+                        Expanded(
+                          child:
+                            TabBarView(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child:
+                                      Center(
+                                        child:
+                                          Column(
+                                            children: <Widget>[
+                                              _buildMultilineTextField(1, "Product name",Icons.title),
+                                              _buildMultilineTextField(2, "Product description",Icons.description),
+                                              _buildValuePicker()
+                                            ],
+                                          ),
+                                      )
+
+                                ),
+                                Center(
+                                  child:_buildPictureGrild(),
+                                ),
+                                _buildPictureGrild()
+                              ],
+                            ),
+                        ),
+                      ],
+                    )
+                  ),
+                ),
+              )
+          ),
+      bottomNavigationBar: _createBottomBar(),
+    );
   }
 }
