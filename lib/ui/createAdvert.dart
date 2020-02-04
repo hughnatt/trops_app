@@ -322,34 +322,39 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   @override
   Widget build(BuildContext context) {
    return Scaffold(
+
      backgroundColor: Colors.white,
-     body: GridView.count(
-       crossAxisCount: 1,
+     body: ListView(
        scrollDirection: Axis.vertical,
        shrinkWrap: true,
        children: <Widget>[
-        CardSettings(
+        Container(
+           child: Column(
+            children: <Widget>[
+              CardSettingsHeader(label: 'Informations Générales'),
+              _buildMultilineTextField(1, "Nom du produit", Icons.title),
+              _buildMultilineTextField(2, "Description", Icons.description),
+              _buildValuePicker(),],
 
-           children: <Widget>[
-             CardSettingsHeader(label: 'Informations Générales'),
-             _buildMultilineTextField(1, "Nom du produit", Icons.title),
-             _buildMultilineTextField(2, "Description", Icons.description),
-             _buildValuePicker(),
-           ],
-           ),
-         CardSettings(
-             children: <Widget>[
-               CardSettingsHeader(label: 'Photos'),
-               _buildPictureGrild()
-             ],
-           ),
-         CardSettings(
-           children: <Widget>[
-             CardSettingsHeader(label: 'Informations Générales'),
-             _buildMultilineTextField(1, "Nom du produit", Icons.title),
-             _buildMultilineTextField(2, "Description", Icons.description),
-             _buildValuePicker(),
-           ],
+          )
+        ),
+         Container(
+             padding: EdgeInsets.only(top: 25),
+             child: Column(
+               children: <Widget>[
+                 CardSettingsHeader(label: 'Photos'),
+                 _buildPictureGrild(),
+               ],
+             )
+         ),
+         Container(
+             padding: EdgeInsets.only(top: 25),
+             child: Column(
+               children: <Widget>[
+                 CardSettingsHeader(label: 'Date'),
+                 _buildDateButton()],
+
+             )
          ),
        ],
      )
