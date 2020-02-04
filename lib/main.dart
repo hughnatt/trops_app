@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/home.dart';
+import 'ui/home.dart';
 
 void main() => runApp(TropsApp());
 
