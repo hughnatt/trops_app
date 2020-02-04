@@ -12,20 +12,68 @@ class CreateAdvertPage extends StatefulWidget {
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
-  List<File> imageFile = List(4);
+  List<File> imageFiles = List(4);
+  int imageIndex = 0;
 
   _openGallery(BuildContext context, int index) async{
+    int indexToSave;
     var picture = await ImagePicker.pickImage(source: ImageSource.gallery);
     this.setState((){
-      this.imageFile[index] = picture;
+      if(imageIndex == 4){
+        indexToSave = index;
+      }
+      else{
+        indexToSave= imageIndex;
+        imageIndex++;
+      }
+      this.imageFiles[indexToSave] = picture;
     });
     Navigator.of(context).pop();
   }
 
   _openCamera(BuildContext context,int index) async{
+    int indexToSave;
     var picture = await ImagePicker.pickImage(source: ImageSource.camera);
     this.setState((){
-      this.imageFile[index] = picture;
+      if(imageIndex == 4){
+        indexToSave = index;
+      }
+      else{
+        indexToSave= imageIndex;
+        imageIndex++;
+      }
+      this.imageFiles[indexToSave] = picture;
+    });
+    Navigator.of(context).pop();
+  }
+
+  _openSource(BuildContext context,@required int index, @required String source) async{
+
+    int indexToSave;
+    ImageSource sourceChoice;
+
+    switch(source) {
+      case "camera": {
+        sourceChoice = ImageSource.camera;
+      }
+      break;
+
+      case "gallery": {
+        sourceChoice = ImageSource.gallery;
+      }
+      break;
+    }
+
+    var picture = await ImagePicker.pickImage(source: sourceChoice);
+    this.setState((){
+      if(imageIndex == 4){
+        indexToSave = index;
+      }
+      else{
+        indexToSave= imageIndex;
+        imageIndex++;
+      }
+      this.imageFiles[indexToSave] = picture;
     });
     Navigator.of(context).pop();
   }
@@ -40,7 +88,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
               GestureDetector(
                 child: Text("Load picture"),
                 onTap: (){
-                  _openGallery(context,index);
+                  _openSource(context,index,"gallery");
                 },
               ),
 
@@ -48,7 +96,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
               GestureDetector(
                 child: Text("Take picture"),
                 onTap: (){
-                  _openCamera(context,index);
+                  _openSource(context,index,"camera");
                 },
               )
             ],
@@ -121,14 +169,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
 Widget _boxContent(int index){
-    if(imageFile[index] == null){
+    if(imageFiles[index] == null){
       return Icon(
           Icons.camera_enhance,
           size: 50,
       );
     }
     else{
-      return Image.file(imageFile[index],fit: BoxFit.cover);
+      return Image.file(imageFiles[index],fit: BoxFit.cover);
     }
 }
 
@@ -214,6 +262,8 @@ Widget _createBottomBar(){
                                       Center(
                                         child:
                                           Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
                                             children: <Widget>[
                                               _buildMultilineTextField(1, "Product name",Icons.title),
                                               _buildMultilineTextField(2, "Product description",Icons.description),
