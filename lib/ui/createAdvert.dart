@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:card_settings/card_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/rendering/box.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 
@@ -83,16 +83,15 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Widget _buildMultilineTextField(int nbLines, String label,
       IconData iconName) {
     return Container(
-        padding: EdgeInsets.only(top: 50,right: 50),
+        padding: EdgeInsets.only(top: 25,right: 50,left:10),
         child:
         TextField(
             maxLines: nbLines,
             decoration: InputDecoration(
-              icon: Icon(iconName),
+              //icon: Icon(iconName),
               labelText: label,
-              hintText: 'Type something...',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                borderRadius: BorderRadius.all(Radius.circular(1.0)),
               ),
             )
         )
@@ -101,16 +100,16 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   Widget _buildValuePicker() {
     return Container(
-      padding: EdgeInsets.only(top: 50,right: 50,bottom: 50),
+      padding: EdgeInsets.only(top: 20,right: 50,left:10,bottom:20),
       child:
       TextField(
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          icon: Icon(Icons.euro_symbol),
-          labelText: 'Enter an integer:',
+          //icon: Icon(Icons.euro_symbol),
+          labelText: 'Coût de location (par jour)',
           contentPadding: EdgeInsets.all(10.0),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
+            borderRadius: BorderRadius.all(Radius.circular(1.0)),
           ),
         ),
       ),
@@ -131,25 +130,28 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   void _pickDateTime() async{
-    DateTime firstDate;
+    DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
     DateTime lastDate;
 
-    if(picked != null && picked.first != null && picked.last != null){
-      firstDate = picked.first;
+    if(picked != null && picked.first != null && picked.last != null){ //if the user already picked some dates
+      firstDate = picked.first; //we will show him the range choose before
       lastDate = picked.last;
     }
     else{
-      picked = List(2);
-      firstDate = lastDate = DateTime.now();
+      firstDate = lastDate = DateTime.now(); //else we just show the basic date (today)
     }
 
-    picked = await DateRagePicker.showDatePicker(
+    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affecter to the result, but if the user tap cancel, picked was loose because replace by NULL
         context: context,
         initialFirstDate: firstDate,
         initialLastDate: lastDate,
         firstDate: DateTime(DateTime.now().year),
         lastDate: DateTime(DateTime.now().year + 5)
     );
+
+    if(returnedDates != null){ //Allow to handle the cancel button that pop the context
+      picked = returnedDates;
+    }
   }
 
   Widget _buildPictureGrild() {
@@ -167,8 +169,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey, width: 3.0),
                 ),
-                width: 500,
-                height: 500,
+                width: 200,
+                height: 200,
                 child: _boxContent(index),
               ),
             )
@@ -266,7 +268,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 //  }
 
 
-  @override
+  /*@override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
@@ -314,5 +316,43 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         ),
       )
     );
+  }*/
+
+
+  @override
+  Widget build(BuildContext context) {
+   return Scaffold(
+     backgroundColor: Colors.white,
+     body: GridView.count(
+       crossAxisCount: 1,
+       scrollDirection: Axis.vertical,
+       shrinkWrap: true,
+       children: <Widget>[
+        CardSettings(
+
+           children: <Widget>[
+             CardSettingsHeader(label: 'Informations Générales'),
+             _buildMultilineTextField(1, "Nom du produit", Icons.title),
+             _buildMultilineTextField(2, "Description", Icons.description),
+             _buildValuePicker(),
+           ],
+           ),
+         CardSettings(
+             children: <Widget>[
+               CardSettingsHeader(label: 'Photos'),
+               _buildPictureGrild()
+             ],
+           ),
+         CardSettings(
+           children: <Widget>[
+             CardSettingsHeader(label: 'Informations Générales'),
+             _buildMultilineTextField(1, "Nom du produit", Icons.title),
+             _buildMultilineTextField(2, "Description", Icons.description),
+             _buildValuePicker(),
+           ],
+         ),
+       ],
+     )
+     );
   }
 }
