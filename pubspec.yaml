@@ -26,6 +26,9 @@ dependencies:
   # Font Awesome Icons, notably used in login and register screens
   font_awesome_flutter: ^8.0.1
 
+  #HTTP plugin for communicating with our REST APIs
+  http: ^0.12.0+4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

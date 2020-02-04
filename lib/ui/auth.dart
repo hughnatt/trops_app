@@ -28,6 +28,8 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
+import 'package:trops_app/api/auth.dart' as Auth;
+import 'package:http/http.dart' as Http;
 
 
 class AuthPage extends StatefulWidget {
@@ -42,24 +44,23 @@ class _AuthPageState extends State<AuthPage>
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  final FocusNode myFocusNodeEmailLogin = FocusNode();
-  final FocusNode myFocusNodePasswordLogin = FocusNode();
+  final FocusNode _focusLoginEmail = FocusNode();
+  final FocusNode _focusLoginPassword = FocusNode();
+  final FocusNode _focusRegisterName = FocusNode();
+  final FocusNode _focusRegisterEmail = FocusNode();
+  final FocusNode _focusRegisterPassword = FocusNode();
+  final FocusNode _focusRegisterConfirmPassword = FocusNode();
 
-  final FocusNode myFocusNodePassword = FocusNode();
-  final FocusNode myFocusNodeEmail = FocusNode();
-  final FocusNode myFocusNodeName = FocusNode();
+  TextEditingController _ctrlLoginEmail = new TextEditingController();
+  TextEditingController _ctrlLoginPassword = new TextEditingController();
+  TextEditingController _ctrlRegisterEmail = new TextEditingController();
+  TextEditingController _ctrlRegisterName = new TextEditingController();
+  TextEditingController _ctrlRegisterPassword = new TextEditingController();
+  TextEditingController _ctrlRegisterConfirmPassword = new TextEditingController();
 
-  TextEditingController loginEmailController = new TextEditingController();
-  TextEditingController loginPasswordController = new TextEditingController();
-
-  bool _obscureTextLogin = true;
-  bool _obscureTextSignup = true;
-  bool _obscureTextSignupConfirm = true;
-
-  TextEditingController signupEmailController = new TextEditingController();
-  TextEditingController signupNameController = new TextEditingController();
-  TextEditingController signupPasswordController = new TextEditingController();
-  TextEditingController signupConfirmPasswordController = new TextEditingController();
+  bool _obscureLoginPassword = true;
+  bool _obscureRegisterPassword = true;
+  bool _obscureRegisterConfirmPassword = true;
 
   PageController _pageController;
 
@@ -70,7 +71,12 @@ class _AuthPageState extends State<AuthPage>
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: SingleChildScrollView(
+      body: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return false;
+          },
+        child : SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height >= 775.0
@@ -124,14 +130,18 @@ class _AuthPageState extends State<AuthPage>
             ),
           ),
         ),
+      ),
     );
   }
 
   @override
   void dispose() {
-    myFocusNodePassword.dispose();
-    myFocusNodeEmail.dispose();
-    myFocusNodeName.dispose();
+    // Clean up the focus node when the Form is disposed.
+    _focusLoginEmail.dispose();
+    _focusLoginPassword.dispose();
+    _focusRegisterName.dispose();
+    _focusRegisterEmail.dispose();
+    _focusRegisterPassword.dispose();
     _pageController?.dispose();
     super.dispose();
   }
@@ -237,8 +247,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeEmailLogin,
-                          controller: loginEmailController,
+                          focusNode: _focusLoginEmail,
+                          controller: _ctrlLoginEmail,
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -266,9 +276,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodePasswordLogin,
-                          controller: loginPasswordController,
-                          obscureText: _obscureTextLogin,
+                          focusNode: _focusLoginPassword,
+                          controller: _ctrlLoginPassword,
+                          obscureText: _obscureLoginPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -284,11 +294,8 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 17.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleLogin,
-                              child: Icon(
-                                _obscureTextLogin
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleLoginPassword,
+                              child: Icon(_obscureLoginPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
@@ -333,8 +340,8 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () =>
-                        showInSnackBar("Login button pressed")),
+                    onPressed: () => _login()
+                ),
               ),
             ],
           ),
@@ -467,8 +474,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeName,
-                          controller: signupNameController,
+                          focusNode: _focusRegisterName,
+                          controller: _ctrlRegisterName,
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.words,
                           style: TextStyle(
@@ -496,8 +503,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeEmail,
-                          controller: signupEmailController,
+                          focusNode: _focusRegisterEmail,
+                          controller: _ctrlRegisterEmail,
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -524,9 +531,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodePassword,
-                          controller: signupPasswordController,
-                          obscureText: _obscureTextSignup,
+                          focusNode: _focusRegisterPassword,
+                          controller: _ctrlRegisterPassword,
+                          obscureText: _obscureRegisterPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -541,11 +548,8 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleSignup,
-                              child: Icon(
-                                _obscureTextSignup
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleRegisterPassword,
+                              child: Icon(_obscureRegisterPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
@@ -562,8 +566,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          controller: signupConfirmPasswordController,
-                          obscureText: _obscureTextSignupConfirm,
+                          focusNode: _focusRegisterConfirmPassword,
+                          controller: _ctrlRegisterConfirmPassword,
+                          obscureText: _obscureRegisterConfirmPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -578,11 +583,8 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleSignupConfirm,
-                              child: Icon(
-                                _obscureTextSignupConfirm
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleRegisterConfirmPassword,
+                              child: Icon(_obscureRegisterConfirmPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
@@ -627,8 +629,8 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () =>
-                        showInSnackBar("SignUp button pressed")),
+                    onPressed: () => _register()
+                ),
               ),
             ],
           ),
@@ -647,21 +649,39 @@ class _AuthPageState extends State<AuthPage>
         duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
-  void _toggleLogin() {
+  void _toggleLoginPassword() {
     setState(() {
-      _obscureTextLogin = !_obscureTextLogin;
+      _obscureLoginPassword = !_obscureLoginPassword;
     });
   }
 
-  void _toggleSignup() {
+  void _toggleRegisterPassword() {
     setState(() {
-      _obscureTextSignup = !_obscureTextSignup;
+      _obscureRegisterPassword = !_obscureRegisterPassword;
     });
   }
 
-  void _toggleSignupConfirm() {
+  void _toggleRegisterConfirmPassword() {
     setState(() {
-      _obscureTextSignupConfirm = !_obscureTextSignupConfirm;
+      _obscureRegisterConfirmPassword = !_obscureRegisterConfirmPassword;
     });
+  }
+
+  void _register() async {
+    if (_ctrlRegisterPassword.text == _ctrlRegisterConfirmPassword.text){
+      await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+    } else {
+      showInSnackBar("Les mots de passe ne correspondent pas !");
+    }
+  }
+
+  void _login() async {
+    Http.Response response;
+    response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
+    if (response.statusCode != 200){
+      showInSnackBar("Echec");
+    } else {
+      showInSnackBar("Connecté");
+    }
   }
 }
