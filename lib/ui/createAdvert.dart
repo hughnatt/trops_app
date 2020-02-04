@@ -40,11 +40,11 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice);
     this.setState(() {
-      if (imageIndex == 4) {
+      if (imageIndex == 4 || index < imageIndex) { //if the user have already load 4 picture or we we want to change one
         indexToSave = index;
       }
-      else {
-        indexToSave = imageIndex;
+      else { //The user haven't load 4 image but choose an index too far (exemple: he clicked on the 3rd picture sample; but the second haven't any loaded picture)
+        indexToSave = imageIndex; //the index where put the photo is the first availible in the list
         imageIndex++;
       }
       this.imageFiles[indexToSave] = picture;
@@ -66,11 +66,18 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                 },
               ),
 
-              Padding(padding: EdgeInsets.all(8.0)),
+              Padding(padding: EdgeInsets.all(10.0)),
               GestureDetector(
                 child: Text("Take picture"),
                 onTap: () {
                   _openSource(context, index, "camera");
+                },
+              ),
+              Padding(padding: EdgeInsets.all(10.0)),
+              GestureDetector(
+                child: Text("Delete picture"),
+                onTap: () {
+                  //TODO implement it !
                 },
               )
             ],
