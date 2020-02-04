@@ -357,7 +357,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
              )
          ),
        ],
-     )
+     ),
+       bottomNavigationBar: _buildBottomBar(),
      );
   }
 }
