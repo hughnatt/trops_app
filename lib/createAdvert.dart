@@ -251,7 +251,6 @@ Widget _createBottomBar(){
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
                       children: <Widget>[
-                        TabPageSelector(),
                         Expanded(
                           child:
                             TabBarView(
@@ -280,6 +279,7 @@ Widget _createBottomBar(){
                               ],
                             ),
                         ),
+                        TabPageSelector(),
                       ],
                     )
                   ),
