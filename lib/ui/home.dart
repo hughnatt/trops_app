@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
                   ClipRRect(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
                     child: FadeInImage.assetNetwork(
-                      placeholder: "",
+                      placeholder: "assets/Rolling-1s-200px.gif",
                       image: _adverts[index].getImage(),
                       height: 100,
                       width: 100,
