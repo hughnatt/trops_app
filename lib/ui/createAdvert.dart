@@ -156,6 +156,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   Widget _buildPictureGrild() {
     return GridView.count(
+      physics: const NeverScrollableScrollPhysics(), //prevent the user to scroll on the gridview instead of the list
       crossAxisCount: 2,
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -348,7 +349,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
              )
          ),
          Container(
-             padding: EdgeInsets.only(top: 25),
              child: Column(
                children: <Widget>[
                  CardSettingsHeader(label: 'Date'),
