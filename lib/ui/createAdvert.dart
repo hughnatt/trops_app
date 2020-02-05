@@ -54,35 +54,31 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
     return showDialog(context: context, builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("How to import picture ?"),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              GestureDetector(
-                child: Text("Load picture"),
-                onTap: () {
-                  _openSource(context, index, "gallery");
-                },
-              ),
-
-              Padding(padding: EdgeInsets.all(10.0)),
-              GestureDetector(
-                child: Text("Take picture"),
-                onTap: () {
-                  _openSource(context, index, "camera");
-                },
-              ),
-              Padding(padding: EdgeInsets.all(10.0)),
-              GestureDetector(
-                child: Text("Delete picture"),
-                onTap: () {
-                  //TODO implement it !
-                },
-              )
-            ],
+      return SimpleDialog(
+        title: Text("Que voulez-vous faire ?"),
+        children: <Widget>[
+          ListTile(
+            leading: Icon(Icons.image),
+            title: Text("Importer depuis la gallerie"),
+            onTap: () {
+              _openSource(context, index, "gallery");
+            },
           ),
-        ),
+          ListTile(
+            leading: Icon(Icons.photo_camera),
+            title: Text("Prendre une photo"),
+            onTap: () {
+              _openSource(context, index, "camera");
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.delete),
+            title: Text("Supprimer la photo"),
+            onTap: () {
+              print("Not yet implemented");
+            },
+          )
+        ],
       );
     });
   }
@@ -90,16 +86,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Widget _buildMultilineTextField(int nbLines, String label,
       IconData iconName) {
     return Container(
-        padding: EdgeInsets.only(top: 25,right: 50,left:10),
-        child:
-        TextField(
+        padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
+        child: TextField(
             maxLines: nbLines,
             decoration: InputDecoration(
-              //icon: Icon(iconName),
-              labelText: label,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(1.0)),
-              ),
+              icon: Icon(iconName),
+              hintText: label,
+              border: InputBorder.none,
             )
         )
     );
@@ -107,36 +100,35 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   Widget _buildValuePicker() {
     return Container(
-      padding: EdgeInsets.only(top: 20,right: 50,left:10,bottom:20),
+      padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
       child:
       TextField(
         keyboardType: TextInputType.number,
         decoration: InputDecoration(
-          //icon: Icon(Icons.euro_symbol),
-          labelText: 'Coût de location (par jour)',
-          contentPadding: EdgeInsets.all(10.0),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(1.0)),
-          ),
+          icon: Icon(Icons.euro_symbol),
+          hintText: 'Coût de location (par jour)',
+          border: InputBorder.none,
         ),
       ),
     );
   }
 
   Widget _buildValidationButton(){
-    return MaterialButton(
+    return Container(
+      padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
+      child: MaterialButton(
         color: Colors.green,
         textColor: Colors.white,
+        onPressed: () {},
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
-        onPressed: () => _pickDateTime(),
-        child: new Text("Crée l'annonce")
+        child: Text("Créer l'annonce"),
+      ),
     );
   }
 
   Widget _buildDateButton() {
-
     return MaterialButton(
         color: Colors.blueAccent,
         textColor: Colors.white,
@@ -180,20 +172,24 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       children: List.generate(4, (index) {
-        return Center(
-            child: GestureDetector(
-              onTap: () {
-                _showChoiceDialog(context, index);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey, width: 3.0),
+        return GestureDetector(
+          onTap: () {
+            _showChoiceDialog(context, index);
+          },
+          child: Container(
+              padding: EdgeInsets.all(10.0),
+              child: Material(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
                 ),
-                width: 200,
-                height: 200,
-                child: _boxContent(index),
-              ),
-            )
+                color: Colors.white,
+                child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    child: _boxContent(index),
+                  ),
+              )
+          ),
         );
       }),
     );
@@ -202,7 +198,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Widget _boxContent(int index) {
     if (imageFiles[index] == null) {
       return Icon(
-        Icons.camera_enhance,
+        Icons.photo_camera,
         size: 50,
       );
     }
@@ -232,149 +228,80 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
-
-//@override
-//  Widget build(BuildContext context) {
-//
-//    return Scaffold(
-//        body:
-//          SafeArea(
-//            child:
-//              DefaultTabController(
-//                length: 2,
-//                child: Builder(
-//                  builder: (BuildContext context) => Padding(
-//                    padding: const EdgeInsets.all(8.0),
-//                    child: Column(
-//                      children: <Widget>[
-//                        Flexible(
-//                          child:
-//                            TabBarView(
-//                              children: [
-//                                Padding(
-//                                  padding: EdgeInsets.all(10),
-//                                  child:
-//                                    Container(
-//                                      color: Colors.blue,
-//                                      child:
-//                                        Column(
-//                                          mainAxisAlignment: MainAxisAlignment.center,
-//                                          crossAxisAlignment: CrossAxisAlignment.center,
-//                                          children: <Widget>[
-//                                            _buildMultilineTextField(1, "Product name",Icons.title),
-//                                            _buildMultilineTextField(2, "Product description",Icons.description),
-//                                            _buildValuePicker(),
-//                                            _buildDateButton()
-//                                          ],
-//                                        ),
-//                                    )
-//
-//                                ),
-//                                Center(
-//                                  child:_buildPictureGrild(),
-//                                ),
-//                              ],
-//                            ),
-//                        ),
-//                        TabPageSelector(),
-//                      ],
-//                    )
-//                  ),
-//                ),
-//              )
-//          ),
-//      bottomNavigationBar: _buildBottomBar(),
-//    );
-//  }
-
-
-  /*@override
-  Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: SafeArea(
-        child: Scaffold(
-          body: Stack(
-            children: <Widget>[
-              TabBarView(
-                children: <Widget>[
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Center(
-                         child: Container(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Material(
-
-                              borderRadius: BorderRadius.all(const Radius.circular(25.0)),
-                              elevation: 10.0,
-                              child:Column(
-                                children: <Widget>[
-                                  _buildMultilineTextField(1, "Nom du produit", Icons.title),
-                                  _buildMultilineTextField(2, "Description du produit", Icons.description),
-                                  _buildValuePicker(),
-                                  _buildDateButton()
-                                ],
-                              ),
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                  _buildPictureGrild()
-                ],
-              ),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: TabPageSelector(),
-              )
-
-            ],
-          ),
-          bottomNavigationBar: _buildBottomBar(),
-        ),
-      )
-    );
-  }*/
-
-
   @override
   Widget build(BuildContext context) {
    return Scaffold(
-
      backgroundColor: Colors.white,
      body: ListView(
        scrollDirection: Axis.vertical,
        shrinkWrap: true,
        children: <Widget>[
-        Container(
-           child: Column(
-            children: <Widget>[
-              CardSettingsHeader(label: 'Informations Générales'),
-              _buildMultilineTextField(1, "Nom du produit", Icons.title),
-              _buildMultilineTextField(2, "Description", Icons.description),
-              _buildValuePicker(),
-              _buildDateButton()],
 
-          )
-        ),
          Container(
-             padding: EdgeInsets.only(top: 25),
-             child: Column(
-               children: <Widget>[
-                 CardSettingsHeader(label: 'Photos'),
-                 _buildPictureGrild(),
-               ],
-             )
+           padding: EdgeInsets.only(top: 25),
+           child: Center(
+             child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
+           )
          ),
+
+        Container(
+          padding: EdgeInsets.all(25.0),
+          child: Material(
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+            ),
+            child: Column(
+              children: <Widget>[
+                _buildMultilineTextField(1, "Nom du produit", Icons.title),
+                Container(
+                  width: 250.0,
+                  height: 1.0,
+                  color: Colors.grey[400],
+                ),
+                _buildValuePicker(),
+              ],
+            ),
+          ),
+        ),
+
+        Container(
+          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+          child: Material(
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)
+            ),
+            child: _buildMultilineTextField(4, "Description", Icons.description),
+          ),
+        ),
+
+        Container(
+          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+          child: _buildDateButton()
+        ),
+
+        Container(
+          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
+          child: Material(
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)
+            ),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text("Ajouter des photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
+                ),
+                _buildPictureGrild()
+              ],
+            ),
+          ),
+        ),
           Container(
             padding: EdgeInsets.only(top:25),
-             child: Column(
-               children: <Widget>[
-                 _buildValidationButton()
-               ],
-             )
+             child: _buildValidationButton()
          ),
        ],
      ),
