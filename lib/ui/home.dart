@@ -6,8 +6,6 @@ import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/common/trops_bottom_bar.dart';
 import 'package:trops_app/ui/common/trops_fab.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
-import 'package:trops_app/models/User.dart';
-import 'package:trops_app/ui/profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
