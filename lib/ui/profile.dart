@@ -49,11 +49,11 @@ class _ProfilePageState extends State<ProfilePage>{
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 SizedBox(width: 1),
-                IconButton(icon: Icon(Icons.home), onPressed : _toggleFabVisibility),
-                IconButton(icon: Icon(Icons.search), onPressed: () {},),
+                IconButton(icon: Icon(Icons.home), onPressed : () {Navigator.pushNamed(context, "/");}),
+                IconButton(icon: Icon(Icons.search), onPressed: _toggleFabVisibility,),
                 SizedBox(width: 40), // The dummy child
                 IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-                IconButton(icon: Icon(Icons.message), onPressed: () {}),
+                IconButton(icon: Icon(Icons.account_circle), onPressed: () {}),
                 SizedBox(width: 1),
               ],
             )

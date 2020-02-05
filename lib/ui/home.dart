@@ -177,8 +177,8 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed : () {}),
-            IconButton(icon: Icon(Icons.search), onPressed: () {},),
+            IconButton(icon: Icon(Icons.home), onPressed : () {Navigator.pushNamed(context, "/");}),
+            IconButton(icon: Icon(Icons.search), onPressed: () {Navigator.pushNamed(context, "/search");},),
             SizedBox(width: 40), // The dummy child
             IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
             IconButton(icon: Icon(Icons.account_circle), onPressed: () { Navigator.pushNamed(context, "/profile"); }),
@@ -209,6 +209,8 @@ class _HomePageState extends State<HomePage> {
                           color: Theme.of(context).accentColor,
                         ),
                         border: InputBorder.none),
+                    onTap: ()  => Navigator.pushNamed(context, "/search"),
+                    readOnly: true,
                   )
               )
             ],
