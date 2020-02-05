@@ -43,7 +43,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
         );
 
         if (query != '') {
-          if (advert.getTitle().) {
+          if (query == advert.getTitle()) {
             _adverts.add(advert);
           }
         } else {
@@ -159,7 +159,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
                         border: InputBorder.none),
                     onSubmitted: onSubmitted,
                     onChanged: onSubmitted,
-                  ))
+                  ),
+              ),
             ],
           ),
         ),
@@ -195,34 +196,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
-  onSubmitted(query) {
+  onSubmitted(query) async {
     loadAdverts(query);
     print(_adverts.length);
     print(query);
   }
 }
-
-/*class AnnonceCard extends StatefulWidget {
-  AnnonceCard({Key key}) : super(key: key);
-
-  @override
-  _AnnonceCardState createState() => _AnnonceCardState();
-}
-
-class _AnnonceCardState extends State<ColorfulTile> {
-  Color myColor;
-
-  @override
-  void initState() {
-    super.initState();
-    myColor = UniqueColorGenerator.getColor();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        color: myColor,
-        child: Padding(
-          padding: EdgeInsets.all(70.0),
-        ));
-  }*/
