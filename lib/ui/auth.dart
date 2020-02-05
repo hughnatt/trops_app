@@ -265,6 +265,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 17.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusLoginPassword),
                         ),
                       ),
                       Container(
@@ -301,6 +302,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => _login(),
                         ),
                       ),
                     ],
@@ -492,6 +494,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterEmail),
                         ),
                       ),
                       Container(
@@ -520,6 +523,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterPassword)
                         ),
                       ),
                       Container(
@@ -555,6 +559,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword)
                         ),
                       ),
                       Container(
@@ -590,6 +595,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => _register(),
                         ),
                       ),
                     ],
@@ -640,13 +646,11 @@ class _AuthPageState extends State<AuthPage>
   }
 
   void _onSignInButtonPress() {
-    _pageController.animateToPage(0,
-        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+    _pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
   void _onSignUpButtonPress() {
-    _pageController?.animateToPage(1,
-        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+    _pageController?.animateToPage(1, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
   void _toggleLoginPassword() {
