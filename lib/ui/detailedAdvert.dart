@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
-import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/models/Advert.dart';
 
 class DetailedAdvertPage extends StatelessWidget {
 

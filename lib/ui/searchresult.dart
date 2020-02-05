@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/models/Advert.dart';
 
 class SearchResultPage extends StatefulWidget {
 

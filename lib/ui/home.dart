@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/ui/profile.dart';
