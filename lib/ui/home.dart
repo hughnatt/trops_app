@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/advert.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
+import 'package:trops_app/models/User.dart';
+import 'package:trops_app/ui/profile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -185,7 +187,15 @@ class _HomePageState extends State<HomePage> {
             IconButton(icon: Icon(Icons.search), onPressed: () {Navigator.pushNamed(context, "/search");},),
             SizedBox(width: 40), // The dummy child
             IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-            IconButton(icon: Icon(Icons.account_circle), onPressed: () { Navigator.pushNamed(context, "/profile"); }),
+            IconButton(icon: Icon(Icons.account_circle), onPressed: ()
+            {
+              if (User.current != null)
+              {
+                Navigator.push(context, MaterialPageRoute(builder : (context) => ProfilePage(user : User.current)));
+              } else {
+                Navigator.pushNamed(context, "/auth");
+              }
+            }),
             SizedBox(width: 1),
 
           ],
