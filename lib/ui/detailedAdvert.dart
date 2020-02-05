@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
+import 'package:trops_app/models/advert.dart';
 
-class DetailedAdvertPage extends StatefulWidget {
+class DetailedAdvertPage extends StatelessWidget {
 
-  @override
-  _DetailedAdvertPage createState() => _DetailedAdvertPage();
-}
+  final Advert advert;
 
-class _DetailedAdvertPage extends State<DetailedAdvertPage> {
-
-
+  DetailedAdvertPage({Key key, @required this.advert}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +26,14 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
                 Container(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    'NAME OF THE PRODUCT',
+                    advert.getTitle(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
                 Text(
-                  'NAME OF THE SELLER',
+                  advert.getPrice().toString(),
                   style: TextStyle(
                     color: Colors.grey[500],
                   ),
@@ -60,42 +57,41 @@ class _DetailedAdvertPage extends State<DetailedAdvertPage> {
     Widget textSection = Container(
       padding: const EdgeInsets.all(edgeAllPadding),
       child: Text(
-        "Per hoc minui studium suum existimans Paulus,"
-        "ut erat in conplicandis negotiis artifex dirus,"
-        "unde ei Catenae inditum est cognomentum, "
-        "vicarium ipsum eos quibus praeerat adhuc defensantem "
-        "ad sortem periculorum communium traxit. et instabat ut eum "
-        "quoque cum tribunis et aliis pluribus ad comitatum imperatoris vinctum perduceret: "
-        "quo percitus ille exitio urgente abrupto ferro eundem adoritur Paulum. ",
+        advert.getDescription(),
         softWrap: true,
       ),
     );
-    return Scaffold(
-      body: SingleChildScrollView(
-        child:
-        Column(
-          //mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            SizedBox(
-                height: 250.0,
-                width: MediaQuery.of(context).size.width,
-                child: Carousel(
-                  images: [
-                    NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
-                    NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
-                  ],
-                  autoplay: false,
-                  dotSize: 4,
-                  dotBgColor: Colors.grey[800].withOpacity(0),
-                )
-            ),
-            titleSection,
-            textSection,
-            buttonSection,
 
-          ],
+    return Scaffold(
+      appBar: AppBar(
+      ,
+      ),
+      body: SafeArea(
+        child:  SingleChildScrollView(
+          child:
+          Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                  height: 250.0,
+                  width: MediaQuery.of(context).size.width,
+                  child: Carousel(
+                    images: [
+                      NetworkImage(advert.getImage()),
+                      NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
+                    ],
+                    autoplay: false,
+                    dotSize: 4,
+                    dotBgColor: Colors.grey[800].withOpacity(0),
+                  )
+              ),
+              titleSection,
+              textSection,
+              buttonSection,
+            ],
+          ),
         ),
-      )
+      ),
     );
   }
 

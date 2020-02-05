@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/ui/detailedAdvert.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -60,7 +61,8 @@ class _HomePageState extends State<HomePage> {
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
-        return Container(
+        return GestureDetector(
+          child: Container(
             margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 0),
             child: Material(
               borderRadius: BorderRadius.circular(10.0),
@@ -78,10 +80,12 @@ class _HomePageState extends State<HomePage> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice(), _adverts[index].getDescription())
+                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice().toString(), _adverts[index].getDescription())
                 ],
               ),
-            )
+            ),
+          ),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : _adverts[index]))),
         );
       },
     );
