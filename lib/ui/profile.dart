@@ -3,6 +3,8 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/ui/common/trops_bottom_bar.dart';
+import 'package:trops_app/ui/common/trops_fab.dart';
 
 class ProfilePage extends StatefulWidget {
   final User user;
@@ -57,8 +59,12 @@ class _ProfilePageState extends State<ProfilePage>{
                   padding: EdgeInsets.all(20),
                   child : Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      Icon(Icons.accessibility_new),
+                      IconButton(
+                        icon : Icon(FontAwesomeIcons.cogs),
+                        onPressed: null,
+                      ),
                       Material(
                         elevation: 4.0,
                         shape: CircleBorder(),
@@ -91,6 +97,9 @@ class _ProfilePageState extends State<ProfilePage>{
                 Text(
                   widget.user.getEmail(),
                   textAlign: TextAlign.center,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top : 20.0),
                 ),
                 Align(
                   alignment: Alignment.centerLeft,
@@ -137,29 +146,10 @@ class _ProfilePageState extends State<ProfilePage>{
         ),
         floatingActionButton: Visibility(
           visible: _isFabVisible,
-          child: FloatingActionButton(
-            child: Icon(Icons.search),
-            onPressed: () {},
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-          ),
+          child: TropsFloatingActionButton()
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: BottomAppBar(
-            shape: _bottomBarShape,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                SizedBox(width: 1),
-                IconButton(icon: Icon(Icons.home), onPressed : () {Navigator.pushNamed(context, "/");}),
-                IconButton(icon: Icon(Icons.search), onPressed: _toggleFabVisibility,),
-                SizedBox(width: 40), // The dummy child
-                IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-                IconButton(icon: Icon(Icons.account_circle), onPressed: () {}),
-                SizedBox(width: 1),
-              ],
-            )
-        )
+        bottomNavigationBar: TropsBottomAppBar()
     );
   }
 
