@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/ui/profile.dart';
+import 'package:trops_app/ui/searchresult.dart';
 import 'ui/home.dart';
 
 void main() => runApp(TropsApp());
@@ -13,7 +14,8 @@ class TropsApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         '/' : (context) => HomePage(),
-        '/profile' : (context) => ProfilePage()
+        '/profile' : (context) => ProfilePage(),
+        '/search' : (context) => SearchResultPage(),
       },
     );
   }

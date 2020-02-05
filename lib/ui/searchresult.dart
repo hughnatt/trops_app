@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/models/advert.dart';
 
 class SearchResultPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class SearchResultPage extends StatefulWidget {
 class _SearchResultPageState extends State<SearchResultPage>{
 
   List<Advert> _adverts = new List<Advert>();
+
 
   @override
   void initState(){
@@ -138,41 +140,55 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   Widget _searchBar(){
     return Container(
-      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0),
-      margin: const EdgeInsets.only(),
-      child: new Material(
-        borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
-        elevation: 2.0,
-        child: new Container(
-          height: 45.0,
-          margin: new EdgeInsets.only(left: 16.0, right: 16.0),
-          child: new Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              new Expanded(
-                  child: new TextField(
-                    maxLines: 1,
-                    decoration: new InputDecoration(
-                        icon: Icon(
-                          Icons.search,
-                        ),
-                        border: InputBorder.none),
-                    onSubmitted: onSubmitted,
-                    onChanged: onSubmitted,
-                  ),
-              ),
-            ],
+      padding: EdgeInsets.all(10.0),
+      child: Row(
+        children: <Widget>[
+          IconButton(
+              icon:Icon(Icons.arrow_back),
+              onPressed:() => Navigator.pop(context, false)
           ),
-        ),
-      ),
+          Expanded(
+            child: Material(
+              borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
+              elevation: 3.0,
+              child: Container(
+                height: 45.0,
+                margin: EdgeInsets.only(left: 16.0, right: 5.0),
+                child: new TextField(
+                  maxLines: 1,
+                  autofocus: true,
+                  decoration: new InputDecoration(
+                      icon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).accentColor
+                      ),
+                      suffixIcon: PopupMenuButton<String>(
+                        icon: Icon(Icons.arrow_drop_down),
+                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                          const PopupMenuItem<String>(
+                            value: 'Advanced Search',
+                            child: Text('Advanced Search'),
+                          ),
+                        ],
+                      ),
+                      border: InputBorder.none),
+                  onSubmitted: onSubmitted,
+                  onChanged: onSubmitted,
+                ),
+              ),
+            ),
+          ),
+        ],
+      )
     );
   }
 
 
 
+
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
 
       body: SafeArea(
