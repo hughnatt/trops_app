@@ -63,8 +63,7 @@ class DetailedAdvertPage extends StatelessWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(
-      ),
+      appBar: AppBar(),
       body: SafeArea(
         child:  SingleChildScrollView(
           child:
