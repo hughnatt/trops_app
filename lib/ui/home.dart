@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
             IconButton(icon: Icon(Icons.search), onPressed: () {},),
             SizedBox(width: 40), // The dummy child
             IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-            IconButton(icon: Icon(Icons.message), onPressed: () {}),
+            IconButton(icon: Icon(Icons.account_circle), onPressed: () { Navigator.pushNamed(context, "/profile"); }),
             SizedBox(width: 1),
 
           ],
