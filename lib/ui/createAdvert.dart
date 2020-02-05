@@ -123,6 +123,18 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+  Widget _buildValidationButton(){
+    return MaterialButton(
+        color: Colors.green,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+        onPressed: () => _pickDateTime(),
+        child: new Text("Crée l'annonce")
+    );
+  }
+
   Widget _buildDateButton() {
 
     return MaterialButton(
@@ -342,7 +354,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
               CardSettingsHeader(label: 'Informations Générales'),
               _buildMultilineTextField(1, "Nom du produit", Icons.title),
               _buildMultilineTextField(2, "Description", Icons.description),
-              _buildValuePicker(),],
+              _buildValuePicker(),
+              _buildDateButton()],
 
           )
         ),
@@ -355,12 +368,12 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                ],
              )
          ),
-         Container(
+          Container(
+            padding: EdgeInsets.only(top:25),
              child: Column(
                children: <Widget>[
-                 CardSettingsHeader(label: 'Date'),
-                 _buildDateButton()],
-
+                 _buildValidationButton()
+               ],
              )
          ),
        ],
