@@ -84,7 +84,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                       fit: BoxFit.cover,
                     ),
                   ),
-                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice(), _adverts[index].getDescription())
+                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice().toString(), _adverts[index].getDescription())
                 ],
               ),
             )
