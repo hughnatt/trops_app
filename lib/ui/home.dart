@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed : () {}),
+            IconButton(icon: Icon(Icons.home), onPressed : () {Navigator.pushNamed(context, "/");}),
             IconButton(icon: Icon(Icons.search), onPressed: () {},),
             SizedBox(width: 40), // The dummy child
             IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
