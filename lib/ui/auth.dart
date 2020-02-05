@@ -79,9 +79,7 @@ class _AuthPageState extends State<AuthPage>
         child : SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height >= 775.0
-                ? MediaQuery.of(context).size.height
-                : 775.0,
+            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -673,9 +671,22 @@ class _AuthPageState extends State<AuthPage>
 
   void _register() async {
     if (_ctrlRegisterPassword.text == _ctrlRegisterConfirmPassword.text){
-      await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+      if (response.statusCode >= 300){
+        showInSnackBar("Echec de l'inscription");
+        FocusScope.of(context).requestFocus(_focusRegisterName);
+        _ctrlRegisterPassword.clear();
+        _ctrlRegisterConfirmPassword.clear();
+      } else {
+        showInSnackBar("Inscription réussie");
+        _ctrlRegisterName.clear();
+        _ctrlRegisterEmail.clear();
+        _ctrlRegisterPassword.clear();
+        _ctrlRegisterConfirmPassword.clear();
+      }
     } else {
       showInSnackBar("Les mots de passe ne correspondent pas !");
+      FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
     }
   }
 
@@ -684,6 +695,7 @@ class _AuthPageState extends State<AuthPage>
     response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
     if (response.statusCode != 200){
       showInSnackBar("Echec");
+
     } else {
       showInSnackBar("Connecté");
     }
