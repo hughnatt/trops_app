@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/ui/detailedAdvert.dart';
 
 class SearchResultPage extends StatefulWidget {
 
@@ -44,7 +45,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
         );
 
         if (query != '') {
-          if (query == advert.getTitle()) {
+          if (advert.getTitle().contains(query)) {
             _adverts.add(advert);
           }
         } else {
@@ -64,7 +65,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
-        return Container(
+        return GestureDetector(
+          child: Container(
             //key: UniqueKey(),
             margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 0),
             child: Material(
@@ -76,7 +78,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   ClipRRect(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
                     child: FadeInImage.assetNetwork(
-                      placeholder: "",
+                      placeholder: "assets/Rolling-1s-200px.gif",
                       image: _adverts[index].getImage(),
                       height: 100,
                       width: 100,
@@ -86,7 +88,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice().toString(), _adverts[index].getDescription())
                 ],
               ),
-            )
+            ),
+          ),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : _adverts[index]))),
         );
       },
     );
@@ -213,7 +217,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   onSubmitted(query) async {
     loadAdverts(query);
-    print(_adverts.length);
-    print(query);
+    //print(_adverts.length);
+    //print(query);
   }
 }
