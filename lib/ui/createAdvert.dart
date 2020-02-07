@@ -1,7 +1,4 @@
 import 'dart:io';
-import 'dart:math';
-
-import 'package:card_settings/card_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -19,8 +16,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   List<File> imageFiles = List(4);
   int imageIndex = 0;
 
-  _openSource(BuildContext context, @required int index,
-      @required String source) async {
+  _openSource(BuildContext context, int index, String source) async {
     int indexToSave;
     ImageSource sourceChoice;
 
@@ -228,6 +224,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+  String _expansionTileTitle = "Choisir une catégorie";
+
   @override
   Widget build(BuildContext context) {
    return Scaffold(
@@ -273,6 +271,29 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                 borderRadius: BorderRadius.circular(10.0)
             ),
             child: _buildMultilineTextField(4, "Description", Icons.description),
+          ),
+        ),
+
+        Container(
+          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+          child: Material(
+            elevation: 2.0,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)
+            ),
+            child: ExpansionTile(
+              title: Text(_expansionTileTitle),
+              children: <String>["Test1", "Test2"].map((String value) {
+                return ListTile(
+                  onTap: () {
+                    setState(() {
+                      _expansionTileTitle = value;
+                    });
+                  },
+                  title: Text(value),
+                );
+              }).toList(),
+            ),
           ),
         ),
 
