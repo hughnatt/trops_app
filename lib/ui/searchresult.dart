@@ -18,6 +18,24 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   List<Advert> _adverts = new List<Advert>();
 
+  String cat = "Catégorie";
+
+  List<String> _categories = ["Catégorie",
+    "Ski",
+    "Surf",
+    "Foot",
+    "Rugby",
+    "Tennis",
+    "Basket",
+    "Volley",
+    "Hand",
+    "Badminton",
+    "Pétanque",
+    "Danse"
+  ];
+
+  TextEditingController _editingController = TextEditingController();
+
 
   @override
   void initState(){
@@ -200,7 +218,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             _searchBar(),
 
-            SizedBox(height: 10.0,),
+            _advancedResearchBar(),
 
             Expanded(
               child: _getListViewWidget(),
@@ -216,5 +234,92 @@ class _SearchResultPageState extends State<SearchResultPage>{
     loadAdverts(query);
     print(_adverts.length);
     print(query);
+  }
+
+  Widget _advancedResearchBar(){
+    return ExpansionTile(
+      title: Text("Recherche Avancée"),
+      children: <Widget>[
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Column(
+                  children: <Widget>[
+                    /*Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Text("Catégorie :"),*/
+                    DropdownButton<String>(
+                      onChanged: (String newValue) {
+                        setState(() {
+                          cat = newValue;
+                        });
+                      },
+                        isDense: false,
+                        value: cat,
+                        isExpanded: true,
+                        icon: Icon(Icons.arrow_downward),
+                        iconSize: 24,
+                        items: _categories
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        })
+                            .toList(),
+
+                    ),
+                    /*],
+                  ),*/
+
+                    SizedBox(
+                      height: 10.0,
+                    ),
+
+                    TextField(
+                      controller: _editingController,
+                      style: TextStyle(
+                          fontFamily: "WorkSansSemiBold",
+                          fontSize: 16.0,
+                          color: Colors.black
+                      ),
+                      decoration: InputDecoration(
+                        hintText: "Prix Maximal",
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+
+                    ButtonBar(
+                      alignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        RaisedButton(
+                          child: Text("Rechercher"),
+                          onPressed: onAdvancedSubmitted,
+                        ),
+                      ],
+                    ),
+                  ],
+                ) ,
+              ),
+
+
+
+            ),
+
+            Card(
+              child: Text("Date"),
+            ),
+      ],
+    );
+  }
+
+  onAdvancedSubmitted(){
+    print(_editingController.text);
+    print(cat);
+  }
+
+  dummy(value){
+    print('yolo');
   }
 }
