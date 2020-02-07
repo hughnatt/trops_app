@@ -1,7 +1,5 @@
 import 'dart:io';
-import 'dart:math';
 
-import 'package:card_settings/card_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -20,8 +18,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   List<File> imageFiles = List(4);
   int imageIndex = 0;
 
-  _openSource(BuildContext context, @required int index,
-      @required String source) async {
+  _openSource(BuildContext context, int index, String source) async {
     int indexToSave;
     ImageSource sourceChoice;
 
