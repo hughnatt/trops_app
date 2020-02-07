@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/ui/common/trops_bottom_bar.dart';
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -326,7 +327,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
          ),
        ],
      ),
-       bottomNavigationBar: _buildBottomBar(),
+       bottomNavigationBar: TropsBottomAppBar(),
      );
   }
 }
