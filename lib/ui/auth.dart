@@ -81,9 +81,6 @@ class _AuthPageState extends State<AuthPage>
             return false;
           },
         child : SingleChildScrollView(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -99,8 +96,9 @@ class _AuthPageState extends State<AuthPage>
                   padding: EdgeInsets.only(top: 20.0),
                   child: _buildMenuBar(context),
                 ),
-                Expanded(
-                  flex: 2,
+                Container(
+                  height: 500,
+                  width: MediaQuery.of(context).size.width,
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (i) {
@@ -132,7 +130,6 @@ class _AuthPageState extends State<AuthPage>
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -152,10 +149,10 @@ class _AuthPageState extends State<AuthPage>
   void initState() {
     super.initState();
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.portraitUp,
+//      DeviceOrientation.portraitDown,
+//    ]);
 
     _pageController = PageController();
   }
