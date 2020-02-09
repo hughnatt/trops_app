@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 
 class SearchResultPage extends StatefulWidget {
 
@@ -19,6 +20,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
   List<Advert> _adverts = new List<Advert>();
 
   String cat = "Catégorie";
+
+  List<DateTime> picked;
 
   List<String> _categories = ["Catégorie",
     "Ski",
@@ -183,15 +186,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
                           Icons.search,
                           color: Theme.of(context).accentColor
                       ),
-                      suffixIcon: PopupMenuButton<String>(
-                        icon: Icon(Icons.arrow_drop_down),
-                        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                          const PopupMenuItem<String>(
-                            value: 'Advanced Search',
-                            child: Text('Advanced Search'),
-                          ),
-                        ],
-                      ),
                       border: InputBorder.none),
                   onSubmitted: onSubmitted,
                   onChanged: onSubmitted,
@@ -293,6 +287,24 @@ class _SearchResultPageState extends State<SearchResultPage>{
                       keyboardType: TextInputType.number,
                     ),
 
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    
+                    MaterialButton(
+                      color: Colors.blueAccent,
+                      textColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      onPressed: _pickDateTime,
+                      child: new Text("Choisir la disponibilité")
+                    ),
+
+                    SizedBox(
+                      height: 10.0,
+                    ),
+
                     ButtonBar(
                       alignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -310,19 +322,43 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             ),
 
-            Card(
-              child: Text("Date"),
-            ),
       ],
     );
+  }
+
+  void _pickDateTime() async {
+    DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
+    DateTime lastDate;
+
+    if(picked != null && picked.first != null && picked.last != null){ //if the user already picked some dates
+      firstDate = picked.first; //we will show him the range choose before
+      lastDate = picked.last;
+    }
+    else{
+      firstDate = lastDate = DateTime.now(); //else we just show the basic date (today)
+    }
+
+    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affecter to the result, but if the user tap cancel, picked was loose because replace by NULL
+        context: context,
+        initialFirstDate: firstDate,
+        initialLastDate: lastDate,
+        firstDate: DateTime(DateTime.now().year),
+        lastDate: DateTime(DateTime.now().year + 5)
+    );
+
+    if(returnedDates != null){ //Allow to handle the cancel button that pop the context
+      picked = returnedDates;
+    }
   }
 
   onAdvancedSubmitted(){
     print(_editingController.text);
     print(cat);
+    print(picked.first.toString());
+    print(picked.last.toString());
   }
 
-  dummy(value){
+  dummy(){
     print('yolo');
   }
 }
