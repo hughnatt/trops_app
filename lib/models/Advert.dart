@@ -1,26 +1,28 @@
+import 'dart:ffi';
+
 class Advert {
 
-  var _title;
-  var _price;
-  var _description;
-  var _image;
+  String _title;
+  String _price;
+  String _description;
+  String _image;
+
 
   Advert(this._title, this._price, this._description, this._image);
 
-  getTitle(){
+  String getTitle(){
     return this._title;
   }
 
-  getPrice(){
+  String getPrice(){
     return this._price;
   }
 
-  getDescription(){
+  String getDescription(){
     return this._description;
   }
 
-  getImage(){
+  String getImage(){
     return this._image;
   }
-
 }

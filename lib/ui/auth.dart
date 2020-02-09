@@ -23,6 +23,8 @@ SOFTWARE.
 Original Version :  https://github.com/huextrat/TheGorgeousLogin/
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -30,6 +32,8 @@ import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
 import 'package:trops_app/api/auth.dart' as Auth;
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/models/User.dart';
+import 'package:trops_app/ui/profile.dart';
 
 
 class AuthPage extends StatefulWidget {
@@ -77,9 +81,6 @@ class _AuthPageState extends State<AuthPage>
             return false;
           },
         child : SingleChildScrollView(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -95,8 +96,9 @@ class _AuthPageState extends State<AuthPage>
                   padding: EdgeInsets.only(top: 20.0),
                   child: _buildMenuBar(context),
                 ),
-                Expanded(
-                  flex: 2,
+                Container(
+                  height: 500,
+                  width: MediaQuery.of(context).size.width,
                   child: PageView(
                     controller: _pageController,
                     onPageChanged: (i) {
@@ -128,7 +130,6 @@ class _AuthPageState extends State<AuthPage>
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -148,10 +149,10 @@ class _AuthPageState extends State<AuthPage>
   void initState() {
     super.initState();
 
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.portraitUp,
+//      DeviceOrientation.portraitDown,
+//    ]);
 
     _pageController = PageController();
   }
@@ -698,6 +699,11 @@ class _AuthPageState extends State<AuthPage>
 
     } else {
       showInSnackBar("Connecté");
+      Map json = jsonDecode(response.body);
+      User user = User(json['user']['name'],json['user']['email'],json['token']);
+      User.current = user;
+      Navigator.pop(context);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user : User.current)));
     }
   }
 }

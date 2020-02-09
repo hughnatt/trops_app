@@ -2,7 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/ui/common/trops_bottom_bar.dart';
+import 'package:trops_app/ui/common/trops_fab.dart';
+import 'package:trops_app/ui/detailedAdvert.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -60,7 +63,8 @@ class _HomePageState extends State<HomePage> {
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
-        return Container(
+        return GestureDetector(
+          child: Container(
             margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 0),
             child: Material(
               borderRadius: BorderRadius.circular(10.0),
@@ -78,10 +82,12 @@ class _HomePageState extends State<HomePage> {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice(), _adverts[index].getDescription())
+                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice().toString(), _adverts[index].getDescription())
                 ],
               ),
-            )
+            ),
+          ),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : _adverts[index]))),
         );
       },
     );
@@ -169,26 +175,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    Widget bottomBar = BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      child: Container(
-        height: 50.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed : () {Navigator.pushNamed(context, "/");}),
-            IconButton(icon: Icon(Icons.search), onPressed: () {Navigator.pushNamed(context, "/search");},),
-            SizedBox(width: 40), // The dummy child
-            IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-            IconButton(icon: Icon(Icons.account_circle), onPressed: () { Navigator.pushNamed(context, "/profile"); }),
-            SizedBox(width: 1),
-
-          ],
-        ),
-      ),
-    );
-
     Widget searchBar = Container(
       padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0),
       child: new Material(
@@ -236,13 +222,8 @@ class _HomePageState extends State<HomePage> {
       ),
 
 
-      bottomNavigationBar: bottomBar,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //Changement de page -> Création d'une nouvelle annonce.
-        },
-        child: Icon(Icons.add),
-      ),
+      bottomNavigationBar: TropsBottomAppBar(),
+      floatingActionButton: TropsFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
