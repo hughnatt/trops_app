@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/ui/common/trops_bottom_bar.dart';
+import 'package:trops_app/utils/imagesManager.dart';
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -14,8 +15,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  List<File> imageFiles = List(4); //TODO : make a class to hanlde the pictures
-  int imageIndex = 0;
+  ImagesManager imageFiles = ImagesManager();
 
   _openSource(BuildContext context, int index, String source) async {
     int indexToSave;
@@ -37,14 +37,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice);
     this.setState(() {
-      if (imageIndex == 4 || index < imageIndex) { //if the user have already load 4 picture or we we want to change one
-        indexToSave = index;
-      }
-      else { //The user haven't load 4 image but choose an index too far (exemple: he clicked on the 3rd picture sample; but the second haven't any loaded picture)
-        indexToSave = imageIndex; //the index where put the photo is the first availible in the list
-        imageIndex++;
-      }
-      this.imageFiles[indexToSave] = picture;
+      imageFiles.loadFile(index, picture);
     });
     Navigator.of(context).pop();
   }
@@ -69,7 +62,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             },
           ),
           ListTile(
-            enabled: (imageFiles[index] != null), //the user can't delete the picture if the image at index is null
+            enabled: (imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
@@ -82,14 +75,10 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   _deletePicture(BuildContext context, int index){
-
     this.setState(() { //we reload the UI
-      imageFiles[index] = null; //the image at the index is now null
-      imageFiles.sort((a, b) => a == null ? 1 : 0); //sort the list to put all null at end of the list
-      imageIndex=(imageFiles.indexOf(imageFiles.last)); //the new imageIndex is the last non null index of the list
+      imageFiles.removeAt(index);
     });
     Navigator.of(context).pop(); // we close the alertDialog
-
   }
 
   Widget _buildMultilineTextField(int nbLines, String label,
@@ -205,14 +194,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Widget _boxContent(int index) {
-    if (imageFiles[index] == null) {
+    if (imageFiles.get(index) == null) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
     else {
-      return Image.file(imageFiles[index], fit: BoxFit.cover);
+      return Image.file(imageFiles.get(index), fit: BoxFit.cover);
     }
   }
 
