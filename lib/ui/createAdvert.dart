@@ -14,7 +14,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  List<File> imageFiles = List(4);
+  List<File> imageFiles = List(4); //TODO : make a class to hanlde the pictures
   int imageIndex = 0;
 
   _openSource(BuildContext context, int index, String source) async {
@@ -69,15 +69,27 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             },
           ),
           ListTile(
+            enabled: (imageFiles[index] != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
-              print("Not yet implemented");
+              _deletePicture(context,index);
             },
           )
         ],
       );
     });
+  }
+
+  _deletePicture(BuildContext context, int index){
+
+    this.setState(() { //we reload the UI
+      imageFiles[index] = null; //the image at the index is now null
+      imageFiles.sort((a, b) => a == null ? 1 : 0); //sort the list to put all null at end of the list
+      imageIndex=(imageFiles.indexOf(imageFiles.last)); //the new imageIndex is the last non null index of the list
+    });
+    Navigator.of(context).pop(); // we close the alertDialog
+
   }
 
   Widget _buildMultilineTextField(int nbLines, String label,
