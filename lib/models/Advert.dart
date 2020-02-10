@@ -1,9 +1,7 @@
-import 'dart:ffi';
-
 class Advert {
 
   String _title;
-  String _price;
+  int _price;
   String _description;
   String _image;
 
@@ -14,7 +12,7 @@ class Advert {
     return this._title;
   }
 
-  String getPrice(){
+  int getPrice(){
     return this._price;
   }
 
