@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
+import 'package:trops_app/widgets/advertField.dart';
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -15,6 +16,10 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   List<DateTime> picked;
   ImagesManager imageFiles = ImagesManager();
+  TextEditingController _titleController = TextEditingController();
+  TextEditingController _descriptionController = TextEditingController();
+  TextEditingController _priceController = TextEditingController();
+  String _expansionTileTitle = "Choisir une catégorie";
 
   _openSource(BuildContext context, int index, String source) async {
     ImageSource sourceChoice;
@@ -79,27 +84,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     Navigator.of(context).pop(); // we close the alertDialog
   }
 
-  Widget _buildMultilineTextField(int nbLines, String label,
-      IconData iconName) {
-    return Container(
-        padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
-        child: TextField(
-            maxLines: nbLines,
-            decoration: InputDecoration(
-              icon: Icon(iconName),
-              hintText: label,
-              border: InputBorder.none,
-            )
-        )
-    );
-  }
-
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
       child:
       TextField(
         keyboardType: TextInputType.number,
+        controller: _priceController,
         decoration: InputDecoration(
           icon: Icon(Icons.euro_symbol),
           hintText: 'Coût de location (par jour)',
@@ -203,107 +194,110 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     }
   }
 
-  String _expansionTileTitle = "Choisir une catégorie";
-
   @override
   Widget build(BuildContext context) {
    return Scaffold(
      backgroundColor: Colors.white,
-     body: ListView(
-       scrollDirection: Axis.vertical,
-       shrinkWrap: true,
-       children: <Widget>[
+     body: GestureDetector(
+       onTap: (){
+         FocusScope.of(context).requestFocus(new FocusNode());
+       },
+       child: ListView(
+         scrollDirection: Axis.vertical,
+         shrinkWrap: true,
+         children: <Widget>[
 
-         Container(
-           padding: EdgeInsets.only(top: 25),
-           child: Center(
-             child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
-           )
-         ),
+           Container(
+               padding: EdgeInsets.only(top: 25),
+               child: Center(
+                 child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
+               )
+           ),
 
-        Container(
-          padding: EdgeInsets.all(25.0),
-          child: Material(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: Column(
-              children: <Widget>[
-                _buildMultilineTextField(1, "Nom du produit", Icons.title),
-                Container(
-                  width: 250.0,
-                  height: 1.0,
-                  color: Colors.grey[400],
-                ),
-                _buildValuePicker(),
-              ],
-            ),
-          ),
-        ),
+           Container(
+             padding: EdgeInsets.all(25.0),
+             child: Material(
+               elevation: 2.0,
+               shape: RoundedRectangleBorder(
+                   borderRadius: BorderRadius.circular(10.0)
+               ),
+               child: Column(
+                 children: <Widget>[
+                   AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
+                   Container(
+                     width: 250.0,
+                     height: 1.0,
+                     color: Colors.grey[400],
+                   ),
+                   _buildValuePicker(),
+                 ],
+               ),
+             ),
+           ),
 
-        Container(
-          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-          child: Material(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: _buildMultilineTextField(4, "Description", Icons.description),
-          ),
-        ),
+           Container(
+             padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+             child: Material(
+               elevation: 2.0,
+               shape: RoundedRectangleBorder(
+                   borderRadius: BorderRadius.circular(10.0)
+               ),
+               child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
+             ),
+           ),
 
-        Container(
-          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-          child: Material(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: ExpansionTile(
-              title: Text(_expansionTileTitle),
-              children: <String>["Test1", "Test2"].map((String value) {
-                return ListTile(
-                  onTap: () {
-                    setState(() {
-                      _expansionTileTitle = value;
-                    });
-                  },
-                  title: Text(value),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
+           Container(
+             padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+             child: Material(
+               elevation: 2.0,
+               shape: RoundedRectangleBorder(
+                   borderRadius: BorderRadius.circular(10.0)
+               ),
+               child: ExpansionTile(
+                 title: Text(_expansionTileTitle),
+                 children: <String>["Test1", "Test2"].map((String value) {
+                   return ListTile(
+                     onTap: () {
+                       setState(() {
+                         _expansionTileTitle = value;
+                       });
+                     },
+                     title: Text(value),
+                   );
+                 }).toList(),
+               ),
+             ),
+           ),
 
-        Container(
-          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-          child: _buildDateButton()
-        ),
+           Container(
+               padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+               child: _buildDateButton()
+           ),
 
-        Container(
-          padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
-          child: Material(
-            elevation: 2.0,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0)
-            ),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Text("Ajouter des photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),),
-                ),
-                _buildPictureGrild()
-              ],
-            ),
-          ),
-        ),
-          Container(
-            padding: EdgeInsets.only(top:25),
-             child: _buildValidationButton()
-         ),
-       ],
+           Container(
+             padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
+             child: Material(
+               elevation: 2.0,
+               shape: RoundedRectangleBorder(
+                   borderRadius: BorderRadius.circular(10.0)
+               ),
+               child: Column(
+                 children: <Widget>[
+                   Container(
+                     padding: EdgeInsets.all(10.0),
+                     child: Text("Ajouter des photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                   ),
+                   _buildPictureGrild()
+                 ],
+               ),
+             ),
+           ),
+           Container(
+               padding: EdgeInsets.only(top:25),
+               child: _buildValidationButton()
+           ),
+         ],
+       ),
      ),
        bottomNavigationBar: TropsBottomAppBar(),
      );
