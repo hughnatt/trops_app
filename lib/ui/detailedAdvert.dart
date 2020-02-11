@@ -75,7 +75,7 @@ class DetailedAdvertPage extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: Carousel(
                     images: [
-                      NetworkImage(advert.getImage()),
+                      NetworkImage(advert.getFirstImage()),
                       NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
                     ],
                     autoplay: false,
