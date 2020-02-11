@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/ui/common/trops_bottom_bar.dart';
-import 'package:trops_app/ui/common/trops_fab.dart';
+import 'package:trops_app/widgets/trops_bottom_bar.dart';
+import 'package:trops_app/widgets/trops_fab.dart';
 
 class TropsScaffold extends StatelessWidget {
 
