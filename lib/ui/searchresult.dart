@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/widgets/advertTile.dart';
@@ -16,6 +17,7 @@ class SearchResultPage extends StatefulWidget {
 }
 
 class _SearchResultPageState extends State<SearchResultPage>{
+  GlobalKey<ScaffoldState> _ScaffoldKey = GlobalKey();
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -23,7 +25,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   List<DateTime> picked;
 
-  List<String> _categories = ["Catégorie",
+  List<String> _categories = [
+    "Catégorie",
     "Ski",
     "Surf",
     "Foot",
@@ -43,11 +46,20 @@ class _SearchResultPageState extends State<SearchResultPage>{
   @override
   void initState(){
     super.initState();
-    loadAdverts('');
+    loadAdverts();
   }
 
+  loadAdverts() async {
 
-  loadAdverts(String query) {
+    getAllAdverts().then( (List<Advert> res) {
+      setState(() {
+        _adverts = res;
+      });
+    });
+
+  }
+
+  /*loadAdverts(String query) {
 
     List result = jsonDecode("[{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":20,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"}]");
 
@@ -73,8 +85,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
         }
       });
     });
-
-  }
+  }*/
 
   Widget _getListViewWidget(){
     return ListView.builder(
@@ -125,93 +136,184 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
+  double _advancedResearchBarHeight(){
+    var usableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom - 150;
+    if (usableHeight < 250) {
+      return usableHeight;
+    } else {
+      return 250;
+    }
+  }
+
   Widget _advancedResearchBar(){
     return ExpansionTile(
       title: Text("Recherche Avancée"),
       children: <Widget>[
-        Padding(
-          padding: EdgeInsets.all(10.0),
+        Container(
+          height: _advancedResearchBarHeight(),
           child: SingleChildScrollView(
-            child: Column(
-            children: <Widget>[
-              DropdownButton<String>(
-                onChanged: (String newValue) {
-                  setState(() {
-                    cat = newValue;
-                  });
-                  },
-                isDense: false,
-                value: cat,
-                isExpanded: true,
-                icon: Icon(Icons.arrow_downward),
-                iconSize: 24,
-                items: _categories
-                      .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      })
-                    .toList(),
-              ),
-
-              SizedBox(
-                height: 10.0,
-              ),
-              TextField(
-                controller: _editingController,
-                style: TextStyle(
-                    fontFamily: "WorkSansSemiBold",
-                    fontSize: 16.0,
-                    color: Colors.black
-                ),
-                decoration: InputDecoration(
-                  hintText: "Prix Maximal",
-                ),
-                keyboardType: TextInputType.number,
-              ),
-
-              SizedBox(
-                height: 10.0,
-              ),
-
-              MaterialButton(
-                  color: Colors.blueAccent,
-                  textColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  ),
-                  onPressed: _pickDateTime,
-                  child: new Text("Choisir la disponibilité")
-              ),
-
-              SizedBox(
-                height: 10.0,
-              ),
-
-              ButtonBar(
-                alignment: MainAxisAlignment.center,
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
                 children: <Widget>[
-                  RaisedButton(
-                    child: Text("Rechercher"),
-                    onPressed: onAdvancedSubmitted,
+                  DropdownButton<String>(
+                    onChanged: (String newValue) {
+                    setState(() {
+                    cat = newValue;
+                    });
+                    },
+                    isDense: false,
+                    value: cat,
+                    isExpanded: true,
+                    icon: Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    items: _categories
+                    .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                    }).toList(),
                   ),
+
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  TextField(
+                    controller: _editingController,
+                    style: TextStyle(
+                        fontFamily: "WorkSansSemiBold",
+                        fontSize: 16.0,
+                        color: Colors.black
+                    ),
+                    decoration: InputDecoration(
+                      hintText: "Prix Maximal",
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+
+                  SizedBox(
+                    height: 10.0,
+                  ),
+
+                  MaterialButton(
+                      color: Colors.blueAccent,
+                      textColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      ),
+                      onPressed: _pickDateTime,
+                      child: Text("Choisir la disponibilité")
+                  ),
+
+                  SizedBox(
+                    height: 10.0,
+                  ),
+
+                  ButtonBar(
+                    alignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                        child: Text("Rechercher"),
+                        onPressed: onAdvancedSubmitted,
+                      ),
+                    ],
+                  ),
+
                 ],
               ),
-            ],
-          ), ),
+            ),
+          ),
         ),
       ],
     );
   }
 
+  Widget _advancedResearchDrawer(){
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 50.0),
+            ),
 
+            DropdownButton<String>(
+              onChanged: (String newValue) {
+                setState(() {
+                  cat = newValue;
+                });
+              },
+              isDense: false,
+              value: cat,
+              isExpanded: true,
+              icon: Icon(Icons.arrow_downward),
+              iconSize: 24,
+              items: _categories
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
 
+            SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              controller: _editingController,
+              style: TextStyle(
+                  fontFamily: "WorkSansSemiBold",
+                  fontSize: 16.0,
+                  color: Colors.black
+              ),
+              decoration: InputDecoration(
+                hintText: "Prix Maximal",
+              ),
+              keyboardType: TextInputType.number,
+            ),
 
+            SizedBox(
+              height: 10.0,
+            ),
+
+            MaterialButton(
+                color: Colors.blueAccent,
+                textColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                ),
+                onPressed: _pickDateTime,
+                child: Text("Choisir la disponibilité")
+            ),
+
+            SizedBox(
+              height: 10.0,
+            ),
+
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RaisedButton(
+                  child: Text("Rechercher"),
+                  onPressed: () {onAdvancedSubmitted();_ScaffoldKey.currentState.openEndDrawer();},
+                ),
+              ],
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _ScaffoldKey,
+
       body: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -221,7 +323,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             _searchBar(),
 
-            _advancedResearchBar(),
+            /*SingleChildScrollView(
+              child: _advancedResearchBar(),
+            ),*/
+
+            FlatButton(
+              child: Text("Recherche Avancée"),
+              onPressed: () {_ScaffoldKey.currentState.openDrawer();},
+            ),
 
             Expanded(
               child: _getListViewWidget(),
@@ -230,11 +339,16 @@ class _SearchResultPageState extends State<SearchResultPage>{
           ],
         ),
       ),
+
+      drawer: Drawer(
+        child: _advancedResearchDrawer(),
+      ),
+
     );
   }
 
   onSubmitted(query) async {
-    loadAdverts(query);
+    loadAdverts();
   }
 
   onAdvancedSubmitted(){
@@ -258,6 +372,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       print(picked.first.toString());
       print(picked.last.toString());
       print(_editingController.text);
+      //Navigator.pop(_ScaffoldKey.currentContext);
     }
 
 
