@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:trops_app/models/Advert.dart';
@@ -7,6 +8,29 @@ class DetailedAdvertPage extends StatelessWidget {
   final Advert advert;
 
   DetailedAdvertPage({Key key, @required this.advert}) : super(key: key);
+
+  List<Widget> getImagesWidget(){
+
+    List<String> images = this.advert.getAllImages();
+    List<Widget> imagesWidget = new List<Widget>();
+
+    if(images != null){
+      images.forEach((item) {
+        imagesWidget.add(
+          Container(
+            child: CachedNetworkImage(
+              imageUrl: item,
+            ),
+          )
+        );
+      });
+      return imagesWidget;
+    }
+    else {
+      return [Image.asset("assets/default_image.jpeg", fit: BoxFit.cover,)];
+    }
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,10 +98,7 @@ class DetailedAdvertPage extends StatelessWidget {
                   height: 250.0,
                   width: MediaQuery.of(context).size.width,
                   child: Carousel(
-                    images: [
-                      NetworkImage(advert.getImage()),
-                      NetworkImage('https://flutterappdev.com/wp-content/uploads/2019/01/Screen-Shot-2019-01-25-at-12.54.42-PM.png'),
-                    ],
+                    images: getImagesWidget(),
                     autoplay: false,
                     dotSize: 4,
                     dotBgColor: Colors.grey[800].withOpacity(0),

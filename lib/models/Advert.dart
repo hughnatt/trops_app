@@ -3,10 +3,10 @@ class Advert {
   String _title;
   int _price;
   String _description;
-  String _image;
+  List<String> _photos;
 
 
-  Advert(this._title, this._price, this._description, this._image);
+  Advert(this._title, this._price, this._description, this._photos);
 
   String getTitle(){
     return this._title;
@@ -20,7 +20,25 @@ class Advert {
     return this._description;
   }
 
-  String getImage(){
-    return this._image;
+  String getFirstImage(){
+    if(!this.isEmpty()){
+      return _photos.elementAt(0);
+    }
+    else{
+      return null;
+    }
+  }
+
+  List<String> getAllImages(){
+    if(!this.isEmpty()){
+      return _photos;
+    }
+    else{
+      return null;
+    }
+  }
+
+  bool isEmpty(){
+    return _photos.length == 0;
   }
 }

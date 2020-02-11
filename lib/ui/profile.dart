@@ -3,8 +3,7 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:trops_app/ui/common/trops_bottom_bar.dart';
-import 'package:trops_app/ui/common/trops_fab.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class ProfilePage extends StatefulWidget {
   final User user;
@@ -17,9 +16,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage>{
-
-  bool _isFabVisible = true;
-  NotchedShape _bottomBarShape = CircularNotchedRectangle();
 
   @override
   void initState() {
@@ -34,22 +30,9 @@ class _ProfilePageState extends State<ProfilePage>{
     }
   }
 
-  void _toggleFabVisibility(){
-    setState(() {
-      if (_isFabVisible){
-        _isFabVisible = false;
-        _bottomBarShape = null;
-      } else {
-        _isFabVisible = true;
-        _bottomBarShape = CircularNotchedRectangle();
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
+    return TropsScaffold(
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(10),
@@ -144,12 +127,6 @@ class _ProfilePageState extends State<ProfilePage>{
             ),
           ),
         ),
-        floatingActionButton: Visibility(
-          visible: _isFabVisible,
-          child: TropsFloatingActionButton()
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: TropsBottomAppBar()
     );
   }
 

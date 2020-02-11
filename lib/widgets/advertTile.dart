@@ -12,6 +12,29 @@ class AdvertTile extends StatelessWidget {
     @required this.advert
   }) : super(key: key);
 
+  Widget _getImageWidget(){
+
+    if(this.advert.getFirstImage() != null){
+
+      return CachedNetworkImage(
+        imageUrl: this.advert.getFirstImage(),
+        placeholder: (context, url) => Center(
+          child: Container(
+            height: 50,
+            width: 50,
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        errorWidget: (context, url, error) => Icon(Icons.broken_image),
+        fit: BoxFit.cover,
+      );
+    }
+    else {
+      return Image.asset("assets/default_image.jpeg", fit: BoxFit.cover,);
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -26,15 +49,10 @@ class AdvertTile extends StatelessWidget {
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-                child: SizedBox(
+                child: Container(
                   height: 100,
                   width: 100,
-                  child: CachedNetworkImage(
-                    imageUrl: this.advert.getImage(),
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    fit: BoxFit.cover,
-                  ),
+                  child: _getImageWidget()
                 ),
               ),
               Container(

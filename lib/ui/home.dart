@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/common/trops_bottom_bar.dart';
 import 'package:trops_app/ui/common/trops_fab.dart';
 import 'package:trops_app/widgets/advertTile.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -15,6 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   List<Advert> _adverts = new List<Advert>();
   List<String> _categories = [
@@ -39,23 +42,12 @@ class _HomePageState extends State<HomePage> {
 
   loadAdverts() async {
 
-    List result = await jsonDecode("[{\"title\":\"Titre de annonce 1 pouet pouet\",\"price\":10,\"description\":\"Description annonce 1 uevbfyizbcuize euizebf uizeb zeufh zue czu euzehuzaehduzehd zeuhzuiegdiuz i zebfi zebfzzehfiuadiu fuehfuizh ui zheiuh eiuc i\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":20,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"}]");
-
-    setState(() {
-
-      result.forEach((item){
-
-        var advert = new Advert(
-          item["title"],
-          item["price"],
-          item["description"],
-          item["image"]
-        );
-
-        _adverts.add(advert);
-
+    getAllAdverts().then( (List<Advert> res) {
+      setState(() {
+        _adverts = res;
       });
     });
+
   }
 
   Widget _getListViewWidget(){
@@ -140,7 +132,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return Scaffold(
+    return TropsScaffold(
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -149,17 +141,19 @@ class _HomePageState extends State<HomePage> {
               height: 50,
               child: _getListCategories(),
             ),
-            Expanded(
-              child: _getListViewWidget(),
+            Flexible(
+              child: SmartRefresher(
+                controller: _refreshController,
+                onRefresh: () {
+                  loadAdverts();
+                  _refreshController.refreshCompleted();
+                },
+                child: _getListViewWidget(),
+              ),
             )
           ],
         ),
       ),
-
-
-      bottomNavigationBar: TropsBottomAppBar(),
-      floatingActionButton: TropsFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
