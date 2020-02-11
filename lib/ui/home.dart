@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/common/trops_bottom_bar.dart';
 import 'package:trops_app/ui/common/trops_fab.dart';
-import 'package:trops_app/widgets/advert_tile.dart';
+import 'package:trops_app/widgets/advertTile.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);

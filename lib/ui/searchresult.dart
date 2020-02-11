@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
-import 'package:trops_app/widgets/advert_tile.dart';
+import 'package:trops_app/widgets/advertTile.dart';
 
 class SearchResultPage extends StatefulWidget {
 
