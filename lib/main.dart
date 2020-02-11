@@ -11,7 +11,7 @@ class TropsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Trop's",
+      title: "TROPS",
       initialRoute: "/",
       routes: {
         '/' : (context) => HomePage(),
