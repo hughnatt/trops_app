@@ -32,6 +32,7 @@ dependencies:
   date_range_picker: ^1.0.5
   card_settings: ^1.5.5
   cached_network_image: ^2.0.0
+  pull_to_refresh: ^1.5.8
 
   # Font Awesome Icons, notably used in login and register screens
   font_awesome_flutter: ^8.0.1

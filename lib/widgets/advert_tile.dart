@@ -30,7 +30,7 @@ class AdvertTile extends StatelessWidget {
                   height: 100,
                   width: 100,
                   child: CachedNetworkImage(
-                    imageUrl: this.advert.getImage(),
+                    imageUrl: this.advert.getFirstImage(),
                     placeholder: (context, url) => CircularProgressIndicator(),
                     errorWidget: (context, url, error) => Icon(Icons.error),
                     fit: BoxFit.cover,
