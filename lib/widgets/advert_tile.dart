@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class AdvertTile extends StatelessWidget {
 
@@ -25,38 +26,61 @@ class AdvertTile extends StatelessWidget {
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-                child: FadeInImage.assetNetwork(
-                  placeholder: "assets/Rolling-1s-200px.gif",
-                  image: this.advert.getImage(),
+                child: SizedBox(
                   height: 100,
                   width: 100,
-                  fit: BoxFit.cover,
+                  child: CachedNetworkImage(
+                    imageUrl: this.advert.getImage(),
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               Container(
-                padding: EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      this.advert.getTitle(),
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold
+                child: Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Flexible(
+                            child: Container(
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0),
+                              child: Text(
+                                this.advert.getTitle(),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.only(right: 10.0, top: 10.0),
+                            child: Text(
+                              this.advert.getPrice().toString() + "€",
+                              maxLines: 1,
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                  color: Colors.orange
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Text(
-                      this.advert.getPrice().toString() + "€",
-                      maxLines: 1,
-                      style: TextStyle(
-                        color: Colors.orange
-                      ),
-                    ),
-                    Text(
-                      this.advert.getDescription(),
-                      maxLines: 3,
-                    )
-                  ],
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          this.advert.getDescription(),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               )
             ],
