@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/ui/common/trops_bottom_bar.dart';
-import 'package:trops_app/ui/common/trops_fab.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
