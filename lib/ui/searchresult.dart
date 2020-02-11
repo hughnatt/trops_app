@@ -131,7 +131,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
       children: <Widget>[
         Padding(
           padding: EdgeInsets.all(10.0),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             children: <Widget>[
               DropdownButton<String>(
                 onChanged: (String newValue) {
@@ -198,7 +199,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                 ],
               ),
             ],
-          ) ,
+          ), ),
         ),
       ],
     );
