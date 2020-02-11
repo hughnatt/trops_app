@@ -17,6 +17,7 @@ class SearchResultPage extends StatefulWidget {
 }
 
 class _SearchResultPageState extends State<SearchResultPage>{
+  GlobalKey<ScaffoldState> _ScaffoldKey = GlobalKey();
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -137,10 +138,10 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   double _advancedResearchBarHeight(){
     var usableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom - 150;
-    if (usableHeight < 300) {
+    if (usableHeight < 250) {
       return usableHeight;
     } else {
-      return 300;
+      return 250;
     }
   }
 
@@ -202,7 +203,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       ),
                       onPressed: _pickDateTime,
-                      child: new Text("Choisir la disponibilité")
+                      child: Text("Choisir la disponibilité")
                   ),
 
                   SizedBox(
@@ -228,13 +229,91 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
+  Widget _advancedResearchDrawer(){
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(top: 50.0),
+            ),
 
+            DropdownButton<String>(
+              onChanged: (String newValue) {
+                setState(() {
+                  cat = newValue;
+                });
+              },
+              isDense: false,
+              value: cat,
+              isExpanded: true,
+              icon: Icon(Icons.arrow_downward),
+              iconSize: 24,
+              items: _categories
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
 
+            SizedBox(
+              height: 10.0,
+            ),
+            TextField(
+              controller: _editingController,
+              style: TextStyle(
+                  fontFamily: "WorkSansSemiBold",
+                  fontSize: 16.0,
+                  color: Colors.black
+              ),
+              decoration: InputDecoration(
+                hintText: "Prix Maximal",
+              ),
+              keyboardType: TextInputType.number,
+            ),
 
+            SizedBox(
+              height: 10.0,
+            ),
+
+            MaterialButton(
+                color: Colors.blueAccent,
+                textColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                ),
+                onPressed: _pickDateTime,
+                child: Text("Choisir la disponibilité")
+            ),
+
+            SizedBox(
+              height: 10.0,
+            ),
+
+            ButtonBar(
+              alignment: MainAxisAlignment.center,
+              children: <Widget>[
+                RaisedButton(
+                  child: Text("Rechercher"),
+                  onPressed: () {onAdvancedSubmitted();_ScaffoldKey.currentState.openEndDrawer();},
+                ),
+              ],
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _ScaffoldKey,
+
       body: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -244,8 +323,13 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             _searchBar(),
 
-            SingleChildScrollView(
+            /*SingleChildScrollView(
               child: _advancedResearchBar(),
+            ),*/
+
+            FlatButton(
+              child: Text("Recherche Avancée"),
+              onPressed: () {_ScaffoldKey.currentState.openDrawer();},
             ),
 
             Expanded(
@@ -255,6 +339,11 @@ class _SearchResultPageState extends State<SearchResultPage>{
           ],
         ),
       ),
+
+      drawer: Drawer(
+        child: _advancedResearchDrawer(),
+      ),
+
     );
   }
 
@@ -283,6 +372,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       print(picked.first.toString());
       print(picked.last.toString());
       print(_editingController.text);
+      //Navigator.pop(_ScaffoldKey.currentContext);
     }
 
 
