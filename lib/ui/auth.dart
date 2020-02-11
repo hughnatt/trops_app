@@ -28,6 +28,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/ui/common/trops_bottom_bar.dart';
+import 'package:trops_app/ui/common/trops_fab.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
 import 'package:trops_app/api/auth.dart' as Auth;
@@ -75,6 +77,12 @@ class _AuthPageState extends State<AuthPage>
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
+      bottomNavigationBar: TropsBottomAppBar(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: Visibility(
+        visible: _dockedFabVisibility(context),
+        child: TropsFloatingActionButton()
+      ),
       body: NotificationListener<OverscrollIndicatorNotification>(
         onNotification: (overscroll) {
             overscroll.disallowGlow();
@@ -668,6 +676,14 @@ class _AuthPageState extends State<AuthPage>
     setState(() {
       _obscureRegisterConfirmPassword = !_obscureRegisterConfirmPassword;
     });
+  }
+
+  static _dockedFabVisibility(context) {
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   void _register() async {
