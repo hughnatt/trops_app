@@ -25,7 +25,16 @@ class Advert {
       return _photos.elementAt(0);
     }
     else{
-      return "https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fmaestroselectronics.com%2Fwp-content%2Fuploads%2F2017%2F12%2FNo_Image_Available.jpg";
+      return null;
+    }
+  }
+
+  List<String> getAllImages(){
+    if(!this.isEmpty()){
+      return _photos;
+    }
+    else{
+      return null;
     }
   }
 
