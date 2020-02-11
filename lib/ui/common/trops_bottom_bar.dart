@@ -30,7 +30,7 @@ class TropsBottomAppBar extends StatelessWidget {
           ],
         ),
       ),
-    );;
+    );
   }
 
 }

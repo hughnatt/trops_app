@@ -4,7 +4,7 @@ import 'dart:io';
 
 class ImagesManager {
   final _imagesFiles = List<File>(); // we declare a dynamic list (at beginning, none index is checkable !!)
-  static final int MAX_IMAGES_FILES = 4;
+  static const int MAX_IMAGES_FILES = 4;
 
 
 

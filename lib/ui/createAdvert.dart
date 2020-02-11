@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -18,7 +17,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   ImagesManager imageFiles = ImagesManager();
 
   _openSource(BuildContext context, int index, String source) async {
-    int indexToSave;
     ImageSource sourceChoice;
 
     switch (source) {
@@ -203,27 +201,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     else {
       return Image.file(imageFiles.get(index), fit: BoxFit.cover);
     }
-  }
-
-  Widget _buildBottomBar() {
-    return BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      child: Container(
-        height: 50.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed: () {}),
-            IconButton(icon: Icon(Icons.search), onPressed: () {},),
-            SizedBox(width: 40), // The dummy child
-            IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-            IconButton(icon: Icon(Icons.message), onPressed: () {}),
-            SizedBox(width: 1),
-          ],
-        ),
-      ),
-    );
   }
 
   String _expansionTileTitle = "Choisir une catégorie";

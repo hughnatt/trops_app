@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/ui/common/trops_bottom_bar.dart';
-import 'package:trops_app/ui/common/trops_fab.dart';
 import 'package:trops_app/widgets/advert_tile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -133,7 +130,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return Scaffold(
+    return TropsScaffold(
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -155,11 +152,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-
-
-      bottomNavigationBar: TropsBottomAppBar(),
-      floatingActionButton: TropsFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
