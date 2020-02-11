@@ -160,7 +160,7 @@ class _AuthPageState extends State<AuthPage>
   void showInSnackBar(String value) {
     FocusScope.of(context).requestFocus(new FocusNode());
     _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+    _scaffoldKey.currentState?.showSnackBar(new SnackBar(
       content: new Text(
         value,
         textAlign: TextAlign.center,
