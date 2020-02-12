@@ -96,13 +96,22 @@ class DetailedAdvertPage extends StatelessWidget {
                     ],
                   ),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Container(
                         padding: EdgeInsets.all(10.0),
                         child: Text(
-                          "Jean-Michel POUET",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
+                          this.advert.getOwner(),
+                          style: TextStyle(
+                            fontSize: 13.0,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          this.advert.getCategory(),
                           style: TextStyle(
                             fontSize: 13.0,
                             color: Colors.black54,
