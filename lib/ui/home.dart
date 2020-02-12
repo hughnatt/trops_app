@@ -18,24 +18,22 @@ class _HomePageState extends State<HomePage> {
   RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   List<Advert> _adverts = new List<Advert>();
-  List<String> _categories = [
-    "Ski",
-    "Surf",
-    "Foot",
-    "Rugby",
-    "Tennis",
-    "Basket",
-    "Volley",
-    "Hand",
-    "Badminton",
-    "Pétanque",
-    "Danse"
-  ];
+  List<String> _categories = new List<String>();
 
   @override
   void initState(){
     super.initState();
     loadAdverts();
+    loadCategories();
+  }
+
+  loadCategories() async {
+
+    getCategories().then( (List<String> res) {
+      setState(() {
+        _categories = res;
+      });
+    });
   }
 
   loadAdverts() async {
@@ -45,7 +43,6 @@ class _HomePageState extends State<HomePage> {
         _adverts = res;
       });
     });
-
   }
 
   Widget _getListViewWidget(){

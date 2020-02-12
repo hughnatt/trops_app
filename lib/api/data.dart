@@ -32,9 +32,29 @@ Future<List<Advert>> getAllAdverts() async {
 
   }
   else {
-    throw Exception("Failed to load json");
+    throw Exception("Failed to get adverts");
   }
   
+}
+
+Future<List<String>> getCategories() async {
+
+  List<String> categories = new List<String>();
+  var uri = new Uri.https(_dataBaseURI, "/category");
+  var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+
+  if(response.statusCode == 200) {
+
+    var result = await jsonDecode(response.body);
+    result.forEach((item) {
+      categories.add(item["categoryName"]);
+    });
+
+    return categories;
+  }
+  else {
+    throw Exception("Failed to get categories");
+  }
 }
 
 //Future<Http.Response> register(String name, String email, String password) async {
