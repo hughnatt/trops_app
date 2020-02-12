@@ -6,8 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class ProfilePage extends StatefulWidget {
-  final User user;
-  const ProfilePage({Key key, @required this.user}) : super(key : key);
+  const ProfilePage({Key key}) : super(key : key);
 
   @override
   _ProfilePageState createState() {
@@ -32,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage>{
 
   @override
   Widget build(BuildContext context) {
+    final User user = ModalRoute.of(context).settings.arguments;
     return TropsScaffold(
         body: SingleChildScrollView(
           child: Padding(
@@ -72,13 +72,13 @@ class _ProfilePageState extends State<ProfilePage>{
                 ),
 
                 Text(
-                    widget.user.getName(),
+                    user.getName(),
                     textAlign: TextAlign.center,
                     textScaleFactor: 2.0,
                     style: TextStyle(fontWeight: FontWeight.bold)
                 ),
                 Text(
-                  widget.user.getEmail(),
+                  user.getEmail(),
                   textAlign: TextAlign.center,
                 ),
                 Padding(

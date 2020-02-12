@@ -127,28 +127,32 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    return TropsScaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            searchBar,
-            SizedBox(
-              height: 50,
-              child: _getListCategories(),
+    return WillPopScope(
+        onWillPop: () async => false,
+        child: TropsScaffold(
+          body: SafeArea(
+            child: Column(
+              children: <Widget>[
+                searchBar,
+                SizedBox(
+                  height: 50,
+                  child: _getListCategories(),
+                ),
+                Flexible(
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    onRefresh: () {
+                      loadAdverts();
+                      _refreshController.refreshCompleted();
+                    },
+                    child: _getListViewWidget(),
+                  ),
+                )
+              ],
             ),
-            Flexible(
-              child: SmartRefresher(
-                controller: _refreshController,
-                onRefresh: () {
-                  loadAdverts();
-                  _refreshController.refreshCompleted();
-                },
-                child: _getListViewWidget(),
-              ),
-            )
-          ],
-        ),
-      ),
+          ),
+        )
     );
+
   }
 }

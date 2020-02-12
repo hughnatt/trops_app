@@ -703,7 +703,7 @@ class _AuthPageState extends State<AuthPage>
       User user = User(json['user']['name'],json['user']['email'],json['token']);
       User.current = user;
       Navigator.pop(context);
-      Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user : User.current)));
+      Navigator.pushNamed(context, "/profile", arguments: User.current);
     }
   }
 }
