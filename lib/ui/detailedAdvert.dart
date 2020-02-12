@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:trops_app/models/Advert.dart';
@@ -20,6 +21,7 @@ class DetailedAdvertPage extends StatelessWidget {
           Container(
             child: CachedNetworkImage(
               imageUrl: item,
+              fit: BoxFit.cover,
             ),
           )
         );
@@ -37,57 +39,14 @@ class DetailedAdvertPage extends StatelessWidget {
     Color color = Theme.of(context).accentColor;
     const double edgeAllPadding = 32;
 
-    Widget titleSection = Container(
-      padding: const EdgeInsets.all(edgeAllPadding),
-      child: Row(
-        children: [
-          Expanded(
-            /*1*/
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /*2*/
-                Container(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Text(
-                    advert.getTitle(),
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Text(
-                  advert.getPrice().toString(),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-    Widget buttonSection = Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildButtonColumn(color, Icons.call, 'CONTACT'),
-          _buildButtonColumn(color, Icons.message, 'MESSAGE'),
-          _buildButtonColumn(color, Icons.ac_unit, 'LOL'),
-        ],
-      ),
-    );
-    Widget textSection = Container(
-      padding: const EdgeInsets.all(edgeAllPadding),
-      child: Text(
-        advert.getDescription(),
-        softWrap: true,
-      ),
-    );
-
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Détails d'une annonce", style: TextStyle(
+          fontSize: 25.0,
+          ),
+        ),
+      ),
       body: SafeArea(
         child:  SingleChildScrollView(
           child:
@@ -104,34 +63,92 @@ class DetailedAdvertPage extends StatelessWidget {
                     dotBgColor: Colors.grey[800].withOpacity(0),
                   )
               ),
-              titleSection,
-              textSection,
-              buttonSection,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 10.0, top: 10.0),
+                          child: Text(
+                            this.advert.getTitle(),
+                            style: TextStyle(
+                              fontSize: 20.0,
+                                fontWeight: FontWeight.bold
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(right: 10.0, top: 10.0),
+                        child: Text(
+                          this.advert.getPrice().toString() + "€",
+                          maxLines: 1,
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            fontSize: 20.0,
+                              color: Colors.orange
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Text(
+                          "Jean-Michel POUET",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 3,
+                          style: TextStyle(
+                            fontSize: 13.0,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Center(
+                    child: Container(
+                      height: 2.0,
+                      width: MediaQuery.of(context).size.width * 0.80,
+                      color: Colors.lightBlue,
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      this.advert.getDescription(),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-
-  Column _buildButtonColumn(Color color, IconData icon, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, color: color),
-        Container(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: color,
-            ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.smartphone),
+            title: Text('Appeler'),
           ),
-        ),
-      ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            title: Text('Réserver'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            title: Text('Message'),
+          ),
+        ],
+        selectedItemColor: Colors.black54,
+        unselectedItemColor: Colors.black54,
+      ),
     );
   }
 }
