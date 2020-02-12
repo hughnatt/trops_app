@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -106,7 +109,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       child: MaterialButton(
         color: Colors.green,
         textColor: Colors.white,
-        onPressed: () {},
+        onPressed: () => _uploadAdvert(),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
@@ -191,6 +194,17 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     }
     else {
       return Image.file(imageFiles.get(index), fit: BoxFit.cover);
+    }
+  }
+
+
+  void _uploadAdvert() async {
+    var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, "Sports d'hiver", "test@test.com", picked.first, picked.last);
+    if (response.statusCode != 201){
+      print("ERREUR");
+    }
+    else{
+      Navigator.pop(context);
     }
   }
 

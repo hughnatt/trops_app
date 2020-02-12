@@ -59,6 +59,27 @@ Future<List<String>> getCategories() async {
   }
 }
 
+
+Future<Http.Response> uploadAdvert(String title, int price, String description,String category,String owner,DateTime beginDate, DateTime endDate) async {
+  var jsonBody = '''
+  {
+    "title" : "$title",
+    "price" : $price,
+    "description" : "$description",
+    "category" : "$category",
+    "owner": "$owner",
+    "startDate" : "$beginDate",
+    "endDate" : "$endDate"
+  }''';
+  var uri = new Uri.https(_dataBaseURI, "/advert");
+  print(jsonBody);
+  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
+  print(response.statusCode);
+  print(response.body);
+  return response;
+}
+
+
 //Future<Http.Response> register(String name, String email, String password) async {
 //  var jsonBody = '''
 //  {
