@@ -21,7 +21,9 @@ Future<List<Advert>> getAllAdverts() async {
         item["title"],
         item["price"],
         item["description"],
-        photos
+        photos,
+        item["owner"],
+        item["category"]
       );
 
       _adverts.add(advert);

@@ -4,9 +4,11 @@ class Advert {
   int _price;
   String _description;
   List<String> _photos;
+  String _owner;
+  String _category;
 
 
-  Advert(this._title, this._price, this._description, this._photos);
+  Advert(this._title, this._price, this._description, this._photos, this._owner, this._category);
 
   String getTitle(){
     return this._title;
@@ -40,5 +42,13 @@ class Advert {
 
   bool isEmpty(){
     return _photos.length == 0;
+  }
+
+  String getCategory(){
+    return this._category;
+  }
+
+  String getOwner(){
+    return this._owner;
   }
 }
