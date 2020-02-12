@@ -94,8 +94,25 @@ class AdvertTile extends StatelessWidget {
                         child: Text(
                           this.advert.getDescription(),
                           overflow: TextOverflow.ellipsis,
-                          maxLines: 3,
+                          maxLines: 2,
                         ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.only(right: 10.0),
+                            child: Text(
+                              this.advert.getCategory(),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 13.0,
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ],
                       )
                     ],
                   ),
