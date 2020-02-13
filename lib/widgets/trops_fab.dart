@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:trops_app/ui/createAdvert.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class TropsFloatingActionButton extends StatelessWidget {
 
@@ -18,7 +19,7 @@ class TropsFloatingActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
-        child: Icon(Icons.add),
+        child: Icon(FontAwesomeIcons.plus),
         onPressed: () => _onButtonPressed(context),
         );
   }
