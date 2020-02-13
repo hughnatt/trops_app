@@ -33,7 +33,6 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String 
 
       _adverts.add(advert);
     });
-    print(_adverts);
     return _adverts;
   } else {
     throw Exception("Failed to get adverts");

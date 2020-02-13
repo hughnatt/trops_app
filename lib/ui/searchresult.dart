@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -24,20 +25,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   List<DateTime> picked;
 
-  List<String> _categories = [
-    "Catégorie",
-    "Ski",
-    "Surf",
-    "Foot",
-    "Rugby",
-    "Tennis",
-    "Basket",
-    "Volley",
-    "Hand",
-    "Badminton",
-    "Pétanque",
-    "Danse"
-  ];
+  List<String> _categories = [];
 
   TextEditingController _keywordController = TextEditingController();
   TextEditingController _priceMinController = TextEditingController();
@@ -45,24 +33,48 @@ class _SearchResultPageState extends State<SearchResultPage>{
   String _dropdownValue;
   RangeValues _priceRange = RangeValues(0.0,1.0);
 
-
+  static const int PRICE_MAX = 500;
+  static const int PRICE_MIN = 0;
 
   @override
   void initState(){
     super.initState();
+    loadCategories();
+  }
+
+  loadCategories() async {
+
+    getCategories().then( (List<String> res) {
+      setState(() {
+        _categories = res;
+      });
+    });
   }
 
   loadAdverts() async {
-    getResults(_keywordController.text, 0, 10000, "").then((res) {
+    var priceMin;
+    var priceMax;
+    try {
+      print(_priceMinController.text);
+      print(_priceMaxController.text);
+      priceMin = int.parse(_priceMinController.text);
+      priceMax = int.parse(_priceMaxController.text);
+      if (priceMin < 0 || priceMax < priceMin){
+        throw Exception();
+      }
+    } catch(ex){
+      priceMin = 0;
+      priceMax = 10000;
+    }
+
+    print(priceMin);
+    print(priceMax);
+
+    getResults(_keywordController.text, priceMin, priceMax, "").then((res) {
       setState(() {
         _adverts = res;
       });
     });
-    /*getAllAdverts().then( (List<Advert> res) {
-      setState(() {
-        _adverts = res;
-      });
-    });*/
   }
 
   /*loadAdverts(String query) {
@@ -94,16 +106,24 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }*/
 
   Widget _getListViewWidget(){
-    return ListView.builder(
-     // key: UniqueKey(),
-      itemCount: _adverts.length,
-      padding: EdgeInsets.only(top: 5.0),
-      itemBuilder: (context, index) {
-        return AdvertTile(
-          advert: _adverts[index],
-        );
-      },
-    );
+    if (_adverts.length == 0){
+      return Center(
+        child: Text(
+          "Aucun résultat",
+        ),
+      );
+    } else {
+      return ListView.builder(
+        // key: UniqueKey(),
+        itemCount: _adverts.length,
+        padding: EdgeInsets.only(top: 5.0),
+        itemBuilder: (context, index) {
+          return AdvertTile(
+            advert: _adverts[index],
+          );
+        },
+      );
+    }
   }
 
   Widget _searchBar(){
@@ -246,6 +266,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
           padding: EdgeInsets.all(20),
           child: Column(
             children: <Widget>[
+              Text(
+                "Filtres",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+                textAlign: TextAlign.center,
+              ),
               TextField(
                 controller: _keywordController,
                 decoration: InputDecoration(
@@ -289,7 +317,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
               Row(
                 children: <Widget>[
                   Text (
-                    "Prix maximal",
+                    "Prix minimal",
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -298,14 +326,13 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   ),
                   Expanded(
                     child: TextField(
-                      controller: _priceMaxController,
-                      decoration: InputDecoration(
-                        hintText: "€",
-                      ),
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold
-                      )
+                        controller: _priceMinController,
+                        onSubmitted: (value) => _onPriceRangeChange(),
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold
+                        )
                     ),
                   ),
                   Text (
@@ -320,7 +347,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
               Row(
                 children: <Widget>[
                   Text (
-                    "Prix minimal",
+                    "Prix maximal",
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -329,11 +356,13 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   ),
                   Expanded(
                     child: TextField(
-                      controller: _priceMinController,
+                      controller: _priceMaxController,
+                      textAlign: TextAlign.center,
                       keyboardType: TextInputType.number,
                       style: TextStyle(
                         fontWeight: FontWeight.bold
-                      )
+                      ),
+                      onSubmitted: (value) => _onPriceRangeChange(),
                     ),
                   ),
                   Text (
@@ -341,7 +370,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   ),
                 ],
               ),
-
 
               Padding(
                 padding: EdgeInsets.only(top: 10),
@@ -351,11 +379,13 @@ class _SearchResultPageState extends State<SearchResultPage>{
                 onChanged: (RangeValues values){
                   setState(() {
                     _priceRange = values;
+                    _priceMinController.text = (_priceRange.start * PRICE_MAX).toInt().toString();
+                    _priceMaxController.text = (_priceRange.end * PRICE_MAX).toInt().toString();
                   });
                 },
 
               ),
-              MaterialButton(
+              /*MaterialButton(
                   color: Colors.blueAccent,
                   textColor: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -363,7 +393,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   ),
                   onPressed: _pickDateTime,
                   child: Text("Choisir la disponibilité")
-              ),
+              ),*/
 
               Padding(
                 padding: EdgeInsets.only(top: 10),
@@ -406,8 +436,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
               child: _advancedResearchBar(),
             ),*/
 
-            FlatButton(
-              child: Text("Recherche Avancée"),
+            FlatButton.icon(
+              icon: Icon(Icons.filter_list),
+              label: Text("Filtres"),
               onPressed: () {_scaffoldKey.currentState.openDrawer();},
             ),
 
@@ -426,12 +457,46 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
+  _onPriceRangeChange(){
+    var _priceMin;
+    try {
+      _priceMin = int.parse(_priceMinController.text);
+      if (_priceMin < PRICE_MIN) {
+        throw Exception();
+      }
+    } catch (ex){
+      _priceMin = PRICE_MIN;
+    }
+
+    var _priceMax;
+    try {
+      _priceMax = int.parse(_priceMaxController.text);
+      if (_priceMax > PRICE_MAX) {
+        throw Exception();
+      }
+    } catch (ex){
+      _priceMax = PRICE_MAX;
+    }
+
+    if (_priceMin <= _priceMax){
+      setState(() {
+        _priceRange = RangeValues(_priceMin/PRICE_MAX,_priceMax/PRICE_MAX);
+      });
+    } else {
+      setState(() {
+        _priceRange = RangeValues(0.0,1.0);
+        _priceMinController.text = "";
+        _priceMaxController.text = "";
+      });
+    }
+  }
+
   onSubmitted(query) async {
     loadAdverts();
   }
 
   onAdvancedSubmitted(){
-    if(cat=="Catégorie"){
+    /*if(cat=="Catégorie"){
       showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
@@ -452,9 +517,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
       print(picked.last.toString());
       print(_keywordController.text);
       //Navigator.pop(_ScaffoldKey.currentContext);
-    }
-
-
+    }*/
+    FocusScope.of(context).unfocus();
+    loadAdverts();
   }
 
   void _pickDateTime() async {
