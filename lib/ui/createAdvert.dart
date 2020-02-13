@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -19,7 +20,24 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
-  String _expansionTileTitle = "Choisir une catégorie";
+  String _dropdownValue;
+
+  List<String> _categories = new List<String>();
+
+  @override
+  void initState(){
+    super.initState();
+    loadCategories();
+  }
+
+  loadCategories() async {
+
+    getCategories().then( (List<String> res) {
+      setState(() {
+        _categories = res;
+      });
+    });
+  }
 
   _openSource(BuildContext context, int index, String source) async {
     ImageSource sourceChoice;
@@ -253,18 +271,36 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                shape: RoundedRectangleBorder(
                    borderRadius: BorderRadius.circular(10.0)
                ),
-               child: ExpansionTile(
-                 title: Text(_expansionTileTitle),
-                 children: <String>["Test1", "Test2"].map((String value) {
-                   return ListTile(
-                     onTap: () {
-                       setState(() {
-                         _expansionTileTitle = value;
-                       });
-                     },
-                     title: Text(value),
-                   );
-                 }).toList(),
+               child: Container(
+                 padding: EdgeInsets.all(10.0),
+                 child: Row(
+                   children: <Widget>[
+                     Container(
+                       padding: EdgeInsets.only(right: 10.0),
+                       child: Icon(Icons.list, color: Colors.black54,),
+                     ),
+                     Flexible(
+                       child: DropdownButtonHideUnderline(
+                         child: DropdownButton<String>(
+                           hint: Text("Choisir une catégorie"),
+                           value: _dropdownValue,
+                           isExpanded: true,
+                           items: _categories.map<DropdownMenuItem<String>>((String value) {
+                             return DropdownMenuItem<String>(
+                               value: value,
+                               child: Text(value),
+                             );
+                           }).toList(),
+                           onChanged: (String newvalue) {
+                             setState(() {
+                               _dropdownValue = newvalue;
+                             });
+                           },
+                         ),
+                       ),
+                     )
+                   ],
+                 )
                ),
              ),
            ),
