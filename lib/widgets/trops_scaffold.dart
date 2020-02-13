@@ -9,11 +9,18 @@ class TropsScaffold extends StatelessWidget {
 
   TropsScaffold({Key key, @required this.body, this.appBar}) : super(key : key);
 
+  final Drawer drawer;
+  final Key scaffoldKey;
+
+  TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer}) : super(key : key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: this.appBar,
+      key: this.scaffoldKey,
       body: this.body,
+      drawer: this.drawer,
       bottomNavigationBar: TropsBottomAppBar(),
       floatingActionButton: Visibility(
           visible: _dockedFabVisibility(context),
