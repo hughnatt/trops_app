@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -18,7 +16,7 @@ class SearchResultPage extends StatefulWidget {
 }
 
 class _SearchResultPageState extends State<SearchResultPage>{
-  GlobalKey<ScaffoldState> _ScaffoldKey = GlobalKey();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -41,18 +39,21 @@ class _SearchResultPageState extends State<SearchResultPage>{
     "Danse"
   ];
 
-  TextEditingController _editingController = TextEditingController();
-  TextEditingController _titleController = TextEditingController();
+  TextEditingController _keywordController = TextEditingController();
+  TextEditingController _priceMinController = TextEditingController();
+  TextEditingController _priceMaxController = TextEditingController();
+  String _dropdownValue;
+  RangeValues _priceRange = RangeValues(0.0,1.0);
+
 
 
   @override
   void initState(){
     super.initState();
-    loadAdverts();
   }
 
   loadAdverts() async {
-    getResults(_titleController.text, 0, 10000, "").then((res) {
+    getResults(_keywordController.text, 0, 10000, "").then((res) {
       setState(() {
         _adverts = res;
       });
@@ -122,7 +123,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                 height: 45.0,
                 margin: EdgeInsets.only(left: 16.0, right: 5.0),
                 child: new TextField(
-                  controller: _titleController,
+                  controller: _keywordController,
                   maxLines: 1,
                   autofocus: true,
                   decoration: new InputDecoration(
@@ -142,6 +143,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
+/*
   double _advancedResearchBarHeight(){
     var usableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom - 150;
     if (usableHeight < 250) {
@@ -150,7 +152,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
       return 250;
     }
   }
-
+*/
+/*
   Widget _advancedResearchBar(){
     return ExpansionTile(
       title: Text("Recherche Avancée"),
@@ -234,82 +237,152 @@ class _SearchResultPageState extends State<SearchResultPage>{
       ],
     );
   }
+*/
 
   Widget _advancedResearchDrawer(){
     return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(top: 50.0),
-            ),
-
-            DropdownButton<String>(
-              onChanged: (String newValue) {
-                setState(() {
-                  cat = newValue;
-                });
-              },
-              isDense: false,
-              value: cat,
-              isExpanded: true,
-              icon: Icon(Icons.arrow_downward),
-              iconSize: 24,
-              items: _categories
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-
-            SizedBox(
-              height: 10.0,
-            ),
-            TextField(
-              controller: _editingController,
-              style: TextStyle(
-                  fontFamily: "WorkSansSemiBold",
-                  fontSize: 16.0,
-                  color: Colors.black
-              ),
-              decoration: InputDecoration(
-                hintText: "Prix Maximal",
-              ),
-              keyboardType: TextInputType.number,
-            ),
-
-            SizedBox(
-              height: 10.0,
-            ),
-
-            MaterialButton(
-                color: Colors.blueAccent,
-                textColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: <Widget>[
+              TextField(
+                controller: _keywordController,
+                decoration: InputDecoration(
+                  hintText: "Mots-clés",
                 ),
-                onPressed: _pickDateTime,
-                child: Text("Choisir la disponibilité")
-            ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+              ),
+              Row(
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.only(right: 10.0),
+                    child: Icon(Icons.list, color: Colors.black54,),
+                  ),
+                  Flexible(
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        hint: Text("Choisir une catégorie"),
+                        value: _dropdownValue,
+                        isExpanded: true,
+                        items: _categories.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                        onChanged: (String newvalue) {
+                          setState(() {
+                            _dropdownValue = newvalue;
+                          });
+                        },
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+              ),
+              Row(
+                children: <Widget>[
+                  Text (
+                    "Prix maximal",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  Spacer(
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _priceMaxController,
+                      decoration: InputDecoration(
+                        hintText: "€",
+                      ),
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold
+                      )
+                    ),
+                  ),
+                  Text (
+                    "€",
+                  ),
+                ],
+              ),
 
-            SizedBox(
-              height: 10.0,
-            ),
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+              ),
+              Row(
+                children: <Widget>[
+                  Text (
+                    "Prix minimal",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  Spacer(
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: _priceMinController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
+                  ),
+                  Text (
+                    "€",
+                  ),
+                ],
+              ),
 
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: <Widget>[
-                RaisedButton(
-                  child: Text("Rechercher"),
-                  onPressed: () {onAdvancedSubmitted();_ScaffoldKey.currentState.openEndDrawer();},
+
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+              ),
+              RangeSlider(
+                values: _priceRange,
+                onChanged: (RangeValues values){
+                  setState(() {
+                    _priceRange = values;
+                  });
+                },
+
+              ),
+              MaterialButton(
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  onPressed: _pickDateTime,
+                  child: Text("Choisir la disponibilité")
+              ),
+
+              Padding(
+                padding: EdgeInsets.only(top: 10),
+              ),
+
+              Center(
+                child: RaisedButton.icon(
+                  label: Text("Appliquer"),
+                  icon: Icon(Icons.search),
+                  textColor: Colors.blueAccent,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  onPressed: () {onAdvancedSubmitted();_scaffoldKey.currentState.openEndDrawer();},
                 ),
-              ],
-            ),
-
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -318,7 +391,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _ScaffoldKey,
+      key: _scaffoldKey,
 
       body: SafeArea(
         child: Column(
@@ -335,7 +408,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             FlatButton(
               child: Text("Recherche Avancée"),
-              onPressed: () {_ScaffoldKey.currentState.openDrawer();},
+              onPressed: () {_scaffoldKey.currentState.openDrawer();},
             ),
 
             Expanded(
@@ -377,7 +450,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       print(cat);
       print(picked.first.toString());
       print(picked.last.toString());
-      print(_editingController.text);
+      print(_keywordController.text);
       //Navigator.pop(_ScaffoldKey.currentContext);
     }
 
