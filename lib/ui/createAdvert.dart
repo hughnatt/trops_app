@@ -273,23 +273,33 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                ),
                child: Container(
                  padding: EdgeInsets.all(10.0),
-                 child: DropdownButtonHideUnderline(
-                   child: DropdownButton<String>(
-                     hint: Text("Choisir une catégorie"),
-                     value: _dropdownValue,
-                     isExpanded: true,
-                     items: _categories.map<DropdownMenuItem<String>>((String value) {
-                       return DropdownMenuItem<String>(
-                         value: value,
-                         child: Text(value),
-                       );
-                     }).toList(),
-                     onChanged: (String newvalue) {
-                       setState(() {
-                         _dropdownValue = newvalue;
-                       });
-                     },
-                   ),
+                 child: Row(
+                   children: <Widget>[
+                     Container(
+                       padding: EdgeInsets.only(right: 10.0),
+                       child: Icon(Icons.list, color: Colors.black54,),
+                     ),
+                     Flexible(
+                       child: DropdownButtonHideUnderline(
+                         child: DropdownButton<String>(
+                           hint: Text("Choisir une catégorie"),
+                           value: _dropdownValue,
+                           isExpanded: true,
+                           items: _categories.map<DropdownMenuItem<String>>((String value) {
+                             return DropdownMenuItem<String>(
+                               value: value,
+                               child: Text(value),
+                             );
+                           }).toList(),
+                           onChanged: (String newvalue) {
+                             setState(() {
+                               _dropdownValue = newvalue;
+                             });
+                           },
+                         ),
+                       ),
+                     )
+                   ],
                  )
                ),
              ),
