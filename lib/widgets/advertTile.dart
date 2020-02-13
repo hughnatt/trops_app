@@ -52,7 +52,10 @@ class AdvertTile extends StatelessWidget {
                 child: Container(
                   height: 100,
                   width: 100,
-                  child: _getImageWidget()
+                  child: Hero(
+                    tag: 'heroAdvertImage_${advert.getId()}',
+                    child: _getImageWidget()
+                  ),
                 ),
               ),
               Container(

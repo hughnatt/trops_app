@@ -1,5 +1,6 @@
 class Advert {
 
+  String _id;
   String _title;
   int _price;
   String _description;
@@ -7,8 +8,11 @@ class Advert {
   String _owner;
   String _category;
 
+  Advert(this._id, this._title, this._price, this._description, this._photos, this._owner, this._category);
 
-  Advert(this._title, this._price, this._description, this._photos, this._owner, this._category);
+  String getId(){
+    return this._id;
+  }
 
   String getTitle(){
     return this._title;
