@@ -25,6 +25,7 @@ Original Version :  https://github.com/huextrat/TheGorgeousLogin/
 
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -33,7 +34,6 @@ import 'package:trops_app/style/theme.dart' as Theme;
 import 'package:trops_app/api/auth.dart' as Auth;
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/User.dart';
-import 'package:trops_app/ui/profile.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 
@@ -73,64 +73,15 @@ class _AuthPageState extends State<AuthPage>
   Color right = Colors.white;
 
   @override
-  Widget build(BuildContext context) {
-    return TropsScaffold(
-      body: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overscroll) {
-            overscroll.disallowGlow();
-            return false;
-          },
-        child : SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 75.0),
-                  //child: new Image(
-                  //    width: 250.0,
-                  //    height: 191.0,
-                  //    fit: BoxFit.fill,
-                  //    image: new AssetImage('assets/img/abc.png')),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 20.0),
-                  child: _buildMenuBar(context),
-                ),
-                Container(
-                  height: 500,
-                  width: MediaQuery.of(context).size.width,
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (i) {
-                      if (i == 0) {
-                        setState(() {
-                          right = Colors.white;
-                          left = Colors.black;
-                        });
-                      } else if (i == 1) {
-                        setState(() {
-                          right = Colors.black;
-                          left = Colors.white;
-                        });
-                      }
-                    },
-                    children: <Widget>[
-                      new ConstrainedBox(
-                        constraints: const BoxConstraints.expand(),
-                        child: _buildSignIn(context),
-                      ),
-                      new ConstrainedBox(
-                        constraints: const BoxConstraints.expand(),
-                        child: _buildSignUp(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-    );
+  void initState() {
+    super.initState();
+
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.portraitUp,
+//      DeviceOrientation.portraitDown,
+//    ]);
+
+    _pageController = PageController();
   }
 
   @override
@@ -146,32 +97,66 @@ class _AuthPageState extends State<AuthPage>
   }
 
   @override
-  void initState() {
-    super.initState();
-
-//    SystemChrome.setPreferredOrientations([
-//      DeviceOrientation.portraitUp,
-//      DeviceOrientation.portraitDown,
-//    ]);
-
-    _pageController = PageController();
-  }
-
-  void showInSnackBar(String value) {
-    FocusScope.of(context).requestFocus(new FocusNode());
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState?.showSnackBar(new SnackBar(
-      content: new Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontFamily: "WorkSansSemiBold"),
+  Widget build(BuildContext context) {
+    return TropsScaffold(
+      scaffoldKey: _scaffoldKey,
+      body: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowGlow();
+          return false;
+        },
+        child : SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 75.0),
+                //child: new Image(
+                //    width: 250.0,
+                //    height: 191.0,
+                //    fit: BoxFit.fill,
+                //    image: new AssetImage('assets/img/abc.png')),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: _buildMenuBar(context),
+              ),
+              Container(
+                height: 500,
+                width: MediaQuery.of(context).size.width,
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (i) {
+                    FocusScope.of(context).unfocus();
+                    if (i == 0) {
+                      setState(() {
+                        right = Colors.white;
+                        left = Colors.black;
+                      });
+                    } else if (i == 1) {
+                      setState(() {
+                        right = Colors.black;
+                        left = Colors.white;
+                      });
+                    }
+                  },
+                  children: <Widget>[
+                    new ConstrainedBox(
+                      constraints: const BoxConstraints.expand(),
+                      child: _buildSignIn(context),
+                    ),
+                    new ConstrainedBox(
+                      constraints: const BoxConstraints.expand(),
+                      child: _buildSignUp(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 3),
-    ));
+    );
   }
 
   Widget _buildMenuBar(BuildContext context) {
@@ -413,7 +398,7 @@ class _AuthPageState extends State<AuthPage>
               Padding(
                 padding: EdgeInsets.only(top: 20.0, right: 40.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Facebook button pressed"),
+                  onTap: () => _displayAlert("Indisponible"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -430,7 +415,7 @@ class _AuthPageState extends State<AuthPage>
               Padding(
                 padding: EdgeInsets.only(top: 20.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Google button pressed"),
+                  onTap: () => _displayAlert("Indisponible"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -644,6 +629,22 @@ class _AuthPageState extends State<AuthPage>
     );
   }
 
+  void _displayAlert(String text){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("ERREUR"),
+        content: Text(text),
+        actions: [
+          FlatButton(
+            child: Text("ANNULER"),
+            onPressed: () {Navigator.pop(context);},
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onSignInButtonPress() {
     _pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
@@ -674,19 +675,19 @@ class _AuthPageState extends State<AuthPage>
     if (_ctrlRegisterPassword.text == _ctrlRegisterConfirmPassword.text){
       Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
       if (response.statusCode >= 300){
-        showInSnackBar("Echec de l'inscription");
+        _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
         _ctrlRegisterPassword.clear();
         _ctrlRegisterConfirmPassword.clear();
       } else {
-        showInSnackBar("Inscription réussie");
+        _displayAlert("Inscription réussie.");
         _ctrlRegisterName.clear();
         _ctrlRegisterEmail.clear();
         _ctrlRegisterPassword.clear();
         _ctrlRegisterConfirmPassword.clear();
       }
     } else {
-      showInSnackBar("Les mots de passe ne correspondent pas !");
+      _displayAlert("Les mots de passe ne correspondent pas.");
       FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
     }
   }
@@ -695,10 +696,8 @@ class _AuthPageState extends State<AuthPage>
     Http.Response response;
     response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
     if (response.statusCode != 200){
-      showInSnackBar("Echec");
-
+      _displayAlert("Les identifiants fournis sont incorrects.");
     } else {
-      showInSnackBar("Connecté");
       Map json = jsonDecode(response.body);
       User user = User(json['user']['name'],json['user']['email'],json['token']);
       User.current = user;
