@@ -17,13 +17,13 @@ class CreateAdvertPage extends StatefulWidget {
 }
 
 enum SourceType {gallery, camera}
-enum ResultType {success, failure}
+enum ResultType {success, failure, denied}
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  ImagesManager imageFiles = ImagesManager();
+  ImagesManager _imageFiles = ImagesManager();
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
@@ -65,7 +65,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice);
     this.setState(() {
-      imageFiles.loadFile(index, picture);
+      _imageFiles.loadFile(index, picture);
     });
     Navigator.of(context).pop();
   }
@@ -90,7 +90,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             },
           ),
           ListTile(
-            enabled: (imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
+            enabled: (_imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
@@ -104,7 +104,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   _deletePicture(BuildContext context, int index){
     this.setState(() { //we reload the UI
-      imageFiles.removeAt(index);
+      _imageFiles.removeAt(index);
     });
     Navigator.of(context).pop(); // we close the alertDialog
   }
@@ -131,7 +131,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       child: MaterialButton(
         color: Colors.green,
         textColor: Colors.white,
-        onPressed: () => _uploadAdvert(),
+        onPressed: () =>_uploadAdvert(),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
@@ -208,26 +208,38 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Widget _boxContent(int index) {
-    if (imageFiles.get(index) == null) {
+    if (_imageFiles.get(index) == null) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
     else {
-      return Image.file(imageFiles.get(index), fit: BoxFit.cover);
+      return Image.file(_imageFiles.get(index), fit: BoxFit.cover);
     }
   }
 
 
+  bool _checkFields(){
+    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty);
+  }
+
+
   void _uploadAdvert() async {
-    var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, "Sports d'hiver", User.current.getEmail(), picked.first, picked.last);
-    if (response.statusCode != 201){
-      _showUploadResult(context,ResultType.failure);
+
+    if(_checkFields()){
+      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _dropdownValue, User.current.getEmail(), picked.first, picked.last);
+      if (response.statusCode != 201){
+        _showUploadResult(context,ResultType.failure);
+      }
+      else{
+        _showUploadResult(context,ResultType.success);
+      }
     }
     else{
-      _showUploadResult(context,ResultType.success);
+      _showUploadResult(context, ResultType.denied);
     }
+
   }
 
   Future<void> _showUploadResult(BuildContext context, ResultType result) {
@@ -243,18 +255,27 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           title = "Opération terminée";
           content = "Votre annonce a été créée avec succès";
           popCount = 2;
+          break;
         }
-        break;
       case ResultType.failure:
         {
           title = "Opération échouée";
-          content = "Malheuresement, votre annonce n'a pas pu être créée";
+          content = "Malheureusement, votre annonce n'a pas pu être créée";
           popCount = 1;
+          break;
         }
-        break;
+      case ResultType.denied:
+        {
+          title = "Pas si vite !";
+          content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Dates, Catégorie)";
+          popCount = 1;
+          break;
+        }
+
     }
     return showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         // return object of type Dialog
         return AlertDialog(
