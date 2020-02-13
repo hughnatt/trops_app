@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/widgets/advertTile.dart';
@@ -41,6 +42,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
   ];
 
   TextEditingController _editingController = TextEditingController();
+  TextEditingController _titleController = TextEditingController();
 
 
   @override
@@ -50,13 +52,16 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 
   loadAdverts() async {
-
-    getAllAdverts().then( (List<Advert> res) {
+    getResults(_titleController.text, 0, 10000, "").then((res) {
       setState(() {
         _adverts = res;
       });
     });
-
+    /*getAllAdverts().then( (List<Advert> res) {
+      setState(() {
+        _adverts = res;
+      });
+    });*/
   }
 
   /*loadAdverts(String query) {
@@ -117,6 +122,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                 height: 45.0,
                 margin: EdgeInsets.only(left: 16.0, right: 5.0),
                 child: new TextField(
+                  controller: _titleController,
                   maxLines: 1,
                   autofocus: true,
                   decoration: new InputDecoration(
