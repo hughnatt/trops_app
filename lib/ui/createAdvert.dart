@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/data.dart';
+import 'package:trops_app/models/User.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
+import 'package:trops_app/main.dart';
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -23,6 +25,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
   String _dropdownValue;
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<String> _categories = new List<String>();
 
@@ -216,18 +220,36 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   void _uploadAdvert() async {
-    var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, "Sports d'hiver", "test@test.com", picked.first, picked.last);
+    var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, "Sports d'hiver", User.current.getEmail(), picked.first, picked.last);
     if (response.statusCode != 201){
-      print("ERREUR");
+      showInSnackBar("Création impossible");
     }
     else{
       Navigator.pop(context);
     }
   }
 
+  void showInSnackBar(String value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    _scaffoldKey.currentState?.removeCurrentSnackBar();
+    _scaffoldKey.currentState?.showSnackBar(new SnackBar(
+      content: new Text(
+        value,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            color: Colors.white,
+            fontSize: 16.0,
+            fontFamily: "WorkSansSemiBold"),
+      ),
+      backgroundColor: Colors.blue,
+      duration: Duration(seconds: 3),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
    return Scaffold(
+     key: _scaffoldKey,
      backgroundColor: Colors.white,
      body: GestureDetector(
        onTap: (){
