@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/ui/profile.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/cupertino.dart';
 
 class TropsBottomAppBar extends StatelessWidget {
 
@@ -34,6 +36,22 @@ class TropsBottomAppBar extends StatelessWidget {
     }
   }
 
+  Color _whatColorToPaint(BuildContext context, String path){
+    if(ModalRoute.of(context).settings.name == path){
+      return Colors.blue;
+    } else {
+      return Colors.black54;
+    }
+  }
+
+  Color _whatColorToPaintProfile(BuildContext context){
+    if(ModalRoute.of(context).settings.name == "/auth" || ModalRoute.of(context).settings.name == "/profile"){
+      return Colors.blue;
+    } else {
+      return Colors.black54;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
@@ -44,11 +62,11 @@ class TropsBottomAppBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed: () => _onHomePressed(context),),
-            IconButton(icon: Icon(Icons.search), onPressed: () => _onSearchPressed(context),),
+            IconButton(icon: Icon(Icons.home,size: 30,color: _whatColorToPaint(context, "/"),), onPressed: () => _onHomePressed(context),),
+            IconButton(icon: Icon(Icons.search,size: 30,color: _whatColorToPaint(context, "/search")), onPressed: () => _onSearchPressed(context),),
             SizedBox(width: 40), // The dummy child
-            IconButton(icon: Icon(Icons.notifications), onPressed: () => _onNotificationsPressed(context),),
-            IconButton(icon: Icon(Icons.account_circle), onPressed: ()=> _onProfilePressed(context),),
+            IconButton(icon: Icon(FontAwesomeIcons.bell,color: _whatColorToPaint(context, "")), onPressed: () => _onNotificationsPressed(context),),
+            IconButton(icon: Icon(FontAwesomeIcons.user,color: _whatColorToPaintProfile(context)), onPressed: ()=> _onProfilePressed(context),),
             SizedBox(width: 1),
           ],
         ),
