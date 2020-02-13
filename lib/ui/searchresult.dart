@@ -5,6 +5,7 @@ import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/widgets/advertTile.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class SearchResultPage extends StatefulWidget {
 
@@ -55,8 +56,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
     var priceMin;
     var priceMax;
     try {
-      print(_priceMinController.text);
-      print(_priceMaxController.text);
       priceMin = int.parse(_priceMinController.text);
       priceMax = int.parse(_priceMaxController.text);
       if (priceMin < 0 || priceMax < priceMin){
@@ -124,6 +123,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
         },
       );
     }
+
+
   }
 
   Widget _searchBar(){
@@ -259,7 +260,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 */
 
-  Widget _advancedResearchDrawer(){
+  Widget _filtersDrawer(){
     return SingleChildScrollView(
       child: SafeArea(
         child: Padding(
@@ -420,8 +421,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
+    return TropsScaffold(
+      scaffoldKey: _scaffoldKey,
 
       body: SafeArea(
         child: Column(
@@ -451,7 +452,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       ),
 
       drawer: Drawer(
-        child: _advancedResearchDrawer(),
+        child: _filtersDrawer(),
       ),
 
     );
