@@ -23,6 +23,7 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String 
       List<String> photos = new List<String>.from(item["photos"]);
 
       var advert = new Advert(
+          item["_id"],
           item["title"],
           item["price"],
           item["description"],

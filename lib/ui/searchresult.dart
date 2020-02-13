@@ -137,24 +137,27 @@ class _SearchResultPageState extends State<SearchResultPage>{
               onPressed:() => Navigator.pop(context, false)
           ),
           Expanded(
-            child: Material(
-              borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
-              elevation: 3.0,
-              child: Container(
-                height: 45.0,
-                margin: EdgeInsets.only(left: 16.0, right: 5.0),
-                child: new TextField(
-                  controller: _keywordController,
-                  maxLines: 1,
-                  autofocus: true,
-                  decoration: new InputDecoration(
-                      icon: Icon(
-                          Icons.search,
-                          color: Theme.of(context).accentColor
-                      ),
-                      border: InputBorder.none),
-                  onSubmitted: onSubmitted,
-                  onChanged: onSubmitted,
+            child: Hero(
+              tag: 'heroSearchBar',
+              child: Material(
+                borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
+                elevation: 3.0,
+                child: Container(
+                  height: 45.0,
+                  margin: EdgeInsets.only(left: 16.0, right: 5.0),
+                  child: new TextField(
+                    controller: _keywordController,
+                    maxLines: 1,
+                    autofocus: true,
+                    decoration: new InputDecoration(
+                        icon: Icon(
+                            Icons.search,
+                            color: Theme.of(context).accentColor
+                        ),
+                        border: InputBorder.none),
+                    onSubmitted: onSubmitted,
+                    onChanged: onSubmitted,
+                  ),
                 ),
               ),
             ),

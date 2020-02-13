@@ -56,12 +56,15 @@ class DetailedAdvertPage extends StatelessWidget {
               SizedBox(
                   height: 250.0,
                   width: MediaQuery.of(context).size.width,
-                  child: Carousel(
-                    images: getImagesWidget(),
-                    autoplay: false,
-                    dotSize: 4,
-                    dotBgColor: Colors.grey[800].withOpacity(0),
-                  )
+                  child: Hero(
+                    tag: 'heroAdvertImage_${advert.getId()}',
+                    child:Carousel(
+                      images: getImagesWidget(),
+                      autoplay: false,
+                      dotSize: 4,
+                      dotBgColor: Colors.grey[800].withOpacity(0),
+                    ),
+                  ),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
