@@ -5,12 +5,14 @@ import 'package:trops_app/widgets/trops_fab.dart';
 class TropsScaffold extends StatelessWidget {
 
   final Widget body;
+  Widget appBar;
 
-  TropsScaffold({Key key, @required this.body}) : super(key : key);
+  TropsScaffold({Key key, @required this.body, this.appBar}) : super(key : key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: this.appBar,
       body: this.body,
       bottomNavigationBar: TropsBottomAppBar(),
       floatingActionButton: Visibility(

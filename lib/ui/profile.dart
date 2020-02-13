@@ -3,8 +3,8 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
-
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key : key);
 
@@ -16,9 +16,13 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>{
 
+  PageController pageController;
+
   @override
   void initState() {
     super.initState();
+
+    pageController = PageController(viewportFraction: 0.8);
     // Make sure we have an user logged in
     // If not, redirect to authentication screen
     if (User.current == null){
@@ -33,100 +37,96 @@ class _ProfilePageState extends State<ProfilePage>{
   Widget build(BuildContext context) {
     final User user = ModalRoute.of(context).settings.arguments;
     return TropsScaffold(
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.all(20),
-                  child : Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      IconButton(
-                        icon : Icon(FontAwesomeIcons.cogs),
-                        onPressed: null,
-                      ),
-                      Material(
-                        elevation: 4.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.hardEdge,
-                        color: Colors.transparent,
-                        child: Ink.image(
-                          image: NetworkImage("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg"),
-                          fit: BoxFit.cover,
-                          width: 120.0,
-                          height: 120.0,
-                          child: InkWell(
-                            onTap: () {},
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon : Icon(FontAwesomeIcons.signOutAlt),
-                        onPressed: () => _logout()
-                      ),
-                    ],
-                  ),
-                ),
-
-                Text(
-                    user.getName(),
-                    textAlign: TextAlign.center,
-                    textScaleFactor: 2.0,
-                    style: TextStyle(fontWeight: FontWeight.bold)
-                ),
-                Text(
-                  user.getEmail(),
-                  textAlign: TextAlign.center,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top : 20.0),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Mes locations",
-                    textAlign: TextAlign.left,
-                    textScaleFactor: 1.5,
-                  ),
-                ),
-                SizedBox(
-                  height: 300,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 15,
-                    itemBuilder: (BuildContext context, int index) => Card(
-                      child: Center(child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg")),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Mes annonces",
-                    textAlign: TextAlign.left,
-                    textScaleFactor: 1.5,
-                  ),
-                ),
-                SizedBox(
-                  height: 300,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: 15,
-                    itemBuilder: (BuildContext context, int index) => Card(
-                      child: Center(child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Opera_House_and_ferry._Sydney.jpg/220px-Opera_House_and_ferry._Sydney.jpg")),
-                    ),
-                  ),
-                ),
-
-              ],
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text("Profile", style: TextStyle(
+              fontSize: 25.0,
             ),
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                FontAwesomeIcons.cog,
+                color: Colors.white,
+              ),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: Icon(
+                FontAwesomeIcons.signOutAlt,
+                color: Colors.white,
+              ),
+              onPressed: () => _logout(),
+            )
+          ],
         ),
+        body: SafeArea(
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 20.0),
+                    ),
+                    Container(
+                      height: 2,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      color: Colors.blue,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 10.0),
+                      child: Text(
+                          user.getName(),
+                          textAlign: TextAlign.center,
+                          textScaleFactor: 2.0,
+                          style: TextStyle(fontWeight: FontWeight.bold)
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(bottom: 10.0),
+                      child: Text(
+                        user.getEmail(),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Container(
+                      height: 2,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      color: Colors.blue,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 15.0),
+                      child: Text("Réservations en cours", style: TextStyle(fontSize: 18),),
+                    ),
+                    SizedBox(
+                      height: 275,
+                      child: PageView(
+                        controller: pageController,
+                        children: <Widget>[
+                          SlidingCard(),
+                          SlidingCard()
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 15.0),
+                      child: Text("Mes annonces", style: TextStyle(fontSize: 18),),
+                    ),
+                    SizedBox(
+                      height: 275,
+                      child: PageView(
+                        controller: pageController,
+                        children: <Widget>[
+                          SlidingCard(),
+                          SlidingCard()
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        )
     );
   }
 
