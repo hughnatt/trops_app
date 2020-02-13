@@ -16,6 +16,9 @@ class CreateAdvertPage extends StatefulWidget {
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
+enum SourceType {gallery, camera}
+enum ResultType {success, failure}
+
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
@@ -25,8 +28,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
   String _dropdownValue;
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<String> _categories = new List<String>();
 
@@ -45,17 +46,17 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  _openSource(BuildContext context, int index, String source) async {
+  _openSource(BuildContext context, int index, SourceType source) async {
     ImageSource sourceChoice;
 
     switch (source) {
-      case "camera":
+      case SourceType.camera:
         {
           sourceChoice = ImageSource.camera;
         }
         break;
 
-      case "gallery":
+      case SourceType.gallery:
         {
           sourceChoice = ImageSource.gallery;
         }
@@ -78,14 +79,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.image),
             title: Text("Importer depuis la gallerie"),
             onTap: () {
-              _openSource(context, index, "gallery");
+              _openSource(context, index, SourceType.gallery);
             },
           ),
           ListTile(
             leading: Icon(Icons.photo_camera),
             title: Text("Prendre une photo"),
             onTap: () {
-              _openSource(context, index, "camera");
+              _openSource(context, index, SourceType.camera);
             },
           ),
           ListTile(
@@ -222,34 +223,60 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   void _uploadAdvert() async {
     var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, "Sports d'hiver", User.current.getEmail(), picked.first, picked.last);
     if (response.statusCode != 201){
-      showInSnackBar("Création impossible");
+      _showUploadResult(context,ResultType.failure);
     }
     else{
-      Navigator.pop(context);
+      _showUploadResult(context,ResultType.success);
     }
   }
 
-  void showInSnackBar(String value) {
-    FocusScope.of(context).requestFocus(new FocusNode());
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState?.showSnackBar(new SnackBar(
-      content: new Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontFamily: "WorkSansSemiBold"),
-      ),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 3),
-    ));
+  Future<void> _showUploadResult(BuildContext context, ResultType result) {
+    String title;
+    String content;
+    int popCount;
+
+    int count = 0;
+
+    switch(result){
+      case ResultType.success:
+        {
+          title = "Opération terminée";
+          content = "Votre annonce a été créée avec succès";
+          popCount = 2;
+        }
+        break;
+      case ResultType.failure:
+        {
+          title = "Opération échouée";
+          content = "Malheuresement, votre annonce n'a pas pu être créée";
+          popCount = 1;
+        }
+        break;
+    }
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: new Text(title),
+          content: new Text(content),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            new FlatButton(
+              child: new Text("Ok"),
+              onPressed: () {
+                Navigator.of(context).popUntil((_) => count++ >= popCount);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
    return Scaffold(
-     key: _scaffoldKey,
      backgroundColor: Colors.white,
      body: GestureDetector(
        onTap: (){
