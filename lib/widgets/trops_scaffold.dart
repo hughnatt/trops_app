@@ -5,14 +5,11 @@ import 'package:trops_app/widgets/trops_fab.dart';
 class TropsScaffold extends StatelessWidget {
 
   final Widget body;
-  Widget appBar;
-
-  TropsScaffold({Key key, @required this.body, this.appBar}) : super(key : key);
-
   final Drawer drawer;
   final Key scaffoldKey;
+  Widget appBar;
 
-  TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer}) : super(key : key);
+  TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer, this.appBar}) : super(key : key);
 
   @override
   Widget build(BuildContext context) {
