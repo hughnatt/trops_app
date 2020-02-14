@@ -30,7 +30,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   String _dropdownValue;
 
   List<String> _categories = new List<String>();
-
+  
   @override
   void initState(){
     super.initState();
@@ -47,6 +47,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   _openSource(BuildContext context, int index, SourceType source) async {
+
     ImageSource sourceChoice;
 
     switch (source) {
@@ -71,6 +72,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
+
     return showDialog(context: context, builder: (BuildContext context) {
       return SimpleDialog(
         title: Text("Que voulez-vous faire ?"),
@@ -152,9 +154,16 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+  void unfocus(){
+    FocusScope.of(context).unfocus();
+  }
+
   void _pickDateTime() async{
+
     DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
     DateTime lastDate;
+
+    this.unfocus();
 
     if(picked != null && picked.first != null && picked.last != null){ //if the user already picked some dates
       firstDate = picked.first; //we will show him the range choose before
@@ -227,6 +236,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   void _uploadAdvert() async {
 
+    this.unfocus();
+
     if(_checkFields()){
       var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _dropdownValue, User.current.getEmail(), picked.first, picked.last);
       if (response.statusCode != 201){
@@ -248,6 +259,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     int popCount;
 
     int count = 0;
+    Color color;
 
     switch(result){
       case ResultType.success:
@@ -255,6 +267,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           title = "Opération terminée";
           content = "Votre annonce a été créée avec succès";
           popCount = 2;
+          color = Colors.greenAccent;
           break;
         }
       case ResultType.failure:
@@ -262,13 +275,15 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           title = "Opération échouée";
           content = "Malheureusement, votre annonce n'a pas pu être créée";
           popCount = 1;
+          color = Colors.redAccent;
           break;
         }
       case ResultType.denied:
         {
           title = "Pas si vite !";
-          content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Dates, Catégorie)";
+          content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Catégorie, Dates)";
           popCount = 1;
+          color = Colors.redAccent;
           break;
         }
 
@@ -278,18 +293,34 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         // return object of type Dialog
-        return AlertDialog(
-          title: new Text(title),
-          content: new Text(content),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            new FlatButton(
-              child: new Text("Ok"),
-              onPressed: () {
-                Navigator.of(context).popUntil((_) => count++ >= popCount);
-              },
+        return WillPopScope(
+            onWillPop: () {},
+            child : AlertDialog(
+              title: new Text(title),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children : <Widget>[
+                  Expanded(
+                    child:  new Text(
+                      content,
+                      style: TextStyle(
+                        color: color,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                new FlatButton(
+                  child: new Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).popUntil((_) => count++ >= popCount);
+                  },
+                ),
+              ],
             ),
-          ],
         );
       },
     );
