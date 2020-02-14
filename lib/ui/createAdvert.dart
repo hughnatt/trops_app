@@ -16,21 +16,21 @@ class CreateAdvertPage extends StatefulWidget {
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum SourceType {gallery, camera}
-enum ResultType {success, failure, denied}
+enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
+enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  ImagesManager _imageFiles = ImagesManager();
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _priceController = TextEditingController();
+  ImagesManager _imageFiles = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
+  TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
+  TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
+  TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
   String _dropdownValue;
 
   List<String> _categories = new List<String>();
-  
+
   @override
   void initState(){
     super.initState();
@@ -48,9 +48,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   _openSource(BuildContext context, int index, SourceType source) async {
 
-    ImageSource sourceChoice;
+    ImageSource sourceChoice; //object that represent the source form where to pick the imaes
 
-    switch (source) {
+    switch (source) { //we check where to look, depending by the user's choice
       case SourceType.camera:
         {
           sourceChoice = ImageSource.camera;
@@ -64,11 +64,11 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         break;
     }
 
-    var picture = await ImagePicker.pickImage(source: sourceChoice);
-    this.setState(() {
+    var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
+    this.setState(() { //we refresh the UI to display the image
       _imageFiles.loadFile(index, picture);
     });
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(); //we make the alert dialog disapear
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
@@ -155,7 +155,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   void unfocus(){
-    FocusScope.of(context).unfocus();
+    FocusScope.of(context).unfocus(); //make all the textfield loose focus
   }
 
   void _pickDateTime() async{
@@ -173,7 +173,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       firstDate = lastDate = DateTime.now(); //else we just show the basic date (today)
     }
 
-    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affecter to the result, but if the user tap cancel, picked was loose because replace by NULL
+    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affected to the result, but if the user tap cancel, picked was loose because replace by NULL
         context: context,
         initialFirstDate: firstDate,
         initialLastDate: lastDate,
@@ -182,7 +182,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
 
     if(returnedDates != null){ //Allow to handle the cancel button that pop the context
-      picked = returnedDates;
+      picked = returnedDates; //we changes the saved date only if the user pick new ones and don't cancel the process
     }
   }
 
@@ -230,7 +230,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty);
+    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty); //check if all REQUIRED field have a value
   }
 
 
@@ -238,22 +238,22 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     this.unfocus();
 
-    if(_checkFields()){
-      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _dropdownValue, User.current.getEmail(), picked.first, picked.last);
-      if (response.statusCode != 201){
-        _showUploadResult(context,ResultType.failure);
+    if(_checkFields()){ //if the user have correctly completed the form
+      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _dropdownValue, User.current.getEmail(), picked.first, picked.last); // we try to contact the APi to add the advert
+      if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
+        _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
       }
-      else{
-        _showUploadResult(context,ResultType.success);
+      else{ // the response is 201, the creation was a sucess
+        _showUploadResult(context,ResultType.success); // we warn him that it's a success
       }
     }
-    else{
-      _showUploadResult(context, ResultType.denied);
+    else{ // the user doesn't correctly complete the form
+      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
     }
 
   }
 
-  Future<void> _showUploadResult(BuildContext context, ResultType result) {
+  Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
     String title;
     String content;
     int popCount;
