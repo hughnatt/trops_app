@@ -4,6 +4,7 @@ import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
@@ -287,34 +288,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
               Padding(
                 padding: EdgeInsets.only(top: 20.0),
               ),
-              Row(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(right: 10.0),
-                    child: Icon(Icons.list, color: Colors.black54,),
-                  ),
-                  Flexible(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        hint: Text("Choisir une catégorie"),
-                        value: _dropdownValue,
-                        isExpanded: true,
-                        items: _categories.map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String newvalue) {
-                          setState(() {
-                            _dropdownValue = newvalue;
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                ],
-              ),
+              _categorySelector(),
               Padding(
                 padding: EdgeInsets.only(top: 10),
               ),
@@ -415,6 +389,24 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   onPressed: () {onAdvancedSubmitted();_scaffoldKey.currentState.openEndDrawer();},
                 ),
               ),
+              Center(
+                child: OutlineButton.icon(
+                  label: Text("Réinitialiser les filtres"),
+                  icon: Icon(Icons.refresh),
+                  textColor: Colors.blueAccent,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _priceMinController.text = PRICE_MIN.toString();
+                      _priceMaxController.text = PRICE_MAX.toString();
+                      _priceRange = RangeValues(0.0,1.0);
+                    });
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -495,6 +487,12 @@ class _SearchResultPageState extends State<SearchResultPage>{
     }
   }
 
+  void _resetFilters(){
+    setState(() {
+
+    });
+  }
+
   onSubmitted(query) async {
     loadAdverts();
   }
@@ -550,5 +548,69 @@ class _SearchResultPageState extends State<SearchResultPage>{
       picked = returnedDates;
     }
   }
-
 }
+
+Widget _categorySelector(){
+  return Container(
+    height: 200,
+      child: ListView.builder(
+        itemBuilder: (BuildContext context, int index) => CategoryTile(categories[index]),
+        itemCount: categories.length,
+      )
+  );
+}
+
+
+Map<TropsCategory,bool> _categorySelected;
+
+const List<TropsCategory> categories = <TropsCategory>[
+  TropsCategory(
+      'Sports d\'hiver',
+      <TropsCategory>[
+        TropsCategory(
+          'Ski'
+        ),
+        TropsCategory(
+          'Snow'
+        ),
+        TropsCategory(
+          'Traineau'
+        )
+      ]
+  )
+];
+
+class CategoryTile extends StatelessWidget {
+  const CategoryTile(this.category);
+  final TropsCategory category;
+
+  Widget _buildTiles(TropsCategory root){
+    if (root.subcategories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(right: 20),
+        child: CheckboxListTile(
+          title: Text(root.title),
+          onChanged: (bool value) {},
+          value: true,
+        ),
+      );
+    } else {
+      return ExpansionTile(
+        key: PageStorageKey<TropsCategory>(root),
+        title: CheckboxListTile(
+          title: Text(root.title),
+          onChanged: (bool value) {},
+          value: true,
+        ),
+        children: root.subcategories.map(_buildTiles).toList(),
+      );
+    }
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildTiles(category);
+  }
+}
+
