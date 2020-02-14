@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -24,8 +25,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   List<Advert> _adverts = new List<Advert>();
 
-  String cat = "Catégorie";
-
   List<DateTime> picked;
 
   TextEditingController _keywordController = TextEditingController();
@@ -37,8 +36,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
   static const int PRICE_MIN = 0;
 
 
-
-  static const List<TropsCategory> _categories = <TropsCategory>[
+  List<TropsCategory> _categories = List<TropsCategory>();
+/*  static List<TropsCategory> _categories = <TropsCategory>[
     TropsCategory(
       'Sports d\'hiver',
       <TropsCategory>[
@@ -70,7 +69,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
         )
       ]
     )
-  ];
+  ];*/
 
   @override
   void initState(){
@@ -88,12 +87,12 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 
   void loadCategories() async {
-/*    getCategories().then( (List<String> res) {
+    getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
+        _resetCategories(_categories);
       });
-    });*/
-    _resetCategories(_categories);
+    });
   }
 
   loadAdverts() async {
@@ -110,7 +109,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       priceMax = 10000;
     }
 
-    getResults(_keywordController.text, priceMin, priceMax, "").then((res) {
+    getResults(_keywordController.text, priceMin, priceMax, null).then((res) {
       setState(() {
         _adverts = res;
       });
