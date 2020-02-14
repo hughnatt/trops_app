@@ -18,6 +18,7 @@ Future<List<Advert>> getAllAdverts() async {
       List<String> photos = new List<String>.from(item["photos"]);
 
       var advert = new Advert(
+        item["_id"],
         item["title"],
         item["price"],
         item["description"],
