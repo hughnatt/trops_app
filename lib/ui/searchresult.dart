@@ -124,16 +124,46 @@ class _SearchResultPageState extends State<SearchResultPage>{
         ),
       );
     } else {
-      return ListView.builder(
-        // key: UniqueKey(),
-        itemCount: _adverts.length,
-        padding: EdgeInsets.only(top: 5.0),
-        itemBuilder: (context, index) {
-          return AdvertTile(
-            advert: _adverts[index],
-          );
-        },
+      return CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            automaticallyImplyLeading: false,
+            title: Center(
+              child: FlatButton.icon(
+                icon: Icon(Icons.filter_list),
+                label: Text("Filtres"),
+                onPressed: () {_scaffoldKey.currentState.openDrawer();},
+              ),
+            ),
+            snap: true,
+            floating: true,
+            backgroundColor: Colors.white,
+            expandedHeight: 30,
+          ),
+
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                return AdvertTile(
+                  advert: _adverts[index],
+                );
+              },
+            ),
+          ),
+
+          /*ListView.builder(
+            // key: UniqueKey(),
+            itemCount: _adverts.length,
+            padding: EdgeInsets.only(top: 5.0),
+            itemBuilder: (context, index) {
+              return AdvertTile(
+                advert: _adverts[index],
+              );
+            },
+          ),*/
+        ],
       );
+
     }
 
 
@@ -346,15 +376,11 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             _buildSearchBar(),
 
-            /*SingleChildScrollView(
-              child: _advancedResearchBar(),
-            ),*/
-
-            FlatButton.icon(
+            /*FlatButton.icon(
               icon: Icon(Icons.filter_list),
               label: Text("Filtres"),
               onPressed: () {_scaffoldKey.currentState.openDrawer();},
-            ),
+            ),*/
 
             Expanded(
               child: _buildResultsList(),
