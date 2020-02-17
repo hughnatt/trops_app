@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
@@ -18,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   List<Advert> _adverts = new List<Advert>();
-  List<String> _categories = new List<String>();
+  List<TropsCategory> _categories = new List<TropsCategory>();
 
   @override
   void initState(){
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   loadCategories() async {
 
-    getCategories().then( (List<String> res) {
+    getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
       });
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
           ),
-          child: Text(_categories[index]),
+          child: Text(_categories[index].title),
         ),
       ),
     );

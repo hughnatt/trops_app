@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/TropsCategory.dart';
 
 var _dataBaseURI = "trops.sauton.xyz";
 
@@ -40,19 +41,18 @@ Future<List<Advert>> getAllAdverts() async {
   
 }
 
-Future<List<String>> getCategories() async {
+Future<List<TropsCategory>> getCategories() async {
 
-  List<String> categories = new List<String>();
-  var uri = new Uri.https(_dataBaseURI, "/category");
+  List<TropsCategory> categories = List<TropsCategory>();
+  var uri = Uri.https(_dataBaseURI, "/category");
   var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
 
   if(response.statusCode == 200) {
 
     var result = await jsonDecode(response.body);
     result.forEach((item) {
-      categories.add(item["categoryName"]);
+      categories.add(TropsCategory(item['name']));
     });
-
     return categories;
   }
   else {

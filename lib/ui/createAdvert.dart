@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/data.dart';
+import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -22,7 +23,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _priceController = TextEditingController();
   String _dropdownValue;
 
-  List<String> _categories = new List<String>();
+  List<TropsCategory> _categories = new List<TropsCategory>();
 
   @override
   void initState(){
@@ -32,7 +33,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   loadCategories() async {
 
-    getCategories().then( (List<String> res) {
+    getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
       });
@@ -285,10 +286,10 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                            hint: Text("Choisir une catégorie"),
                            value: _dropdownValue,
                            isExpanded: true,
-                           items: _categories.map<DropdownMenuItem<String>>((String value) {
+                           items: _categories.map<DropdownMenuItem<String>>((TropsCategory value) {
                              return DropdownMenuItem<String>(
-                               value: value,
-                               child: Text(value),
+                               value: value.title,
+                               child: Text(value.title),
                              );
                            }).toList(),
                            onChanged: (String newvalue) {
