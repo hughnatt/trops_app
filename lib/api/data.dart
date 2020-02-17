@@ -51,10 +51,8 @@ Future<List<TropsCategory>> getCategories() async {
 
     var result = await jsonDecode(response.body);
     result.forEach((item) {
-      categories.add(TropsCategory(item["categoryName"]));
+      categories.add(TropsCategory(item['name']));
     });
-
-    print(categories);
     return categories;
   }
   else {
