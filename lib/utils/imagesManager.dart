@@ -7,7 +7,6 @@ class ImagesManager {
   static const int MAX_IMAGES_FILES = 4;
 
 
-
   void loadFile(int index, File imageFile){
     if(this.get(index) == null){ //check if the current index does'nt already have a picture
      this.add(imageFile); //if yes, we add the picture to the end of the list
@@ -47,16 +46,23 @@ class ImagesManager {
   Future<File> compressAndGetFile(File file) async {
 
     var targetPath = await getTemporaryDirectory();
+    var compressedImageTitle = targetPath.path+DateTime.now().millisecondsSinceEpoch.toString()+".jpg";
 
     var result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path, targetPath.path+DateTime.now().toString()+".jpg",
+      file.absolute.path,
+      compressedImageTitle,
       quality: 20,
     );
 
     print(file.lengthSync());
-    print(result.lengthSync());
 
     return result;
+  }
+  
+  void uploadImage(File pictureToUpload){
+    this.compressAndGetFile(pictureToUpload).then((compressedPicture) {
+      print(compressedPicture.lengthSync());
+    });
   }
 
 

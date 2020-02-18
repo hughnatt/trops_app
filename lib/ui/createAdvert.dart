@@ -47,7 +47,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  _openSource(BuildContext context, int index, SourceType source) async {
+  Future<File> _openSource(BuildContext context, int index, SourceType source) async {
 
     ImageSource sourceChoice; //object that represent the source form where to pick the imaes
 
@@ -67,11 +67,18 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
 
-    this._imagesManager.compressAndGetFile(picture).then((res) {
-      this.setState(() { //we refresh the UI to display the image
-        _imagesManager.loadFile(index, res);
-      });
+    return picture;
+  }
+
+
+  void _imageProcess(SourceType source, int index) async {
+    var picture = await _openSource(context, index, source); //return the file choosen by the user
+
+    this.setState((){
+      _imagesManager.loadFile(index, picture); //add the file to the imageMangaer
     });
+
+    this._imagesManager.uploadImage(picture); //compress & upload the image on server
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
@@ -84,7 +91,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.image),
             title: Text("Importer depuis la gallerie"),
             onTap: () {
-              _openSource(context, index, SourceType.gallery);
+              _imageProcess(SourceType.gallery, index);
               Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
@@ -92,7 +99,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.photo_camera),
             title: Text("Prendre une photo"),
             onTap: () {
-              _openSource(context, index, SourceType.camera);
+              _imageProcess(SourceType.camera, index);
               Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
@@ -102,6 +109,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             title: Text("Supprimer la photo"),
             onTap: () {
               _deletePicture(context,index);
+              Navigator.of(context).pop(); // we close the alertDialog
             },
           )
         ],
@@ -113,7 +121,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     this.setState(() { //we reload the UI
       _imagesManager.removeAt(index);
     });
-    Navigator.of(context).pop(); // we close the alertDialog
   }
 
   Widget _buildValuePicker() {
