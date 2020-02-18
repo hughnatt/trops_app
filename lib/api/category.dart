@@ -16,7 +16,7 @@ Future<List<TropsCategory>> getCategories() async {
 
     var result = await jsonDecode(response.body);
     result.forEach((item) {
-      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], getSubcategories(item['children']));
+      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], getSubcategories(item['name'],item['children']));
       categories.add(tropsCategory);
       _categoryNameCache.addAll({item['_id'] : item['name']});
     });
@@ -28,20 +28,22 @@ Future<List<TropsCategory>> getCategories() async {
   }
 }
 
-List<TropsCategory> getSubcategories(json) {
+List<TropsCategory> getSubcategories(parentName,json) {
   List<TropsCategory> subcategories = List<TropsCategory>();
   if (json != null) {
     json.forEach((item) {
+      var name = parentName + "/" + item['name'];
       TropsCategory tropsCategory = TropsCategory(
-          item['_id'], item['name'], getSubcategories(item['children']));
+          item['_id'], item['name'], getSubcategories(name,item['children']));
       subcategories.add(tropsCategory);
+      _categoryNameCache.addAll({item['_id'] : name});
     });
   }
   return subcategories;
 }
 
 String getCategoryNameByID(String id) {
-  String name = _categoryNameCache['id'];
+  String name = _categoryNameCache[id];
   if (name == null){
     name = "";
   }

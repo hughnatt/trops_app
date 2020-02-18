@@ -5,27 +5,39 @@ import 'package:trops_app/models/Advert.dart';
 
 const String _dataBaseURI = "trops.sauton.xyz";
 
-Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String category) async {
+class SearchBody{
+  String text;
+  int priceMin;
+  int priceMax;
+  List<String> categories;
+  SearchBody(this.text,this.priceMin,this.priceMax,this.categories);
 
-  List<Advert> _adverts = new List<Advert>();
+  Map<String,dynamic> toJson() => {
+    'text': text,
+    'priceMin': priceMin,
+    'priceMax': priceMax,
+    'categories': categories
+  };
+}
 
-  var jsonBody = '''
-  {
-    "text" : "$text",
-    "priceMin" : "$priceMin",
-    "priceMax" : "$priceMax"
-  }''';
+Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories) async {
+
+  SearchBody body = new SearchBody(text, priceMin, priceMax, categories);
+
   var uri = new Uri.https(_dataBaseURI, "/search");
-  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonBody);
+  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
 
   if(response.statusCode == 200) {
     var result = await jsonDecode(response.body);
+
+    List<Advert> _adverts = new List<Advert>();
 
     for (var item in result){
       List<String> photos = new List<String>.from(item['photos']);
 
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
+      print(categoryName);
 
       var advert = new Advert(
           item['_id'],

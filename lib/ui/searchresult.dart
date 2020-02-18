@@ -78,7 +78,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
       priceMax = 10000;
     }
 
-    getResults(_keywordController.text, priceMin, priceMax, null).then((res) {
+    List<String> categories = List<String>();
+    _categorySelected.forEach((category,selected){
+      if (selected){
+        categories.add(category.id);
+      }
+    });
+
+    getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
       setState(() {
         _adverts = res;
       });
