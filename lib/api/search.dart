@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 
@@ -24,7 +25,7 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
 
   SearchBody body = new SearchBody(text, priceMin, priceMax, categories);
 
-  var uri = new Uri.https(_dataBaseURI, "/search");
+  var uri = new Uri.https(apiBaseURI, "/search");
   var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
 
   if(response.statusCode == 200) {

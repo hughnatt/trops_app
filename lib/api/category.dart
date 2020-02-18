@@ -1,15 +1,14 @@
+import 'package:trops_app/api/api.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
-
-const String _dataBaseURI = "trops.sauton.xyz";
 
 Map<String,String> _categoryNameCache = Map<String,String>();
 
 Future<List<TropsCategory>> getCategories() async {
 
   List<TropsCategory> categories = List<TropsCategory>();
-  var uri = Uri.https(_dataBaseURI, "/category");
+  var uri = Uri.https(apiBaseURI, "/category");
   var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
 
   if(response.statusCode == 200) {

@@ -6,3 +6,19 @@ class TropsCategory {
   final String title;
   final List<TropsCategory> subcategories;
 }
+
+
+TropsCategory findCategory(List<TropsCategory> categories, String id){
+  if (categories != null){
+    for (TropsCategory cat in categories){
+      if (cat.id == id){
+        return cat;
+      }
+      TropsCategory subcat = findCategory(cat.subcategories, id);
+      if (subcat != null){
+        return subcat;
+      }
+    }
+  }
+  return null;
+}
