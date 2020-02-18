@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/data.dart';
+import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
@@ -15,15 +18,17 @@ class CreateAdvertPage extends StatefulWidget {
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
+enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
+enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
+
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  ImagesManager imageFiles = ImagesManager();
-  TextEditingController _titleController = TextEditingController();
-  TextEditingController _descriptionController = TextEditingController();
-  TextEditingController _priceController = TextEditingController();
-  String _dropdownValue;
+  ImagesManager _imageFiles = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
+  TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
+  TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
+  TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
   List<TropsCategory> _categories = new List<TropsCategory>();
 
@@ -42,31 +47,33 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  _openSource(BuildContext context, int index, String source) async {
-    ImageSource sourceChoice;
+  _openSource(BuildContext context, int index, SourceType source) async {
 
-    switch (source) {
-      case "camera":
+    ImageSource sourceChoice; //object that represent the source form where to pick the imaes
+
+    switch (source) { //we check where to look, depending by the user's choice
+      case SourceType.camera:
         {
           sourceChoice = ImageSource.camera;
         }
         break;
 
-      case "gallery":
+      case SourceType.gallery:
         {
           sourceChoice = ImageSource.gallery;
         }
         break;
     }
 
-    var picture = await ImagePicker.pickImage(source: sourceChoice);
-    this.setState(() {
-      imageFiles.loadFile(index, picture);
+    var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
+    this.setState(() { //we refresh the UI to display the image
+      _imageFiles.loadFile(index, picture);
     });
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(); //we make the alert dialog disapear
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
+
     return showDialog(context: context, builder: (BuildContext context) {
       return SimpleDialog(
         title: Text("Que voulez-vous faire ?"),
@@ -75,18 +82,18 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.image),
             title: Text("Importer depuis la gallerie"),
             onTap: () {
-              _openSource(context, index, "gallery");
+              _openSource(context, index, SourceType.gallery);
             },
           ),
           ListTile(
             leading: Icon(Icons.photo_camera),
             title: Text("Prendre une photo"),
             onTap: () {
-              _openSource(context, index, "camera");
+              _openSource(context, index, SourceType.camera);
             },
           ),
           ListTile(
-            enabled: (imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
+            enabled: (_imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
@@ -100,7 +107,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   _deletePicture(BuildContext context, int index){
     this.setState(() { //we reload the UI
-      imageFiles.removeAt(index);
+      _imageFiles.removeAt(index);
     });
     Navigator.of(context).pop(); // we close the alertDialog
   }
@@ -127,7 +134,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       child: MaterialButton(
         color: Colors.green,
         textColor: Colors.white,
-        onPressed: () {},
+        onPressed: () =>_uploadAdvert(),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
@@ -148,9 +155,16 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+  void unfocus(){
+    FocusScope.of(context).unfocus(); //make all the textfield loose focus
+  }
+
   void _pickDateTime() async{
+
     DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
     DateTime lastDate;
+
+    this.unfocus();
 
     if(picked != null && picked.first != null && picked.last != null){ //if the user already picked some dates
       firstDate = picked.first; //we will show him the range choose before
@@ -160,7 +174,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       firstDate = lastDate = DateTime.now(); //else we just show the basic date (today)
     }
 
-    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affecter to the result, but if the user tap cancel, picked was loose because replace by NULL
+    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affected to the result, but if the user tap cancel, picked was loose because replace by NULL
         context: context,
         initialFirstDate: firstDate,
         initialLastDate: lastDate,
@@ -169,7 +183,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
 
     if(returnedDates != null){ //Allow to handle the cancel button that pop the context
-      picked = returnedDates;
+      picked = returnedDates; //we changes the saved date only if the user pick new ones and don't cancel the process
     }
   }
 
@@ -204,15 +218,113 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Widget _boxContent(int index) {
-    if (imageFiles.get(index) == null) {
+    if (_imageFiles.get(index) == null) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
     else {
-      return Image.file(imageFiles.get(index), fit: BoxFit.cover);
+      return Image.file(_imageFiles.get(index), fit: BoxFit.cover);
     }
+  }
+
+
+  bool _checkFields(){
+    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != ""); //check if all REQUIRED field have a value
+  }
+
+
+  void _uploadAdvert() async {
+
+    this.unfocus();
+
+    if(_checkFields()){ //if the user have correctly completed the form
+      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(), picked.first, picked.last); // we try to contact the APi to add the advert
+      if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
+        _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
+      }
+      else{ // the response is 201, the creation was a sucess
+        _showUploadResult(context,ResultType.success); // we warn him that it's a success
+      }
+    }
+    else{ // the user doesn't correctly complete the form
+      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
+    }
+
+  }
+
+  Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
+    String title;
+    String content;
+    int popCount;
+
+    int count = 0;
+    Color color;
+
+    switch(result){
+      case ResultType.success:
+        {
+          title = "Opération terminée";
+          content = "Votre annonce a été créée avec succès";
+          popCount = 2;
+          color = Colors.greenAccent;
+          break;
+        }
+      case ResultType.failure:
+        {
+          title = "Opération échouée";
+          content = "Malheureusement, votre annonce n'a pas pu être créée";
+          popCount = 1;
+          color = Colors.redAccent;
+          break;
+        }
+      case ResultType.denied:
+        {
+          title = "Pas si vite !";
+          content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Catégorie, Dates)";
+          popCount = 1;
+          color = Colors.redAccent;
+          break;
+        }
+
+    }
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return WillPopScope(
+            onWillPop: () {},
+            child : AlertDialog(
+              title: new Text(title),
+              content: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children : <Widget>[
+                  Expanded(
+                    child:  new Text(
+                      content,
+                      style: TextStyle(
+                        color: color,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                // usually buttons at the bottom of the dialog
+                new FlatButton(
+                  child: new Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).popUntil((_) => count++ >= popCount);
+                  },
+                ),
+              ],
+            ),
+        );
+      },
+    );
   }
 
   @override
