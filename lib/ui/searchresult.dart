@@ -117,41 +117,47 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 
   Widget _buildResultsList(){
+    Widget widgetToShow;
     if (_adverts.length == 0){
-      return Center(
-        child: Text(
-          "Aucun résultat",
+      widgetToShow = SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 20.0),
+          child: Center(child:Text("Aucun résultat"),),
         ),
       );
     } else {
-      return CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            automaticallyImplyLeading: false,
-            title: Center(
-              child: FlatButton.icon(
-                icon: Icon(Icons.filter_list),
-                label: Text("Filtres"),
-                onPressed: () {_scaffoldKey.currentState.openDrawer();},
-              ),
-            ),
-            snap: true,
-            floating: true,
-            backgroundColor: Colors.white,
-            expandedHeight: 30,
-          ),
+      widgetToShow = SliverList(
+        delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+            return AdvertTile(
+              advert: _adverts[index],
+            );
+          },
+          childCount: _adverts.length,
+        ),
+      );
+    }
 
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                return AdvertTile(
-                  advert: _adverts[index],
-                );
-              },
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAppBar(
+          automaticallyImplyLeading: false,
+          title: Center(
+            child: FlatButton.icon(
+              icon: Icon(Icons.filter_list),
+              label: Text("Filtres"),
+              onPressed: () {_scaffoldKey.currentState.openDrawer();},
             ),
           ),
+          snap: true,
+          floating: true,
+          backgroundColor: Colors.white,
+          expandedHeight: 30,
+        ),
 
-          /*ListView.builder(
+        widgetToShow,
+
+        /*ListView.builder(
             // key: UniqueKey(),
             itemCount: _adverts.length,
             padding: EdgeInsets.only(top: 5.0),
@@ -161,12 +167,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
               );
             },
           ),*/
-        ],
-      );
-
-    }
-
-
+      ],
+    );
   }
 
   Widget _buildSearchBar(){
