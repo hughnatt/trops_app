@@ -7,6 +7,8 @@ import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
 
+String _selectedCategoryID;
+
 class CreateAdvertPage extends StatefulWidget {
 
   @override
@@ -274,14 +276,30 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                ),
                child: Container(
                  padding: EdgeInsets.all(10.0),
-                 child: Row(
+                 child: Column(
                    children: <Widget>[
-                     Container(
-                       padding: EdgeInsets.only(right: 10.0),
-                       child: Icon(Icons.list, color: Colors.black54,),
+                     Row(
+                         children: <Widget>[
+                           Icon(Icons.list, color: Colors.black54,),
+                           Expanded(
+                             child: Text(
+                               "Choisir une catégorie",
+                               style: TextStyle(
+                                 fontSize: 18.0,
+                               ),
+                               textAlign: TextAlign.center,
+                             ),
+                           ),
+                           Padding(
+                             padding: EdgeInsets.only(right: 20),
+                           )
+                         ],
                      ),
-                     Flexible(
-                       child: DropdownButtonHideUnderline(
+                     Padding(
+                       padding: EdgeInsets.only(top: 15),
+                     ),
+                     CategorySelector(categories: _categories),
+                       /*child: DropdownButtonHideUnderline(
                          child: DropdownButton<String>(
                            hint: Text("Choisir une catégorie"),
                            value: _dropdownValue,
@@ -298,8 +316,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                              });
                            },
                          ),
-                       ),
-                     )
+                       ),*/
                    ],
                  )
                ),
@@ -338,5 +355,70 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
      ),
        bottomNavigationBar: TropsBottomAppBar(),
      );
+  }
+
+
+}
+
+class CategorySelector extends StatefulWidget {
+
+  final List<TropsCategory> categories;
+  CategorySelector({Key key, this.categories}) : super(key: key);
+
+  @override
+  _CategorySelectorState createState() => _CategorySelectorState();
+}
+
+class _CategorySelectorState extends State<CategorySelector>{
+
+
+  Widget _buildTiles(TropsCategory root){
+    if (root.subcategories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(left:20, right: 5),
+        child: Row(
+          children: <Widget>[
+            Text(root.title),
+              Spacer(),
+              Radio<String>(
+                value: root.id,
+                groupValue: _selectedCategoryID,
+                onChanged: (String value){
+                  setState(() {
+                    _selectedCategoryID = value;
+                  });
+                },
+            )
+          ],
+        ),
+      );
+    } else {
+      return ExpansionTile(
+        key: PageStorageKey<TropsCategory>(root),
+        title: Row(
+          children: <Widget>[
+            Text(
+              root.title,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16
+              ),
+            ),
+          ],
+        ),
+        children: root.subcategories.map(_buildTiles).toList(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: 250,
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
+          itemCount: widget.categories.length,
+        )
+    );
   }
 }
