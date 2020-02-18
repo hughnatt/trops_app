@@ -66,9 +66,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     }
 
     var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
-    this.setState(() { //we refresh the UI to display the image
-      _imageFiles.loadFile(index, picture);
+
+    this._imageFiles.compressAndGetFile(picture).then((res) {
+      this.setState(() { //we refresh the UI to display the image
+        _imageFiles.loadFile(index, res);
+      });
     });
+
+
     Navigator.of(context).pop(); //we make the alert dialog disapear
   }
 
