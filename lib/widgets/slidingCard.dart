@@ -4,9 +4,11 @@ import 'package:trops_app/models/Advert.dart';
 
 class SlidingCard extends StatelessWidget {
 
+  final Advert advert;
 
   const SlidingCard({
     Key key,
+    @required this.advert,
   }) : super(key: key);
 
   @override
@@ -35,7 +37,7 @@ class SlidingCard extends StatelessWidget {
                         child: Container(
                           padding: EdgeInsets.only(left: 10.0, top: 10.0),
                           child: Text(
-                            "Le titre",
+                            advert.getTitle(),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -47,7 +49,7 @@ class SlidingCard extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.only(right: 10.0, top: 10.0),
                         child: Text(
-                          "10" + "€",
+                          advert.getPrice().toString() + "€",
                           maxLines: 1,
                           textAlign: TextAlign.left,
                           style: TextStyle(
@@ -60,7 +62,7 @@ class SlidingCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(10.0),
                     child: Text(
-                      "Je suis une description blablabla zuebub cuyezbc yuzeb dyuz bdeyuzb edyu zbedyuzeb dyuzeb ",
+                      advert.getDescription(),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                     ),
@@ -71,7 +73,7 @@ class SlidingCard extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.only(right: 10.0),
                         child: Text(
-                          "Sports nautiques",
+                          advert.getCategory(),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                           style: TextStyle(
