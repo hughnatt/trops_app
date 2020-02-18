@@ -37,7 +37,6 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
 
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
-      print(categoryName);
 
       var advert = new Advert(
           item['_id'],
