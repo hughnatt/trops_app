@@ -51,7 +51,8 @@ Future<List<TropsCategory>> getCategories() async {
 
     var result = await jsonDecode(response.body);
     result.forEach((item) {
-      categories.add(TropsCategory(item['name']));
+      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], getSubcategories(item['children']));
+      categories.add(tropsCategory);
     });
     return categories;
   }
@@ -59,6 +60,19 @@ Future<List<TropsCategory>> getCategories() async {
     throw Exception("Failed to get categories");
   }
 }
+
+List<TropsCategory> getSubcategories(json){
+  List<TropsCategory> subcategories = List<TropsCategory>();
+  if (json != null) {
+    json.forEach((item) {
+      TropsCategory tropsCategory = TropsCategory(
+          item['_id'], item['name'], getSubcategories(item['children']));
+      subcategories.add(tropsCategory);
+    });
+  }
+  return subcategories;
+}
+
 
 //Future<Http.Response> register(String name, String email, String password) async {
 //  var jsonBody = '''
