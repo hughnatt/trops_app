@@ -3,13 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
-import 'package:trops_app/main.dart';
+
+String _selectedCategoryID;
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -28,7 +30,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
-  String _dropdownValue;
 
   List<TropsCategory> _categories = new List<TropsCategory>();
 
@@ -232,7 +233,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty); //check if all REQUIRED field have a value
+    return (picked != null && picked.first !=null && picked.last != null && _titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != ""); //check if all REQUIRED field have a value
   }
 
 
@@ -241,7 +242,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     this.unfocus();
 
     if(_checkFields()){ //if the user have correctly completed the form
-      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _dropdownValue, User.current.getEmail(), picked.first, picked.last); // we try to contact the APi to add the advert
+      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(), picked.first, picked.last); // we try to contact the APi to add the advert
       if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
         _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
       }
@@ -389,32 +390,29 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                ),
                child: Container(
                  padding: EdgeInsets.all(10.0),
-                 child: Row(
+                 child: Column(
                    children: <Widget>[
-                     Container(
-                       padding: EdgeInsets.only(right: 10.0),
-                       child: Icon(Icons.list, color: Colors.black54,),
+                     Row(
+                         children: <Widget>[
+                           Icon(Icons.list, color: Colors.black54,),
+                           Expanded(
+                             child: Text(
+                               "Choisir une catégorie",
+                               style: TextStyle(
+                                 fontSize: 18.0,
+                               ),
+                               textAlign: TextAlign.center,
+                             ),
+                           ),
+                           Padding(
+                             padding: EdgeInsets.only(right: 20),
+                           )
+                         ],
                      ),
-                     Flexible(
-                       child: DropdownButtonHideUnderline(
-                         child: DropdownButton<String>(
-                           hint: Text("Choisir une catégorie"),
-                           value: _dropdownValue,
-                           isExpanded: true,
-                           items: _categories.map<DropdownMenuItem<String>>((TropsCategory value) {
-                             return DropdownMenuItem<String>(
-                               value: value.title,
-                               child: Text(value.title),
-                             );
-                           }).toList(),
-                           onChanged: (String newvalue) {
-                             setState(() {
-                               _dropdownValue = newvalue;
-                             });
-                           },
-                         ),
-                       ),
-                     )
+                     Padding(
+                       padding: EdgeInsets.only(top: 15),
+                     ),
+                     CategorySelector(categories: _categories),
                    ],
                  )
                ),
@@ -453,5 +451,70 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
      ),
        bottomNavigationBar: TropsBottomAppBar(),
      );
+  }
+
+
+}
+
+class CategorySelector extends StatefulWidget {
+
+  final List<TropsCategory> categories;
+  CategorySelector({Key key, this.categories}) : super(key: key);
+
+  @override
+  _CategorySelectorState createState() => _CategorySelectorState();
+}
+
+class _CategorySelectorState extends State<CategorySelector>{
+
+
+  Widget _buildTiles(TropsCategory root){
+    if (root.subcategories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(left:20, right: 5),
+        child: Row(
+          children: <Widget>[
+            Text(root.title),
+              Spacer(),
+              Radio<String>(
+                value: root.id,
+                groupValue: _selectedCategoryID,
+                onChanged: (String value){
+                  setState(() {
+                    _selectedCategoryID = value;
+                  });
+                },
+            )
+          ],
+        ),
+      );
+    } else {
+      return ExpansionTile(
+        key: PageStorageKey<TropsCategory>(root),
+        title: Row(
+          children: <Widget>[
+            Text(
+              root.title,
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16
+              ),
+            ),
+          ],
+        ),
+        children: root.subcategories.map(_buildTiles).toList(),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: 250,
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
+          itemCount: widget.categories.length,
+        )
+    );
   }
 }
