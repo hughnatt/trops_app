@@ -19,6 +19,7 @@ class TropsApp extends StatelessWidget {
         '/search' : (context) => SearchResultPage(),
         '/auth' : (context) => AuthPage(),
         '/profile' : (context) => ProfilePage(),
+        '/home' : (context) => HomePage(),
       },
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate
