@@ -4,6 +4,7 @@ import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
@@ -17,25 +18,58 @@ class SearchResultPage extends StatefulWidget {
 
 }
 
+Map<TropsCategory,bool> _categorySelected = Map<TropsCategory,bool>();
+
 class _SearchResultPageState extends State<SearchResultPage>{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   List<Advert> _adverts = new List<Advert>();
 
-  String cat = "Catégorie";
-
   List<DateTime> picked;
-
-  List<String> _categories = [];
 
   TextEditingController _keywordController = TextEditingController();
   TextEditingController _priceMinController = TextEditingController();
   TextEditingController _priceMaxController = TextEditingController();
-  String _dropdownValue;
   RangeValues _priceRange = RangeValues(0.0,1.0);
 
   static const int PRICE_MAX = 500;
   static const int PRICE_MIN = 0;
+
+
+  List<TropsCategory> _categories = List<TropsCategory>();
+/*  static List<TropsCategory> _categories = <TropsCategory>[
+    TropsCategory(
+      'Sports d\'hiver',
+      <TropsCategory>[
+        TropsCategory(
+            'Ski'
+        ),
+        TropsCategory(
+            'Snow'
+        ),
+        TropsCategory(
+            'Traineau'
+        )
+      ]
+    ),
+    TropsCategory(
+      'Sports de raquette',
+      <TropsCategory>[
+        TropsCategory(
+          'Tennis',
+        ),
+        TropsCategory(
+            'Badminton'
+        ),
+        TropsCategory(
+            'Tennis de table'
+        ),
+        TropsCategory(
+          'Squash',
+        )
+      ]
+    )
+  ];*/
 
   @override
   void initState(){
@@ -43,11 +77,20 @@ class _SearchResultPageState extends State<SearchResultPage>{
     loadCategories();
   }
 
-  loadCategories() async {
+  void _resetCategories(List<TropsCategory> catList){
+    for (TropsCategory cat in catList){
+      _categorySelected[cat] = false;
+      if (cat.subcategories.isNotEmpty){
+        _resetCategories(cat.subcategories);
+      }
+    }
+  }
 
-    getCategories().then( (List<String> res) {
+  void loadCategories() async {
+    getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
+        _resetCategories(_categories);
       });
     });
   }
@@ -66,68 +109,69 @@ class _SearchResultPageState extends State<SearchResultPage>{
       priceMax = 10000;
     }
 
-    print(priceMin);
-    print(priceMax);
-
-    getResults(_keywordController.text, priceMin, priceMax, "").then((res) {
+    getResults(_keywordController.text, priceMin, priceMax, null).then((res) {
       setState(() {
         _adverts = res;
       });
     });
   }
 
-  /*loadAdverts(String query) {
-
-    List result = jsonDecode("[{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":20,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":10,\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":20,\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":30,\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"}]");
-
-    setState(() {
-      if (_adverts.length > 0) {
-        _adverts.removeRange(0, _adverts.length);
-      }
-
-      result.forEach((item) {
-        var advert = new Advert(
-            item["title"],
-            item["price"],
-            item["description"],
-            item["image"]
-        );
-
-        if (query != '') {
-          if (advert.getTitle().contains(query)) {
-            _adverts.add(advert);
-          }
-        } else {
-          _adverts.add(advert);
-        }
-      });
-    });
-  }*/
-
-  Widget _getListViewWidget(){
+  Widget _buildResultsList(){
+    Widget widgetToShow;
     if (_adverts.length == 0){
-      return Center(
-        child: Text(
-          "Aucun résultat",
+      widgetToShow = SliverToBoxAdapter(
+        child: Padding(
+          padding: EdgeInsets.only(top: 20.0),
+          child: Center(child:Text("Aucun résultat"),),
         ),
       );
     } else {
-      return ListView.builder(
-        // key: UniqueKey(),
-        itemCount: _adverts.length,
-        padding: EdgeInsets.only(top: 5.0),
-        itemBuilder: (context, index) {
-          return AdvertTile(
-            advert: _adverts[index],
-          );
-        },
+      widgetToShow = SliverList(
+        delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+            return AdvertTile(
+              advert: _adverts[index],
+            );
+          },
+          childCount: _adverts.length,
+        ),
       );
     }
 
+    return CustomScrollView(
+      slivers: <Widget>[
+        SliverAppBar(
+          automaticallyImplyLeading: false,
+          title: Center(
+            child: FlatButton.icon(
+              icon: Icon(Icons.filter_list),
+              label: Text("Filtres"),
+              onPressed: () {_scaffoldKey.currentState.openDrawer();},
+            ),
+          ),
+          snap: true,
+          floating: true,
+          backgroundColor: Colors.white,
+          expandedHeight: 30,
+        ),
 
+        widgetToShow,
+
+        /*ListView.builder(
+            // key: UniqueKey(),
+            itemCount: _adverts.length,
+            padding: EdgeInsets.only(top: 5.0),
+            itemBuilder: (context, index) {
+              return AdvertTile(
+                advert: _adverts[index],
+              );
+            },
+          ),*/
+      ],
+    );
   }
 
-  Widget _searchBar(){
+  Widget _buildSearchBar(){
     return Container(
       padding: EdgeInsets.all(10.0),
       child: Row(
@@ -155,8 +199,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                             color: Theme.of(context).accentColor
                         ),
                         border: InputBorder.none),
-                    onSubmitted: onSubmitted,
-                    onChanged: onSubmitted,
+                    onChanged: (value) => _doSearch(),
                   ),
                 ),
               ),
@@ -167,103 +210,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     );
   }
 
-/*
-  double _advancedResearchBarHeight(){
-    var usableHeight = MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom - 150;
-    if (usableHeight < 250) {
-      return usableHeight;
-    } else {
-      return 250;
-    }
-  }
-*/
-/*
-  Widget _advancedResearchBar(){
-    return ExpansionTile(
-      title: Text("Recherche Avancée"),
-      children: <Widget>[
-        Container(
-          height: _advancedResearchBarHeight(),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: <Widget>[
-                  DropdownButton<String>(
-                    onChanged: (String newValue) {
-                    setState(() {
-                    cat = newValue;
-                    });
-                    },
-                    isDense: false,
-                    value: cat,
-                    isExpanded: true,
-                    icon: Icon(Icons.arrow_downward),
-                    iconSize: 24,
-                    items: _categories
-                    .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                    }).toList(),
-                  ),
-
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  TextField(
-                    controller: _editingController,
-                    style: TextStyle(
-                        fontFamily: "WorkSansSemiBold",
-                        fontSize: 16.0,
-                        color: Colors.black
-                    ),
-                    decoration: InputDecoration(
-                      hintText: "Prix Maximal",
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-
-                  SizedBox(
-                    height: 10.0,
-                  ),
-
-                  MaterialButton(
-                      color: Colors.blueAccent,
-                      textColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                      onPressed: _pickDateTime,
-                      child: Text("Choisir la disponibilité")
-                  ),
-
-                  SizedBox(
-                    height: 10.0,
-                  ),
-
-                  ButtonBar(
-                    alignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      RaisedButton(
-                        child: Text("Rechercher"),
-                        onPressed: onAdvancedSubmitted,
-                      ),
-                    ],
-                  ),
-
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-*/
-
-  Widget _filtersDrawer(){
+  Widget _buildFiltersDrawer(){
     return SingleChildScrollView(
       child: SafeArea(
         child: Padding(
@@ -287,34 +234,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
               Padding(
                 padding: EdgeInsets.only(top: 20.0),
               ),
-              Row(
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(right: 10.0),
-                    child: Icon(Icons.list, color: Colors.black54,),
-                  ),
-                  Flexible(
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        hint: Text("Choisir une catégorie"),
-                        value: _dropdownValue,
-                        isExpanded: true,
-                        items: _categories.map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String newvalue) {
-                          setState(() {
-                            _dropdownValue = newvalue;
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                ],
-              ),
+              _buildCategorySelector(),
               Padding(
                 padding: EdgeInsets.only(top: 10),
               ),
@@ -412,13 +332,35 @@ class _SearchResultPageState extends State<SearchResultPage>{
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(20.0)),
                   ),
-                  onPressed: () {onAdvancedSubmitted();_scaffoldKey.currentState.openEndDrawer();},
+                  onPressed: () => _applyFilters(),
+                ),
+              ),
+              Center(
+                child: OutlineButton.icon(
+                  label: Text("Réinitialiser les filtres"),
+                  icon: Icon(Icons.refresh),
+                  textColor: Colors.blueAccent,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  onPressed: () => _resetFilters()
                 ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCategorySelector(){
+    return Container(
+        height: 250,
+        child: ListView.builder(
+          itemBuilder: (BuildContext context, int index) => CategoryTile(category: _categories[index]),
+          itemCount: _categories.length,
+        )
     );
   }
 
@@ -434,20 +376,16 @@ class _SearchResultPageState extends State<SearchResultPage>{
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
 
-            _searchBar(),
+            _buildSearchBar(),
 
-            /*SingleChildScrollView(
-              child: _advancedResearchBar(),
-            ),*/
-
-            FlatButton.icon(
+            /*FlatButton.icon(
               icon: Icon(Icons.filter_list),
               label: Text("Filtres"),
               onPressed: () {_scaffoldKey.currentState.openDrawer();},
-            ),
+            ),*/
 
             Expanded(
-              child: _getListViewWidget(),
+              child: _buildResultsList(),
             ),
 
           ],
@@ -455,13 +393,13 @@ class _SearchResultPageState extends State<SearchResultPage>{
       ),
 
       drawer: Drawer(
-        child: _filtersDrawer(),
+        child: _buildFiltersDrawer(),
       ),
 
     );
   }
 
-  _onPriceRangeChange(){
+  void _onPriceRangeChange(){
     var _priceMin;
     try {
       _priceMin = int.parse(_priceMinController.text);
@@ -495,34 +433,22 @@ class _SearchResultPageState extends State<SearchResultPage>{
     }
   }
 
-  onSubmitted(query) async {
+  void _resetFilters(){
+    setState(() {
+      _priceMinController.text = PRICE_MIN.toString();
+      _priceMaxController.text = PRICE_MAX.toString();
+      _priceRange = RangeValues(0.0,1.0);
+      _resetCategories(_categories);
+    });
+  }
+
+  void _applyFilters(){
+    _scaffoldKey.currentState.openEndDrawer();
+    FocusScope.of(context).unfocus();
     loadAdverts();
   }
 
-  onAdvancedSubmitted(){
-    /*if(cat=="Catégorie"){
-      showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          content: Text("Choississez au minimum la catégorie souhaitée."),
-          actions: <Widget>[
-            FlatButton(
-              child: Text("Ok"),
-              onPressed: ()=>Navigator.pop(context),
-            ),
-          ],
-        ),
-      );
-    } else {
-      //send search request to the server
-      //Add handling of null value
-      print(cat);
-      print(picked.first.toString());
-      print(picked.last.toString());
-      print(_keywordController.text);
-      //Navigator.pop(_ScaffoldKey.currentContext);
-    }*/
-    FocusScope.of(context).unfocus();
+  void _doSearch(){
     loadAdverts();
   }
 
@@ -550,5 +476,77 @@ class _SearchResultPageState extends State<SearchResultPage>{
       picked = returnedDates;
     }
   }
-
 }
+
+
+class CategoryTile extends StatefulWidget {
+
+  final TropsCategory category;
+  CategoryTile({Key key, this.category}) : super(key: key);
+
+  @override
+  _CategoryTileState createState() => _CategoryTileState();
+}
+
+class _CategoryTileState extends State<CategoryTile>{
+
+  Widget _buildTiles(TropsCategory root){
+    if (root.subcategories.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(right: 20),
+        child: CheckboxListTile(
+          title: Text(root.title),
+          onChanged: (bool value) {
+            setState(() {
+              _categorySelected[root] = value;
+            });
+          },
+          value: _categorySelected[root],
+        ),
+      );
+    } else {
+      return ExpansionTile(
+        key: PageStorageKey<TropsCategory>(root),
+        title: Row(
+          children: <Widget>[
+            Text(
+              root.title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16
+              ),
+            ),
+            Spacer(),
+            Checkbox(
+              onChanged: (bool value) {
+                setState(() {
+                  _categorySelected[root] = value;
+                  _applyValueToSubcategories(root, value);
+                });
+              },
+              value: _categorySelected[root],
+            )
+          ],
+        ),
+        children: root.subcategories.map(_buildTiles).toList(),
+      );
+    }
+  }
+
+  void _applyValueToSubcategories(TropsCategory cat, bool value){
+    if (cat.subcategories.isNotEmpty){
+      for (TropsCategory subCat in cat.subcategories){
+        _categorySelected[subCat] = value;
+        _applyValueToSubcategories(subCat, value);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildTiles(widget.category);
+  }
+}
+
+
+
