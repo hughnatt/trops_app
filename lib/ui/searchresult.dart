@@ -43,6 +43,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
   void initState(){
     super.initState();
     loadCategories();
+    loadAdverts();
   }
 
   void _resetCategories(List<TropsCategory> catList){
@@ -63,7 +64,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     });
   }
 
-  loadAdverts() async {
+  void loadAdverts() async {
     var priceMin;
     var priceMax;
     try {
