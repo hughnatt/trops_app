@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:trops_app/api/image.dart';
+import 'package:trops_app/models/User.dart';
 
 class ImagesManager {
   final _imagesFiles = List<File>(); // we declare a dynamic list (at beginning, none index is checkable !!)
@@ -46,23 +48,24 @@ class ImagesManager {
   Future<File> compressAndGetFile(File file) async {
 
     var targetPath = await getTemporaryDirectory();
-    var compressedImageTitle = targetPath.path+DateTime.now().millisecondsSinceEpoch.toString()+".jpg";
+    var compressedImagePath = targetPath.path+"/"+DateTime.now().millisecondsSinceEpoch.toString()+".jpeg";
 
     var result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
-      compressedImageTitle,
+        compressedImagePath,
       quality: 20,
+      format: CompressFormat.jpeg
     );
 
-    print(file.lengthSync());
+    print(result.path);
 
     return result;
   }
   
-  void uploadImage(File pictureToUpload){
-    this.compressAndGetFile(pictureToUpload).then((compressedPicture) {
-      print(compressedPicture.lengthSync());
-    });
+  void compressAndUploadImage(File pictureToUpload) async {
+    var compressedPicture = await this.compressAndGetFile(pictureToUpload);
+    uploadImage(compressedPicture);
+
   }
 
 

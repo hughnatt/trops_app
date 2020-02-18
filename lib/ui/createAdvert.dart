@@ -79,7 +79,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       _imagesManager.loadFile(index, picture); //add the file to the imageMangaer
     });
 
-    this._imagesManager.uploadImage(picture); //compress & upload the image on server
+    this._imagesManager.compressAndUploadImage(picture); //compress & upload the image on server
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
