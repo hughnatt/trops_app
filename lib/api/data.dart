@@ -69,7 +69,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   {
     "owner": "$owner"
   }''';
-  var uri = new Uri.https(_dataBaseURI, "/advert/owner");
+  var uri = new Uri.https(apiBaseURI, "/advert/owner");
   print(jsonBody);
   var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
