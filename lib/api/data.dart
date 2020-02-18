@@ -80,6 +80,43 @@ Future<Http.Response> uploadAdvert(String title, int price, String description,S
   return response;
 }
 
+Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
+  List<Advert> _adverts = new List<Advert>();
+  var jsonBody = '''
+  {
+    "owner": "$owner"
+  }''';
+  var uri = new Uri.https(_dataBaseURI, "/advert/owner");
+  print(jsonBody);
+  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"},body : jsonBody);
+  print(response.statusCode);
+  print(response.body);
+
+  if(response.statusCode == 200) {
+    var result = await jsonDecode(response.body);
+    result.forEach((item) {
+      List<String> photos = new List<String>.from(item["photos"]);
+
+      var advert = new Advert(
+          item["_id"],
+          item["title"],
+          item["price"],
+          item["description"],
+          photos,
+          item["owner"],
+          item["category"]
+      );
+
+      _adverts.add(advert);
+    });
+    return _adverts;
+  } else {
+    throw Exception("Failed to get adverts");
+  }
+
+}
+
+
 
 //Future<Http.Response> register(String name, String email, String password) async {
 //  var jsonBody = '''
