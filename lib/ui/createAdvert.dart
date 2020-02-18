@@ -411,24 +411,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                        padding: EdgeInsets.only(top: 15),
                      ),
                      CategorySelector(categories: _categories),
-                       /*child: DropdownButtonHideUnderline(
-                         child: DropdownButton<String>(
-                           hint: Text("Choisir une catégorie"),
-                           value: _dropdownValue,
-                           isExpanded: true,
-                           items: _categories.map<DropdownMenuItem<String>>((TropsCategory value) {
-                             return DropdownMenuItem<String>(
-                               value: value.title,
-                               child: Text(value.title),
-                             );
-                           }).toList(),
-                           onChanged: (String newvalue) {
-                             setState(() {
-                               _dropdownValue = newvalue;
-                             });
-                           },
-                         ),
-                       ),*/
                    ],
                  )
                ),

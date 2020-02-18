@@ -37,39 +37,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
 
   List<TropsCategory> _categories = List<TropsCategory>();
-/*  static List<TropsCategory> _categories = <TropsCategory>[
-    TropsCategory(
-      'Sports d\'hiver',
-      <TropsCategory>[
-        TropsCategory(
-            'Ski'
-        ),
-        TropsCategory(
-            'Snow'
-        ),
-        TropsCategory(
-            'Traineau'
-        )
-      ]
-    ),
-    TropsCategory(
-      'Sports de raquette',
-      <TropsCategory>[
-        TropsCategory(
-          'Tennis',
-        ),
-        TropsCategory(
-            'Badminton'
-        ),
-        TropsCategory(
-            'Tennis de table'
-        ),
-        TropsCategory(
-          'Squash',
-        )
-      ]
-    )
-  ];*/
 
   @override
   void initState(){
@@ -157,16 +124,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
         widgetToShow,
 
-        /*ListView.builder(
-            // key: UniqueKey(),
-            itemCount: _adverts.length,
-            padding: EdgeInsets.only(top: 5.0),
-            itemBuilder: (context, index) {
-              return AdvertTile(
-                advert: _adverts[index],
-              );
-            },
-          ),*/
       ],
     );
   }
@@ -377,12 +334,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
           children: <Widget>[
 
             _buildSearchBar(),
-
-            /*FlatButton.icon(
-              icon: Icon(Icons.filter_list),
-              label: Text("Filtres"),
-              onPressed: () {_scaffoldKey.currentState.openDrawer();},
-            ),*/
 
             Expanded(
               child: _buildResultsList(),
