@@ -1,14 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
-
-var _dataBaseURI = "trops.sauton.xyz";
 
 Future<List<Advert>> getAllAdverts() async {
 
   List<Advert> _adverts = new List<Advert>();
-  var uri = new Uri.https(_dataBaseURI, "/advert");
+  var uri = new Uri.https(apiBaseURI, "/advert");
   var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
 
   if(response.statusCode == 200) {
@@ -55,7 +54,7 @@ Future<Http.Response> uploadAdvert(String title, int price, String description,S
     "startDate" : "$beginDate",
     "endDate" : "$endDate"
   }''';
-  var uri = new Uri.https(_dataBaseURI, "/advert");
+  var uri = new Uri.https(apiBaseURI, "/advert");
   print(jsonBody);
   var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
