@@ -24,7 +24,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   List<DateTime> picked;
-  ImagesManager _imageFiles = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
+  ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
@@ -67,14 +67,11 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
 
-    this._imageFiles.compressAndGetFile(picture).then((res) {
+    this._imagesManager.compressAndGetFile(picture).then((res) {
       this.setState(() { //we refresh the UI to display the image
-        _imageFiles.loadFile(index, res);
+        _imagesManager.loadFile(index, res);
       });
     });
-
-
-    Navigator.of(context).pop(); //we make the alert dialog disapear
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
@@ -88,6 +85,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             title: Text("Importer depuis la gallerie"),
             onTap: () {
               _openSource(context, index, SourceType.gallery);
+              Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
           ListTile(
@@ -95,10 +93,11 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             title: Text("Prendre une photo"),
             onTap: () {
               _openSource(context, index, SourceType.camera);
+              Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
           ListTile(
-            enabled: (_imageFiles.get(index) != null), //the user can't delete the picture if the image at index is null
+            enabled: (_imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
@@ -112,7 +111,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   _deletePicture(BuildContext context, int index){
     this.setState(() { //we reload the UI
-      _imageFiles.removeAt(index);
+      _imagesManager.removeAt(index);
     });
     Navigator.of(context).pop(); // we close the alertDialog
   }
@@ -223,14 +222,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Widget _boxContent(int index) {
-    if (_imageFiles.get(index) == null) {
+    if (_imagesManager.get(index) == null) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
     else {
-      return Image.file(_imageFiles.get(index), fit: BoxFit.cover);
+      return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
     }
   }
 
