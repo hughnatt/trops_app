@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -10,7 +10,8 @@ import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class SearchResultPage extends StatefulWidget {
 
-  SearchResultPage({Key key}) : super(key: key);
+  final List<String> preSelectedCategories;
+  SearchResultPage({this.preSelectedCategories, Key key}) : super(key: key);
 
 
   @override
@@ -18,7 +19,7 @@ class SearchResultPage extends StatefulWidget {
 
 }
 
-Map<TropsCategory,bool> _categorySelected = Map<TropsCategory,bool>();
+Map<String,bool> _categorySelected = Map<String,bool>();
 
 class _SearchResultPageState extends State<SearchResultPage>{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
@@ -37,49 +38,17 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
 
   List<TropsCategory> _categories = List<TropsCategory>();
-/*  static List<TropsCategory> _categories = <TropsCategory>[
-    TropsCategory(
-      'Sports d\'hiver',
-      <TropsCategory>[
-        TropsCategory(
-            'Ski'
-        ),
-        TropsCategory(
-            'Snow'
-        ),
-        TropsCategory(
-            'Traineau'
-        )
-      ]
-    ),
-    TropsCategory(
-      'Sports de raquette',
-      <TropsCategory>[
-        TropsCategory(
-          'Tennis',
-        ),
-        TropsCategory(
-            'Badminton'
-        ),
-        TropsCategory(
-            'Tennis de table'
-        ),
-        TropsCategory(
-          'Squash',
-        )
-      ]
-    )
-  ];*/
 
   @override
   void initState(){
     super.initState();
     loadCategories();
+    loadAdverts();
   }
 
   void _resetCategories(List<TropsCategory> catList){
     for (TropsCategory cat in catList){
-      _categorySelected[cat] = false;
+      _categorySelected[cat.id] = false;
       if (cat.subcategories.isNotEmpty){
         _resetCategories(cat.subcategories);
       }
@@ -91,11 +60,18 @@ class _SearchResultPageState extends State<SearchResultPage>{
       setState(() {
         _categories = res;
         _resetCategories(_categories);
+        if (widget.preSelectedCategories != null){
+          widget.preSelectedCategories.forEach((id){
+            _categorySelected[id] = true;
+            _applyValueToSubcategories(findCategory(_categories, id), true);
+            _applyFilters();
+          });
+        }
       });
     });
   }
 
-  loadAdverts() async {
+  void loadAdverts() async {
     var priceMin;
     var priceMax;
     try {
@@ -109,7 +85,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
       priceMax = 10000;
     }
 
-    getResults(_keywordController.text, priceMin, priceMax, null).then((res) {
+    List<String> categories = List<String>();
+    _categorySelected.forEach((id,selected){
+      if (selected){
+        categories.add(id);
+      }
+    });
+
+    getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -157,16 +140,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
         widgetToShow,
 
-        /*ListView.builder(
-            // key: UniqueKey(),
-            itemCount: _adverts.length,
-            padding: EdgeInsets.only(top: 5.0),
-            itemBuilder: (context, index) {
-              return AdvertTile(
-                advert: _adverts[index],
-              );
-            },
-          ),*/
       ],
     );
   }
@@ -378,12 +351,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
             _buildSearchBar(),
 
-            /*FlatButton.icon(
-              icon: Icon(Icons.filter_list),
-              label: Text("Filtres"),
-              onPressed: () {_scaffoldKey.currentState.openDrawer();},
-            ),*/
-
             Expanded(
               child: _buildResultsList(),
             ),
@@ -478,6 +445,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 }
 
+void _applyValueToSubcategories(TropsCategory cat, bool value){
+  if (cat.subcategories.isNotEmpty){
+    for (TropsCategory subCat in cat.subcategories){
+      _categorySelected[subCat.id] = value;
+      _applyValueToSubcategories(subCat, value);
+    }
+  }
+}
 
 class CategoryTile extends StatefulWidget {
 
@@ -498,10 +473,10 @@ class _CategoryTileState extends State<CategoryTile>{
           title: Text(root.title),
           onChanged: (bool value) {
             setState(() {
-              _categorySelected[root] = value;
+              _categorySelected[root.id] = value;
             });
           },
-          value: _categorySelected[root],
+          value: _categorySelected[root.id],
         ),
       );
     } else {
@@ -520,25 +495,16 @@ class _CategoryTileState extends State<CategoryTile>{
             Checkbox(
               onChanged: (bool value) {
                 setState(() {
-                  _categorySelected[root] = value;
+                  _categorySelected[root.id] = value;
                   _applyValueToSubcategories(root, value);
                 });
               },
-              value: _categorySelected[root],
+              value: _categorySelected[root.id],
             )
           ],
         ),
         children: root.subcategories.map(_buildTiles).toList(),
       );
-    }
-  }
-
-  void _applyValueToSubcategories(TropsCategory cat, bool value){
-    if (cat.subcategories.isNotEmpty){
-      for (TropsCategory subCat in cat.subcategories){
-        _categorySelected[subCat] = value;
-        _applyValueToSubcategories(subCat, value);
-      }
     }
   }
 

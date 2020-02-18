@@ -1,22 +1,24 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/TropsCategory.dart';
-
-var _dataBaseURI = "trops.sauton.xyz";
 
 Future<List<Advert>> getAllAdverts() async {
 
   List<Advert> _adverts = new List<Advert>();
-  var uri = new Uri.https(_dataBaseURI, "/advert");
+  var uri = new Uri.https(apiBaseURI, "/advert");
   var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
 
   if(response.statusCode == 200) {
 
     var result = await jsonDecode(response.body);
-    result.forEach((item){
+    result.forEach((item) async {
 
       List<String> photos = new List<String>.from(item["photos"]);
+
+      //Resolve category name
+      String categoryName = getCategoryNameByID(item['category']);
 
       var advert = new Advert(
         item["_id"],
@@ -25,7 +27,7 @@ Future<List<Advert>> getAllAdverts() async {
         item["description"],
         photos,
         item["owner"],
-        item["category"]
+        categoryName
       );
 
       _adverts.add(advert);
@@ -41,26 +43,6 @@ Future<List<Advert>> getAllAdverts() async {
   
 }
 
-Future<List<TropsCategory>> getCategories() async {
-
-  List<TropsCategory> categories = List<TropsCategory>();
-  var uri = Uri.https(_dataBaseURI, "/category");
-  var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
-
-  if(response.statusCode == 200) {
-
-    var result = await jsonDecode(response.body);
-    result.forEach((item) {
-      categories.add(TropsCategory(item['name']));
-    });
-    return categories;
-  }
-  else {
-    throw Exception("Failed to get categories");
-  }
-}
-
-
 Future<Http.Response> uploadAdvert(String title, int price, String description,String category,String owner,DateTime beginDate, DateTime endDate) async {
   var jsonBody = '''
   {
@@ -72,13 +54,15 @@ Future<Http.Response> uploadAdvert(String title, int price, String description,S
     "startDate" : "$beginDate",
     "endDate" : "$endDate"
   }''';
-  var uri = new Uri.https(_dataBaseURI, "/advert");
+  var uri = new Uri.https(apiBaseURI, "/advert");
   print(jsonBody);
   var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
   print(response.body);
   return response;
+
 }
+
 
 
 //Future<Http.Response> register(String name, String email, String password) async {
