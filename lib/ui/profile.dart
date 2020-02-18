@@ -5,6 +5,8 @@ import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
+import 'package:trops_app/api/data.dart';
+import 'package:trops_app/models/Advert.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key : key);
 
@@ -17,6 +19,8 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage>{
 
   PageController pageController;
+
+  List<Advert> _adverts = new List<Advert>();
 
   @override
   void initState() {
@@ -31,6 +35,16 @@ class _ProfilePageState extends State<ProfilePage>{
         Navigator.of(context).pushNamed("/auth");
       });
     }
+
+    getAdvertOfUser(User.current.getEmail(),User.current.getToken()).then((res) {
+      setState(() {
+        _adverts = res;
+      });
+      print("finish getting avert");
+    });
+
+
+
   }
 
   @override
@@ -103,8 +117,8 @@ class _ProfilePageState extends State<ProfilePage>{
                       child: PageView(
                         controller: pageController,
                         children: <Widget>[
-                          SlidingCard(),
-                          SlidingCard()
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),),
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),)
                         ],
                       ),
                     ),
@@ -114,13 +128,19 @@ class _ProfilePageState extends State<ProfilePage>{
                     ),
                     SizedBox(
                       height: 275,
-                      child: PageView(
+                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {return SlidingCard(
+                        advert: _adverts[index],
+                      );},
+                        itemCount: _adverts.length,
+                      )
+
+                      /*PageView(
                         controller: pageController,
                         children: <Widget>[
                           SlidingCard(),
                           SlidingCard()
                         ],
-                      ),
+                      ),*/
                     ),
                   ],
                 ),
