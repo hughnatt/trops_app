@@ -132,6 +132,7 @@ class _ProfilePageState extends State<ProfilePage>{
                         advert: _adverts[index],
                       );},
                         itemCount: _adverts.length,
+                        controller: pageController,
                       )
 
                       /*PageView(
