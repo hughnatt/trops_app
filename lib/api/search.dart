@@ -1,39 +1,56 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 
-var _dataBaseURI = "trops.sauton.xyz";
+const String _dataBaseURI = "trops.sauton.xyz";
 
-Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String category) async {
+class SearchBody{
+  String text;
+  int priceMin;
+  int priceMax;
+  List<String> categories;
+  SearchBody(this.text,this.priceMin,this.priceMax,this.categories);
 
-  List<Advert> _adverts = new List<Advert>();
+  Map<String,dynamic> toJson() => {
+    'text': text,
+    'priceMin': priceMin,
+    'priceMax': priceMax,
+    'categories': categories
+  };
+}
 
-  var jsonBody = '''
-  {
-    "text" : "$text",
-    "priceMin" : "$priceMin",
-    "priceMax" : "$priceMax"
-  }''';
+Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories) async {
+
+  SearchBody body = new SearchBody(text, priceMin, priceMax, categories);
+
   var uri = new Uri.https(_dataBaseURI, "/search");
-  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonBody);
+  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
 
   if(response.statusCode == 200) {
     var result = await jsonDecode(response.body);
-    result.forEach((item) {
-      List<String> photos = new List<String>.from(item["photos"]);
+
+    List<Advert> _adverts = new List<Advert>();
+
+    for (var item in result){
+      List<String> photos = new List<String>.from(item['photos']);
+
+      //Resolve category name
+      String categoryName = getCategoryNameByID(item['category']);
 
       var advert = new Advert(
-          item["_id"],
-          item["title"],
-          item["price"],
-          item["description"],
+          item['_id'],
+          item['title'],
+          item['price'],
+          item['description'],
           photos,
-          item["owner"],
-          item["category"]
+          item['owner'],
+          categoryName
       );
 
       _adverts.add(advert);
-    });
+    }
+
     return _adverts;
   } else {
     throw Exception("Failed to get adverts");

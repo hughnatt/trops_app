@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
@@ -37,44 +38,12 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
 
   List<TropsCategory> _categories = List<TropsCategory>();
-/*  static List<TropsCategory> _categories = <TropsCategory>[
-    TropsCategory(
-      'Sports d\'hiver',
-      <TropsCategory>[
-        TropsCategory(
-            'Ski'
-        ),
-        TropsCategory(
-            'Snow'
-        ),
-        TropsCategory(
-            'Traineau'
-        )
-      ]
-    ),
-    TropsCategory(
-      'Sports de raquette',
-      <TropsCategory>[
-        TropsCategory(
-          'Tennis',
-        ),
-        TropsCategory(
-            'Badminton'
-        ),
-        TropsCategory(
-            'Tennis de table'
-        ),
-        TropsCategory(
-          'Squash',
-        )
-      ]
-    )
-  ];*/
 
   @override
   void initState(){
     super.initState();
     loadCategories();
+    loadAdverts();
   }
 
   void _resetCategories(List<TropsCategory> catList){
@@ -95,7 +64,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     });
   }
 
-  loadAdverts() async {
+  void loadAdverts() async {
     var priceMin;
     var priceMax;
     try {
@@ -109,7 +78,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
       priceMax = 10000;
     }
 
-    getResults(_keywordController.text, priceMin, priceMax, null).then((res) {
+    List<String> categories = List<String>();
+    _categorySelected.forEach((category,selected){
+      if (selected){
+        categories.add(category.id);
+      }
+    });
+
+    getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -157,16 +133,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
         widgetToShow,
 
-        /*ListView.builder(
-            // key: UniqueKey(),
-            itemCount: _adverts.length,
-            padding: EdgeInsets.only(top: 5.0),
-            itemBuilder: (context, index) {
-              return AdvertTile(
-                advert: _adverts[index],
-              );
-            },
-          ),*/
       ],
     );
   }
@@ -377,12 +343,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
           children: <Widget>[
 
             _buildSearchBar(),
-
-            /*FlatButton.icon(
-              icon: Icon(Icons.filter_list),
-              label: Text("Filtres"),
-              onPressed: () {_scaffoldKey.currentState.openDrawer();},
-            ),*/
 
             Expanded(
               child: _buildResultsList(),
