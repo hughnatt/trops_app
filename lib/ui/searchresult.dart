@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';

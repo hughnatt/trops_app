@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 
-var _dataBaseURI = "trops.sauton.xyz";
+const String _dataBaseURI = "trops.sauton.xyz";
 
 Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String category) async {
 
@@ -19,21 +20,26 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, String 
 
   if(response.statusCode == 200) {
     var result = await jsonDecode(response.body);
-    result.forEach((item) {
-      List<String> photos = new List<String>.from(item["photos"]);
+
+    for (var item in result){
+      List<String> photos = new List<String>.from(item['photos']);
+
+      //Resolve category name
+      String categoryName = getCategoryNameByID(item['category']);
 
       var advert = new Advert(
-          item["_id"],
-          item["title"],
-          item["price"],
-          item["description"],
+          item['_id'],
+          item['title'],
+          item['price'],
+          item['description'],
           photos,
-          item["owner"],
-          item["category"]
+          item['owner'],
+          categoryName
       );
 
       _adverts.add(advert);
-    });
+    }
+
     return _adverts;
   } else {
     throw Exception("Failed to get adverts");
