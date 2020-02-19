@@ -43,7 +43,6 @@ Future<List<Advert>> getAllAdverts() async {
   }
 }
 
-
 class CreateAdvertBody{
   String title;
   double price;
