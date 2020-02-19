@@ -43,7 +43,7 @@ Future<List<Advert>> getAllAdverts() async {
   
 }
 
-Future<Http.Response> uploadAdvertApi(String title, int price, String description,String category,String owner,List<String> photos,DateTime beginDate, DateTime endDate) async {
+Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos,DateTime beginDate, DateTime endDate) async {
   var jsonBody = '''
   {
     "title" : "$title",

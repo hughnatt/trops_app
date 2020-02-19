@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/category.dart';
@@ -137,7 +138,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       print("Delete error " + response.statusCode.toString());
     }
   }
-
+  
+  bool _isPriceValid = true;
+  
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
@@ -145,10 +148,28 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       TextField(
         keyboardType: TextInputType.number,
         controller: _priceController,
+        inputFormatters: [BlacklistingTextInputFormatter(RegExp("[ ]?[,]?[-]?")),],
+        onChanged: (String text) {
+          try{
+            if(_priceController.text != ""){
+              double price;
+              price = double.parse(_priceController.text);
+              setState(() {
+                _isPriceValid = true;
+              });
+            }
+          }
+          catch(err){
+            setState(() {
+              _isPriceValid = false;
+            });
+          }
+        },
         decoration: InputDecoration(
           icon: Icon(Icons.euro_symbol),
           hintText: 'Coût de location (par jour)',
           border: InputBorder.none,
+          errorText: _isPriceValid ? null : "Format incorrect"
         ),
       ),
     );
@@ -267,9 +288,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     List<String> splitedPaths = this._imagesManager.getAllFilePath();
 
-
-    if(_checkFields()){ //if the user have correctly completed the form
-      var response = await uploadAdvertApi(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, picked.first, picked.last); // we try to contact the APi to add the advert
+    if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, picked.first, picked.last); // we try to contact the APi to add the advert
       if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
         _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
       }
