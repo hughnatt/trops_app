@@ -43,7 +43,7 @@ Future<List<Advert>> getAllAdverts() async {
   
 }
 
-Future<Http.Response> uploadAdvert(String title, int price, String description,String category,String owner,DateTime beginDate, DateTime endDate) async {
+Future<Http.Response> uploadAdvertApi(String title, int price, String description,String category,String owner,List<String> photos,DateTime beginDate, DateTime endDate) async {
   var jsonBody = '''
   {
     "title" : "$title",
@@ -51,6 +51,7 @@ Future<Http.Response> uploadAdvert(String title, int price, String description,S
     "description" : "$description",
     "category" : "$category",
     "owner": "$owner",
+    "photos": $photos,
     "startDate" : "$beginDate",
     "endDate" : "$endDate"
   }''';
@@ -62,44 +63,3 @@ Future<Http.Response> uploadAdvert(String title, int price, String description,S
   return response;
 
 }
-
-
-
-//Future<Http.Response> register(String name, String email, String password) async {
-//  var jsonBody = '''
-//  {
-//    "name" : "$name",
-//    "email" : "$email",
-//    "password" : "$password"
-//  }''';
-//  var uri = new Uri.https(_authBaseURI, "/users");
-//  print(jsonBody);
-//  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
-//
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}
-//
-//Future<Http.Response> login(String email, String password) async {
-//  var jsonBody = '''
-//  {
-//    "email" : "$email",
-//    "password" : "$password"
-//  }''';
-//  var uri = new Uri.https(_authBaseURI, "/users/login");
-//  var response = await Http.post(uri,headers:  {"Content-Type": "application/json"},body : jsonBody);
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}
-//
-//Future<Http.Response> signOff(User user) async {
-//  String token = user.getToken();
-//  print(token);
-//  var uri = new Uri.https(_authBaseURI, "/users/me/logout");
-//  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token"});
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}

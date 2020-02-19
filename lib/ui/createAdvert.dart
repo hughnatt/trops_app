@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
@@ -48,7 +49,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  _openSource(BuildContext context, int index, SourceType source) async {
+  Future<File> _openSource(BuildContext context, int index, SourceType source) async {
 
     ImageSource sourceChoice; //object that represent the source form where to pick the imaes
 
@@ -67,9 +68,21 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     }
 
     var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
-    this.setState(() { //we refresh the UI to display the image
-      _imagesManager.loadFile(index, picture);
+
+    return picture;
+  }
+
+
+  void _imageUploadProcess(SourceType source, int index) async {
+    var picture = await _openSource(context, index, source); //return the file choosen by the user
+
+    var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
+
+    this.setState((){
+      _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
     });
+
+    uploadImage(compressedPicture); //compress & upload the image on server
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
@@ -82,7 +95,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.image),
             title: Text("Importer depuis la gallerie"),
             onTap: () {
-              _openSource(context, index, SourceType.gallery);
+              _imageUploadProcess(SourceType.gallery, index);
               Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
@@ -90,7 +103,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.photo_camera),
             title: Text("Prendre une photo"),
             onTap: () {
-              _openSource(context, index, SourceType.camera);
+              _imageUploadProcess(SourceType.camera, index);
               Navigator.of(context).pop(); //we make the alert dialog disapear
             },
           ),
@@ -99,7 +112,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
-              _deletePicture(context,index);
+              _deleteImageProcess(context, index);
+              Navigator.of(context).pop(); // we close the alertDialog
             },
           )
         ],
@@ -111,7 +125,17 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     this.setState(() { //we reload the UI
       _imagesManager.removeAt(index);
     });
-    Navigator.of(context).pop(); // we close the alertDialog
+  }
+
+  void _deleteImageProcess(BuildContext context, int index) async{
+    var response = await deleteImage(_imagesManager.get(index));//First, delete the image from the server
+
+    if(response.statusCode == 200){//if the deletion is a success
+      _deletePicture(context, index); //we delete the image in client + refresh UI
+    }
+    else{
+      print("Delete error " + response.statusCode.toString());
+    }
   }
 
   Widget _buildValuePicker() {
@@ -241,8 +265,11 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     this.unfocus();
 
+    List<String> splitedPaths = this._imagesManager.getAllFilePath();
+
+
     if(_checkFields()){ //if the user have correctly completed the form
-      var response = await uploadAdvert(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(), picked.first, picked.last); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(_titleController.text, int.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, picked.first, picked.last); // we try to contact the APi to add the advert
       if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
         _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
       }
