@@ -329,6 +329,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   Widget _buildCategorySelector(){
     return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) => CategoryTile(category: _categories[index]),
       itemCount: _categories.length,
