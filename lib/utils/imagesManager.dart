@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:trops_app/api/image.dart';
-import 'package:trops_app/models/User.dart';
+import 'package:trops_app/api/api.dart';
 
 class ImagesManager {
   final _imagesFiles = List<File>(); // we declare a dynamic list (at beginning, none index is checkable !!)
@@ -45,12 +45,12 @@ class ImagesManager {
     return _imagesFiles;
   }
 
-  Future<File> compressAndGetFile(File file) async {
+  Future<File> compressAndGetFile(File file) async { //allow us to compress a given file and return the result
 
-    var targetPath = await getTemporaryDirectory();
-    var compressedImagePath = targetPath.path+"/"+DateTime.now().millisecondsSinceEpoch.toString()+".jpeg";
+    var targetPath = await getTemporaryDirectory(); //we get the path to the cache of the application
+    var compressedImagePath = targetPath.path+"/"+DateTime.now().millisecondsSinceEpoch.toString()+".jpeg"; //we named the compressed file the function will return
 
-    var result = await FlutterImageCompress.compressAndGetFile(
+    var result = await FlutterImageCompress.compressAndGetFile( //we compressed the file given at the compressedImagePath path with 20% of base quality into jpeg
       file.absolute.path,
         compressedImagePath,
       quality: 20,
@@ -59,16 +59,26 @@ class ImagesManager {
 
     print(result.path);
 
-    return result;
+    return result; //we return the compressed file
+  }
+
+
+  List<String> getAllFilePath(){ //return the path of the files for beign able to get them with API
+
+    List<String> paths = List<String>();
+
+    this._imagesFiles.forEach((file) { //for each picture loaded by the user
+      var endPath = file.path.split('/'); // we take only the name of the file
+      String fullPath = "\"https://" + apiBaseURI + "/image/" + endPath.last+"\""; //we make the link compatible with the API
+      paths.add(fullPath);
+    });
+
+    return paths; //return the List of all paths
   }
   
-  void compressAndUploadImage(File pictureToUpload) async {
+  /*void compressAndUploadImage(File pictureToUpload) async {
     var compressedPicture = await this.compressAndGetFile(pictureToUpload);
     uploadImage(compressedPicture);
 
-  }
-
-
-
-
+  }*/
 }
