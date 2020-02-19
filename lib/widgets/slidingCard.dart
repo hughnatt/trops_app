@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/ui/detailedAdvert.dart';
+import 'package:trops_app/ui/adminAdvertView.dart';
 
 class SlidingCard extends StatelessWidget {
 
@@ -15,7 +15,7 @@ class SlidingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : this.advert))) ,
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAvertView(advert : this.advert))) ,
       child: Card(
         margin: EdgeInsets.all(10.0),
         elevation: 2.0,
