@@ -43,14 +43,16 @@ Future<List<Advert>> getAllAdverts() async {
   }
 }
 
+
 class CreateAdvertBody{
   String title;
   double price;
   String description;
   String category;
   String owner;
+  List<String> photos;
   List<DateRange> availability;
-  CreateAdvertBody(this.title,this.price,this.description,this.category,this.owner,this.availability);
+  CreateAdvertBody(this.title,this.price,this.description,this.category,this.owner,this.photos,this.availability);
 
   Map<String,dynamic> toJson() => {
     'title' : title,
@@ -59,57 +61,17 @@ class CreateAdvertBody{
     'category' : category,
     'owner' : owner,
     'availability' : availability,
+    'photos': photos,
   };
 }
 
-Future<Http.Response> uploadAdvert(String title, double price, String description,String category,String owner, List<DateRange> availability) async {
-  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, availability);
-  print(availability[0]);
-  print(jsonEncode(body));
+Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability) async {
+  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability);
   Uri uri = new Uri.https(apiBaseURI, "/advert");
   Http.Response response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonEncode(body));
   print(response.statusCode);
   print(response.body);
   return response;
+
 }
 
-
-
-//Future<Http.Response> register(String name, String email, String password) async {
-//  var jsonBody = '''
-//  {
-//    "name" : "$name",
-//    "email" : "$email",
-//    "password" : "$password"
-//  }''';
-//  var uri = new Uri.https(_authBaseURI, "/users");
-//  print(jsonBody);
-//  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
-//
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}
-//
-//Future<Http.Response> login(String email, String password) async {
-//  var jsonBody = '''
-//  {
-//    "email" : "$email",
-//    "password" : "$password"
-//  }''';
-//  var uri = new Uri.https(_authBaseURI, "/users/login");
-//  var response = await Http.post(uri,headers:  {"Content-Type": "application/json"},body : jsonBody);
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}
-//
-//Future<Http.Response> signOff(User user) async {
-//  String token = user.getToken();
-//  print(token);
-//  var uri = new Uri.https(_authBaseURI, "/users/me/logout");
-//  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token"});
-//  print(response.statusCode);
-//  print(response.body);
-//  return response;
-//}
