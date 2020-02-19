@@ -24,7 +24,7 @@ Future<List<Advert>> getAllAdverts() async {
       var advert = new Advert(
         item["_id"],
         item["title"],
-        item["price"],
+        item["price"].toDouble(),
         item["description"],
         photos,
         item["owner"],
