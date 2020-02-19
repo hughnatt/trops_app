@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/DateRange.dart';
@@ -171,7 +170,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
-        child: Text("Créer l'annonce"),
+        child: Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -206,15 +205,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   }
 
   Widget _buildAvailabilityList() {
-    /*return MaterialButton(
-        color: Colors.blueAccent,
-        textColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        onPressed: () => _pickDateTime(),
-        child: new Text("Choisir la disponibilité")
-    );*/
     return ListView.builder(
       shrinkWrap: true,
       itemCount: _availability.length,
@@ -288,34 +278,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   void unfocus(){
     FocusScope.of(context).unfocus(); //make all the textfield loose focus
   }
-
-/*  void _pickDateTime() async{
-
-    DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
-    DateTime lastDate;
-
-    this.unfocus();
-
-    if(picked != null && picked.first != null && picked.last != null){ //if the user already picked some dates
-      firstDate = picked.first; //we will show him the range choose before
-      lastDate = picked.last;
-    }
-    else{
-      firstDate = lastDate = DateTime.now(); //else we just show the basic date (today)
-    }
-
-    List<DateTime> returnedDates = await DateRagePicker.showDatePicker( //BEFORE,picked was affected to the result, but if the user tap cancel, picked was loose because replace by NULL
-        context: context,
-        initialFirstDate: firstDate,
-        initialLastDate: lastDate,
-        firstDate: DateTime(DateTime.now().year),
-        lastDate: DateTime(DateTime.now().year + 5)
-    );
-
-    if(returnedDates != null){ //Allow to handle the cancel button that pop the context
-      picked = returnedDates; //we changes the saved date only if the user pick new ones and don't cancel the process
-    }
-  }*/
 
   Widget _buildPictureGrild() {
     return GridView.count(
@@ -467,121 +429,152 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       backgroundColor: Colors.white,
       body: GestureDetector(
         onTap: (){
-       FocusScope.of(context).requestFocus(new FocusNode());
-      },
-      child: SingleChildScrollView(
-        child: Column(
-         children: <Widget>[
-           Container(
-               padding: EdgeInsets.only(top: 25),
-               child: Center(
-                 child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
-               )
-           ),
-           Container(
-             padding: EdgeInsets.all(25.0),
-             child: Material(
-               elevation: 2.0,
-               shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(10.0)
-               ),
-               child: Column(
-                 children: <Widget>[
-                   AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
-                   Container(
-                     width: 250.0,
-                     height: 1.0,
-                     color: Colors.grey[400],
-                   ),
-                   _buildValuePicker(),
-                 ],
-               ),
-             ),
-           ),
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Container(
+                    padding: EdgeInsets.only(top: 25),
+                    child: Center(
+                      child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
+                    )
+                ),
 
-           Container(
-             padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-             child: Material(
-               elevation: 2.0,
-               shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(10.0)
-               ),
-               child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
-             ),
-           ),
+                Container(
+                  padding: EdgeInsets.all(25.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
+                        Container(
+                          width: 250.0,
+                          height: 1.0,
+                          color: Colors.grey[400],
+                        ),
+                        _buildValuePicker(),
+                      ],
+                    ),
+                  ),
+                ),
 
-           Container(
-             padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-             child: Material(
-               elevation: 2.0,
-               shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(10.0)
-               ),
-               child: Container(
-                   padding: EdgeInsets.all(10.0),
-                   child: Column(
-                     children: <Widget>[
-                       Row(
-                         children: <Widget>[
-                           Icon(Icons.list, color: Colors.black54,),
-                           Text(
-                             "Choisir une catégorie",
-                             style: TextStyle(
-                               fontSize: 18.0,
-                             ),
-                           ),
-                         ],
-                       ),
-                       CategorySelector(categories: _categories),
-                     ],
-                   )
-               ),
-             ),
-           ),
+                Container(
+                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    //child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
+                    child: Container(
+                      padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
+                      child: TextField(
+                        controller: _descriptionController,
+                        maxLines: null,
+                        maxLength: 1000,
+                        decoration: InputDecoration(
+                          icon: Icon(Icons.description),
+                          hintText: "Description",
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
 
-           _buildAvailabilityList(),
-           Padding(
-             padding: EdgeInsets.only(top: 20,bottom: 20),
-           ),
-           RaisedButton.icon(
-             label: Text("Ajouter des disponibilités"),
-             icon: Icon(Icons.add),
-             textColor: Colors.blueAccent,
-             color: Colors.white,
-             shape: RoundedRectangleBorder(
-               borderRadius: BorderRadius.all(Radius.circular(20.0)),
-             ),
-             onPressed: () {
-               setState(() {
-                 _availability.add(DateRange(DateTime.now(), DateTime.now()));
-               });
-             },
-           ),
-           Container(
-             padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
-             child: Material(
-               elevation: 2.0,
-               shape: RoundedRectangleBorder(
-                   borderRadius: BorderRadius.circular(10.0)
-               ),
-               child: Column(
-                 children: <Widget>[
-                   Container(
-                     padding: EdgeInsets.all(10.0),
-                     child: Text("Ajouter des photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-                   ),
-                   _buildPictureGrild()
-                 ],
-               ),
-             ),
-           ),
-           Container(
-               padding: EdgeInsets.only(top:25),
-               child: _buildValidationButton()
-           ),
-         ],
-        ),
-        ),
+                Container(
+                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Container(
+                        padding: EdgeInsets.all(10.0),
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                                "Catégorie",
+                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                            ),
+                            CategorySelector(categories: _categories),
+                          ],
+                        )
+                    ),
+                  ),
+                ),
+
+                Container(
+                    padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+                    child: Material(
+                        elevation: 2.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0)
+                        ),
+                        child: Container(
+                            padding: EdgeInsets.all(10.0),
+                            child: Column(
+                              children: <Widget>[
+                                Text(
+                                    "Disponibilités",
+                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                                ),
+                                _buildAvailabilityList(),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 10),
+                                ),
+                                RaisedButton.icon(
+                                  label: Text("Ajouter une période"),
+                                  icon: Icon(Icons.add),
+                                  textColor: Colors.blueAccent,
+                                  color: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _availability.add(DateRange(DateTime.now(), DateTime.now()));
+                                    });
+                                  },
+                                ),
+                              ],
+                            )
+                        )
+                    )
+                ),
+
+                Container(
+                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                        ),
+                        _buildPictureGrild()
+                      ],
+                    ),
+                  ),
+                ),
+
+                Container(
+                    padding: EdgeInsets.only(top:25,bottom:25),
+                    child: _buildValidationButton()
+                ),
+              ],
+            ),
+          ),
+        )
       ),
       bottomNavigationBar: TropsBottomAppBar(),
     );
