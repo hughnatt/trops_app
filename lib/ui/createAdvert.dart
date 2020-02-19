@@ -529,15 +529,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                              style: TextStyle(
                                fontSize: 18.0,
                              ),
-                             textAlign: TextAlign.center,
                            ),
-                           Padding(
-                             padding: EdgeInsets.only(right: 20),
-                           )
                          ],
-                       ),
-                       Padding(
-                         padding: EdgeInsets.only(top: 15),
                        ),
                        CategorySelector(categories: _categories),
                      ],
@@ -650,12 +643,11 @@ class _CategorySelectorState extends State<CategorySelector>{
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        height: 250,
-        child: ListView.builder(
-          itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
-          itemCount: widget.categories.length,
-        )
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
+      itemCount: widget.categories.length,
     );
   }
 }
