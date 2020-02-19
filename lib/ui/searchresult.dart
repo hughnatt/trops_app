@@ -328,12 +328,10 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 
   Widget _buildCategorySelector(){
-    return Container(
-        height: 250,
-        child: ListView.builder(
-          itemBuilder: (BuildContext context, int index) => CategoryTile(category: _categories[index]),
-          itemCount: _categories.length,
-        )
+    return ListView.builder(
+      shrinkWrap: true,
+      itemBuilder: (BuildContext context, int index) => CategoryTile(category: _categories[index]),
+      itemCount: _categories.length,
     );
   }
 
