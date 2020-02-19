@@ -183,7 +183,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Future<Null> _selectDate(BuildContext context, int index, bool start) async {
     final DateTime picked = await showDatePicker(
         context: context,
-        initialDate: DateTime.now(),
+        initialDate: start ? DateTime.now() : _availability[index].start,
         firstDate: DateTime(2015, 8),
         lastDate: DateTime(2101));
     if (picked != null && picked.isAfter(DateTime.now())){
