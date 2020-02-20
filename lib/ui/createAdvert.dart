@@ -442,6 +442,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Création d'une annonce", style: TextStyle(
+          fontSize: 25.0,
+        ),
+        ),
+      ),
       body: GestureDetector(
         onTap: (){
           FocusScope.of(context).requestFocus(new FocusNode());
@@ -450,13 +457,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                Container(
-                    padding: EdgeInsets.only(top: 25),
-                    child: Center(
-                      child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
-                    )
-                ),
-
                 Container(
                   padding: EdgeInsets.all(25.0),
                   child: Material(
