@@ -23,11 +23,18 @@ SOFTWARE.
 Original Version :  https://github.com/huextrat/TheGorgeousLogin/
  */
 
+import 'dart:convert';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
+import 'package:trops_app/api/auth.dart' as Auth;
+import 'package:http/http.dart' as Http;
+import 'package:trops_app/models/User.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 
 class AuthPage extends StatefulWidget {
@@ -42,24 +49,23 @@ class _AuthPageState extends State<AuthPage>
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  final FocusNode myFocusNodeEmailLogin = FocusNode();
-  final FocusNode myFocusNodePasswordLogin = FocusNode();
+  final FocusNode _focusLoginEmail = FocusNode();
+  final FocusNode _focusLoginPassword = FocusNode();
+  final FocusNode _focusRegisterName = FocusNode();
+  final FocusNode _focusRegisterEmail = FocusNode();
+  final FocusNode _focusRegisterPassword = FocusNode();
+  final FocusNode _focusRegisterConfirmPassword = FocusNode();
 
-  final FocusNode myFocusNodePassword = FocusNode();
-  final FocusNode myFocusNodeEmail = FocusNode();
-  final FocusNode myFocusNodeName = FocusNode();
+  TextEditingController _ctrlLoginEmail = new TextEditingController();
+  TextEditingController _ctrlLoginPassword = new TextEditingController();
+  TextEditingController _ctrlRegisterEmail = new TextEditingController();
+  TextEditingController _ctrlRegisterName = new TextEditingController();
+  TextEditingController _ctrlRegisterPassword = new TextEditingController();
+  TextEditingController _ctrlRegisterConfirmPassword = new TextEditingController();
 
-  TextEditingController loginEmailController = new TextEditingController();
-  TextEditingController loginPasswordController = new TextEditingController();
-
-  bool _obscureTextLogin = true;
-  bool _obscureTextSignup = true;
-  bool _obscureTextSignupConfirm = true;
-
-  TextEditingController signupEmailController = new TextEditingController();
-  TextEditingController signupNameController = new TextEditingController();
-  TextEditingController signupPasswordController = new TextEditingController();
-  TextEditingController signupConfirmPasswordController = new TextEditingController();
+  bool _obscureLoginPassword = true;
+  bool _obscureRegisterPassword = true;
+  bool _obscureRegisterConfirmPassword = true;
 
   PageController _pageController;
 
@@ -67,102 +73,90 @@ class _AuthPageState extends State<AuthPage>
   Color right = Colors.white;
 
   @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      key: _scaffoldKey,
-      body: SingleChildScrollView(
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height >= 775.0
-                ? MediaQuery.of(context).size.height
-                : 775.0,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: 75.0),
-                  //child: new Image(
-                  //    width: 250.0,
-                  //    height: 191.0,
-                  //    fit: BoxFit.fill,
-                  //    image: new AssetImage('assets/img/abc.png')),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 20.0),
-                  child: _buildMenuBar(context),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: PageView(
-                    controller: _pageController,
-                    onPageChanged: (i) {
-                      if (i == 0) {
-                        setState(() {
-                          right = Colors.white;
-                          left = Colors.black;
-                        });
-                      } else if (i == 1) {
-                        setState(() {
-                          right = Colors.black;
-                          left = Colors.white;
-                        });
-                      }
-                    },
-                    children: <Widget>[
-                      new ConstrainedBox(
-                        constraints: const BoxConstraints.expand(),
-                        child: _buildSignIn(context),
-                      ),
-                      new ConstrainedBox(
-                        constraints: const BoxConstraints.expand(),
-                        child: _buildSignUp(context),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-    );
+  void initState() {
+    super.initState();
+
+//    SystemChrome.setPreferredOrientations([
+//      DeviceOrientation.portraitUp,
+//      DeviceOrientation.portraitDown,
+//    ]);
+
+    _pageController = PageController();
   }
 
   @override
   void dispose() {
-    myFocusNodePassword.dispose();
-    myFocusNodeEmail.dispose();
-    myFocusNodeName.dispose();
+    // Clean up the focus node when the Form is disposed.
+    _focusLoginEmail.dispose();
+    _focusLoginPassword.dispose();
+    _focusRegisterName.dispose();
+    _focusRegisterEmail.dispose();
+    _focusRegisterPassword.dispose();
     _pageController?.dispose();
     super.dispose();
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
-    _pageController = PageController();
-  }
-
-  void showInSnackBar(String value) {
-    FocusScope.of(context).requestFocus(new FocusNode());
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
-    _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text(
-        value,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontFamily: "WorkSansSemiBold"),
+  Widget build(BuildContext context) {
+    return TropsScaffold(
+      scaffoldKey: _scaffoldKey,
+      body: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overscroll) {
+          overscroll.disallowGlow();
+          return false;
+        },
+        child : SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.only(top: 75.0),
+                //child: new Image(
+                //    width: 250.0,
+                //    height: 191.0,
+                //    fit: BoxFit.fill,
+                //    image: new AssetImage('assets/img/abc.png')),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: _buildMenuBar(context),
+              ),
+              Container(
+                height: 500,
+                width: MediaQuery.of(context).size.width,
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (i) {
+                    FocusScope.of(context).unfocus();
+                    if (i == 0) {
+                      setState(() {
+                        right = Colors.white;
+                        left = Colors.black;
+                      });
+                    } else if (i == 1) {
+                      setState(() {
+                        right = Colors.black;
+                        left = Colors.white;
+                      });
+                    }
+                  },
+                  children: <Widget>[
+                    new ConstrainedBox(
+                      constraints: const BoxConstraints.expand(),
+                      child: _buildSignIn(context),
+                    ),
+                    new ConstrainedBox(
+                      constraints: const BoxConstraints.expand(),
+                      child: _buildSignUp(context),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
-      backgroundColor: Colors.blue,
-      duration: Duration(seconds: 3),
-    ));
+    );
   }
 
   Widget _buildMenuBar(BuildContext context) {
@@ -237,8 +231,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeEmailLogin,
-                          controller: loginEmailController,
+                          focusNode: _focusLoginEmail,
+                          controller: _ctrlLoginEmail,
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -255,6 +249,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 17.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusLoginPassword),
                         ),
                       ),
                       Container(
@@ -266,9 +261,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodePasswordLogin,
-                          controller: loginPasswordController,
-                          obscureText: _obscureTextLogin,
+                          focusNode: _focusLoginPassword,
+                          controller: _ctrlLoginPassword,
+                          obscureText: _obscureLoginPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -284,16 +279,14 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 17.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleLogin,
-                              child: Icon(
-                                _obscureTextLogin
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleLoginPassword,
+                              child: Icon(_obscureLoginPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => _login(),
                         ),
                       ),
                     ],
@@ -333,8 +326,8 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () =>
-                        showInSnackBar("Login button pressed")),
+                    onPressed: () => _login()
+                ),
               ),
             ],
           ),
@@ -405,7 +398,7 @@ class _AuthPageState extends State<AuthPage>
               Padding(
                 padding: EdgeInsets.only(top: 20.0, right: 40.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Facebook button pressed"),
+                  onTap: () => _displayAlert("Indisponible"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -422,7 +415,7 @@ class _AuthPageState extends State<AuthPage>
               Padding(
                 padding: EdgeInsets.only(top: 20.0),
                 child: GestureDetector(
-                  onTap: () => showInSnackBar("Google button pressed"),
+                  onTap: () => _displayAlert("Indisponible"),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -467,8 +460,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeName,
-                          controller: signupNameController,
+                          focusNode: _focusRegisterName,
+                          controller: _ctrlRegisterName,
                           keyboardType: TextInputType.text,
                           textCapitalization: TextCapitalization.words,
                           style: TextStyle(
@@ -485,6 +478,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterEmail),
                         ),
                       ),
                       Container(
@@ -496,8 +490,8 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodeEmail,
-                          controller: signupEmailController,
+                          focusNode: _focusRegisterEmail,
+                          controller: _ctrlRegisterEmail,
                           keyboardType: TextInputType.emailAddress,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
@@ -513,6 +507,7 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterPassword)
                         ),
                       ),
                       Container(
@@ -524,9 +519,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          focusNode: myFocusNodePassword,
-                          controller: signupPasswordController,
-                          obscureText: _obscureTextSignup,
+                          focusNode: _focusRegisterPassword,
+                          controller: _ctrlRegisterPassword,
+                          obscureText: _obscureRegisterPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -541,16 +536,14 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleSignup,
-                              child: Icon(
-                                _obscureTextSignup
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleRegisterPassword,
+                              child: Icon(_obscureRegisterPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword)
                         ),
                       ),
                       Container(
@@ -562,8 +555,9 @@ class _AuthPageState extends State<AuthPage>
                         padding: EdgeInsets.only(
                             top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
                         child: TextField(
-                          controller: signupConfirmPasswordController,
-                          obscureText: _obscureTextSignupConfirm,
+                          focusNode: _focusRegisterConfirmPassword,
+                          controller: _ctrlRegisterConfirmPassword,
+                          obscureText: _obscureRegisterConfirmPassword,
                           style: TextStyle(
                               fontFamily: "WorkSansSemiBold",
                               fontSize: 16.0,
@@ -578,16 +572,14 @@ class _AuthPageState extends State<AuthPage>
                             hintStyle: TextStyle(
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                             suffixIcon: GestureDetector(
-                              onTap: _toggleSignupConfirm,
-                              child: Icon(
-                                _obscureTextSignupConfirm
-                                    ? FontAwesomeIcons.eye
-                                    : FontAwesomeIcons.eyeSlash,
+                              onTap: _toggleRegisterConfirmPassword,
+                              child: Icon(_obscureRegisterConfirmPassword ? FontAwesomeIcons.eye : FontAwesomeIcons.eyeSlash,
                                 size: 15.0,
                                 color: Colors.black,
                               ),
                             ),
                           ),
+                          onSubmitted: (value) => _register(),
                         ),
                       ),
                     ],
@@ -627,8 +619,8 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () =>
-                        showInSnackBar("SignUp button pressed")),
+                    onPressed: () => _register()
+                ),
               ),
             ],
           ),
@@ -637,31 +629,80 @@ class _AuthPageState extends State<AuthPage>
     );
   }
 
+  void _displayAlert(String text){
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text("ERREUR"),
+        content: Text(text),
+        actions: [
+          FlatButton(
+            child: Text("ANNULER"),
+            onPressed: () {Navigator.pop(context);},
+          ),
+        ],
+      ),
+    );
+  }
+
   void _onSignInButtonPress() {
-    _pageController.animateToPage(0,
-        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+    _pageController.animateToPage(0, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
   void _onSignUpButtonPress() {
-    _pageController?.animateToPage(1,
-        duration: Duration(milliseconds: 500), curve: Curves.decelerate);
+    _pageController?.animateToPage(1, duration: Duration(milliseconds: 500), curve: Curves.decelerate);
   }
 
-  void _toggleLogin() {
+  void _toggleLoginPassword() {
     setState(() {
-      _obscureTextLogin = !_obscureTextLogin;
+      _obscureLoginPassword = !_obscureLoginPassword;
     });
   }
 
-  void _toggleSignup() {
+  void _toggleRegisterPassword() {
     setState(() {
-      _obscureTextSignup = !_obscureTextSignup;
+      _obscureRegisterPassword = !_obscureRegisterPassword;
     });
   }
 
-  void _toggleSignupConfirm() {
+  void _toggleRegisterConfirmPassword() {
     setState(() {
-      _obscureTextSignupConfirm = !_obscureTextSignupConfirm;
+      _obscureRegisterConfirmPassword = !_obscureRegisterConfirmPassword;
     });
+  }
+
+  void _register() async {
+    if (_ctrlRegisterPassword.text == _ctrlRegisterConfirmPassword.text){
+      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+      if (response.statusCode >= 300){
+        _displayAlert("Echec de l'inscription.");
+        FocusScope.of(context).requestFocus(_focusRegisterName);
+        _ctrlRegisterPassword.clear();
+        _ctrlRegisterConfirmPassword.clear();
+      } else {
+        _displayAlert("Inscription réussie.");
+        _ctrlRegisterName.clear();
+        _ctrlRegisterEmail.clear();
+        _ctrlRegisterPassword.clear();
+        _ctrlRegisterConfirmPassword.clear();
+      }
+    } else {
+      _displayAlert("Les mots de passe ne correspondent pas.");
+      FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
+    }
+  }
+
+  void _login() async {
+    Http.Response response;
+    response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
+    if (response.statusCode != 200){
+      _displayAlert("Les identifiants fournis sont incorrects.");
+    } else {
+      Map json = jsonDecode(response.body);
+      User user = User(json['user']['name'],json['user']['email'],json['token']);
+      User.current = user;
+      Navigator.pop(context);
+      Navigator.pushNamed(context, "/profile", arguments: User.current);
+    }
   }
 }

@@ -1,5 +1,5 @@
 name: trops_app
-description: A new Flutter application.
+description: TROP'S, location de matériel sportif entre particuliers.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,16 +19,38 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+
+  # Carousel for full sized advert page
+  carousel_pro: ^1.0.0
+  image_picker:
+  date_range_picker: ^1.0.5
+  card_settings: ^1.5.5
+  cached_network_image: ^2.0.0
+  pull_to_refresh: ^1.5.8
+  flutter_image_compress: ^0.6.5+1
+  path_provider: ^1.6.0
+
   # Font Awesome Icons, notably used in login and register screens
   font_awesome_flutter: ^8.0.1
+
+  #HTTP plugin for communicating with our REST APIs
+  http: ^0.12.0+4
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: "^0.7.3"
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
 
 
 # For information on the generic Dart part of this file, see the
@@ -45,6 +67,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/Rolling-1s-200px.gif
+    - assets/default_image.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

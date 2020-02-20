@@ -1,8 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:trops_app/models/advert.dart';
+import 'package:trops_app/api/category.dart';
+import 'package:trops_app/api/data.dart';
+import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/ui/searchresult.dart';
+import 'package:trops_app/widgets/advertTile.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({ Key key }) : super(key: key);
@@ -13,44 +18,32 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  RefreshController _refreshController = RefreshController(initialRefresh: false);
+
   List<Advert> _adverts = new List<Advert>();
-  List<String> _categories = [
-    "Ski",
-    "Surf",
-    "Foot",
-    "Rugby",
-    "Tennis",
-    "Basket",
-    "Volley",
-    "Hand",
-    "Badminton",
-    "Pétanque",
-    "Danse"
-  ];
+  List<TropsCategory> _categories = new List<TropsCategory>();
 
   @override
   void initState(){
     super.initState();
+    loadCategories();
     loadAdverts();
+  }
+
+  loadCategories() async {
+
+    getCategories().then( (List<TropsCategory> res) {
+      setState(() {
+        _categories = res;
+      });
+    });
   }
 
   loadAdverts() async {
 
-    List result = await jsonDecode("[{\"title\":\"Titre de annonce 1\",\"price\":\"10\u20ac\",\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":\"20\u20ac\",\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":\"30\u20ac\",\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":\"10\u20ac\",\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":\"20\u20ac\",\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":\"30\u20ac\",\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 1\",\"price\":\"10\u20ac\",\"description\":\"Description annonce 1\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=http%3A%2F%2Ficanbecreative.com%2Fres%2FIronMan2%2Firon_man_2_imax_poster-normal.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 2\",\"price\":\"20\u20ac\",\"description\":\"Description annonce 2\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FRKJTKFdiO5c%2Fmaxresdefault.jpg&f=1&nofb=1\"},{\"title\":\"Titre de annonce 3\",\"price\":\"30\u20ac\",\"description\":\"Description annonce 3\",\"image\":\"https:\/\/external-content.duckduckgo.com\/iu\/?u=https%3A%2F%2Fi.ytimg.com%2Fvi%2FQlt9gzVl3dA%2Fmaxresdefault.jpg&f=1&nofb=1\"}]");
-
-    setState(() {
-
-      result.forEach((item){
-
-        var advert = new Advert(
-          item["title"],
-          item["price"],
-          item["description"],
-          item["image"]
-        );
-
-        _adverts.add(advert);
-
+    getAllAdverts().then( (List<Advert> res) {
+      setState(() {
+        _adverts = res;
       });
     });
   }
@@ -60,76 +53,14 @@ class _HomePageState extends State<HomePage> {
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
-        return Container(
-            margin: EdgeInsets.only(left: 10, right: 10, bottom: 10, top: 0),
-            child: Material(
-              borderRadius: BorderRadius.circular(10.0),
-              elevation: 2.0,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(10.0), bottomLeft: Radius.circular(10.0)),
-                    child: FadeInImage.assetNetwork(
-                      placeholder: "assets/Rolling-1s-200px.gif",
-                      image: _adverts[index].getImage(),
-                      height: 100,
-                      width: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  _getTextColumWidget(_adverts[index].getTitle(), _adverts[index].getPrice(), _adverts[index].getDescription())
-                ],
-              ),
-            )
+        return AdvertTile(
+          advert: _adverts[index],
         );
       },
     );
 
     return list;
 
-  }
-
-  Widget _getTitleWidget(String title){
-    return Text(
-      title,
-      maxLines: 1,
-      style: TextStyle(
-          fontWeight: FontWeight.bold
-      ),
-    );
-  }
-
-
-  Widget _getPriceWidget(String price){
-    return Text(
-      price,
-      maxLines: 1,
-      style: TextStyle(
-          color: Colors.orange
-      ),
-    );
-  }
-
-  Widget _getDescriptionWidget(String description){
-    return Text(
-      description,
-      maxLines: 3,
-    );
-  }
-
-  Widget _getTextColumWidget(String title, String price, String description){
-    return Container(
-      margin: EdgeInsets.all(10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _getTitleWidget(title),
-          _getPriceWidget(price),
-          _getDescriptionWidget(description)
-        ],
-      ),
-    );
   }
 
   Widget _getListCategories(){
@@ -153,13 +84,19 @@ class _HomePageState extends State<HomePage> {
       child: Padding(
         padding: EdgeInsets.only(left: 10),
         child: RaisedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => SearchResultPage(preSelectedCategories: [_categories[index].id],),
+                )
+            );
+          },
           color: Colors.blue,
           textColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25.0),
           ),
-          child: Text(_categories[index]),
+          child: Text(_categories[index].title),
         ),
       ),
     );
@@ -169,79 +106,66 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    Widget bottomBar = BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      child: Container(
-        height: 50.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            SizedBox(width: 1),
-            IconButton(icon: Icon(Icons.home), onPressed : () {}),
-            IconButton(icon: Icon(Icons.search), onPressed: () {},),
-            SizedBox(width: 40), // The dummy child
-            IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
-            IconButton(icon: Icon(Icons.message), onPressed: () {}),
-            SizedBox(width: 1),
-
-          ],
-        ),
-      ),
-    );
-
-    Widget searchBar = Container(
-      padding: new EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0),
-      child: new Material(
-        borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
-        elevation: 2.0,
-        child: new Container(
-          height: 45.0,
-          margin: new EdgeInsets.only(left: 16.0, right: 16.0),
-          child: new Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              new Expanded(
-                  child: new TextField(
+    Widget searchBar =
+    Container(
+      padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0),
+      child: Hero(
+        tag: 'heroSearchBar',
+        child: Material(
+          borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
+          elevation: 2.0,
+          child: Container(
+            height: 45.0,
+            margin: EdgeInsets.only(left: 16.0, right: 16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
                     maxLines: 1,
-                    decoration: new InputDecoration(
+                    decoration: InputDecoration(
                         icon: Icon(
                           Icons.search,
                           color: Theme.of(context).accentColor,
                         ),
                         border: InputBorder.none),
+                    onTap: ()  => Navigator.pushNamed(context, "/search"),
+                    readOnly: true,
                   )
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
     );
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: <Widget>[
-            searchBar,
-            SizedBox(
-              height: 50,
-              child: _getListCategories(),
+    return WillPopScope(
+        onWillPop: () async => false,
+        child: TropsScaffold(
+          body: SafeArea(
+            child: Column(
+              children: <Widget>[
+                searchBar,
+                SizedBox(
+                  height: 50,
+                  child: _getListCategories(),
+                ),
+                Flexible(
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    onRefresh: () {
+                      loadAdverts();
+                      _refreshController.refreshCompleted();
+                    },
+                    child: _getListViewWidget(),
+                  ),
+                )
+              ],
             ),
-            Expanded(
-              child: _getListViewWidget(),
-            )
-          ],
-        ),
-      ),
-
-
-      bottomNavigationBar: bottomBar,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //Changement de page -> Création d'une nouvelle annonce.
-        },
-        child: Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          ),
+        )
     );
+
   }
 }
