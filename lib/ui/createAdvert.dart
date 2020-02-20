@@ -230,67 +230,61 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       itemCount: _availability.length,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
-        return Container(
-          height: 50,
-          child: Wrap(
-            alignment: WrapAlignment.center,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              Text(
-                  "DU  ",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-              OutlineButton(
-                child: Text(
-                    DateFormat('dd-MM-yyyy').format(_availability[index].start)
-                ),
-                onPressed: () {
-                  _selectDate(context,index,true);
-                },
-                textColor: Colors.blueAccent,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                ),
-              ),
-              Text(
-                "  AU  ",
-                style: TextStyle(
+        return Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
+            Text(
+                "DU  ",
+              style: TextStyle(
                   fontWeight: FontWeight.bold
-                ),
               ),
-              OutlineButton(
-                child: Text(
-                    DateFormat('dd-MM-yyyy').format(_availability[index].end)
-                ),
-                onPressed: () {
-                  _selectDate(context,index,false);
-                },
-                textColor: Colors.blueAccent,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                ),
+            ),
+            OutlineButton(
+              child: Text(
+                  DateFormat('dd/MM/yy').format(_availability[index].start)
               ),
-              Padding(
-                padding: EdgeInsets.only(left: 10)
+              onPressed: () {
+                _selectDate(context,index,true);
+              },
+              textColor: Colors.blueAccent,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
               ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                color: Colors.red,
-                highlightColor: Colors.deepOrangeAccent,
-                onPressed: (_availability.length <= 1) ? null : () {
-                  {
-                    setState(() {
-                      _availability.removeAt(index);
-                    });
-                  }
-                },
+            ),
+            Text(
+              "  AU  ",
+              style: TextStyle(
+                fontWeight: FontWeight.bold
               ),
-            ],
-          ),
+            ),
+            OutlineButton(
+              child: Text(
+                  DateFormat('dd/MM/yy').format(_availability[index].end)
+              ),
+              onPressed: () {
+                _selectDate(context,index,false);
+              },
+              textColor: Colors.blueAccent,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              color: Colors.red,
+              highlightColor: Colors.deepOrangeAccent,
+              onPressed: (_availability.length <= 1) ? null : () {
+                {
+                  setState(() {
+                    _availability.removeAt(index);
+                  });
+                }
+              },
+            ),
+          ],
         );
       }
     );
