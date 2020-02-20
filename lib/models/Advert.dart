@@ -2,7 +2,7 @@ class Advert {
 
   String _id;
   String _title;
-  int _price;
+  double _price;
   String _description;
   List<String> _photos;
   String _owner;
@@ -18,7 +18,7 @@ class Advert {
     return this._title;
   }
 
-  int getPrice(){
+  double getPrice(){
     return this._price;
   }
 
