@@ -232,8 +232,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       itemBuilder: (BuildContext context, int index) {
         return Container(
           height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               Text(
                   "DU  ",
