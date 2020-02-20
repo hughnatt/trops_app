@@ -7,12 +7,14 @@ class TropsScaffold extends StatelessWidget {
   final Widget body;
   final Drawer drawer;
   final Key scaffoldKey;
+  Widget appBar;
 
-  TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer}) : super(key : key);
+  TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer, this.appBar}) : super(key : key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: this.appBar,
       key: this.scaffoldKey,
       body: this.body,
       drawer: this.drawer,
