@@ -5,8 +5,20 @@ import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:trops_app/models/DateRange.dart';
 
-class AdminAdvertView extends StatelessWidget {
+class AdminAdvertView extends StatefulWidget {
+  final Advert advert;
+
+  const AdminAdvertView({Key key, @required this.advert}) : super(key : key);
+
+  @override
+  _AdminAdvertViewState createState() {
+    return _AdminAdvertViewState(advert: advert);
+  }
+}
+
+class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   final Advert advert;
 
@@ -14,7 +26,17 @@ class AdminAdvertView extends StatelessWidget {
   TextEditingController descriptionController;
   TextEditingController priceController;
 
-  AdminAdvertView({Key key, @required this.advert,}) : super(key: key);
+  //List<DateRange> availability = List<DateRange>();
+
+  _AdminAdvertViewState({Key key, @required this.advert,}) ;
+
+  @override
+  void initState(){
+    super.initState();
+    titleController = TextEditingController(text: advert.getTitle());
+    descriptionController = TextEditingController(text: advert.getDescription());
+    priceController = TextEditingController(text: advert.getPrice().toString());
+  }
 
   List<Widget> getImagesWidget(){
 
@@ -107,7 +129,6 @@ class AdminAdvertView extends StatelessWidget {
     String description = descriptionController.text;
     String price = priceController.text;
 
-
     Http.Response res = await modifyAdvert(title,double.parse(price),description,advert.getCategory(),advert.getOwner(),DateTime.now(),DateTime.now(),advert.getId(), User.current.getToken());
 
     if(res.statusCode==200){
@@ -139,9 +160,6 @@ class AdminAdvertView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    titleController  = TextEditingController(text: advert.getTitle());
-    descriptionController = TextEditingController(text: advert.getDescription());
-    priceController = TextEditingController(text: advert.getPrice().toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -175,13 +193,11 @@ class AdminAdvertView extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextField(
-                  textAlign: TextAlign.center,
+                  //textAlign: TextAlign.center,
+
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: advert.getTitle(),
                   ),
                   controller: titleController,
                 ),
@@ -205,8 +221,6 @@ class AdminAdvertView extends StatelessWidget {
                 ),
               ),
 
-
-
             ],
           ),
         ),
@@ -225,6 +239,14 @@ class AdminAdvertView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose(){
+    titleController.dispose();
+    descriptionController.dispose();
+    priceController.dispose();
+    super.dispose();
   }
 
 }
