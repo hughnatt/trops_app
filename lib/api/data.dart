@@ -24,7 +24,7 @@ Future<List<Advert>> getAllAdverts() async {
       var advert = new Advert(
         item["_id"],
         item["title"],
-        item["price"],
+        item["price"].toDouble(),
         item["description"],
         photos,
         item["owner"],
@@ -42,7 +42,6 @@ Future<List<Advert>> getAllAdverts() async {
     throw Exception("Failed to get adverts");
   }
 }
-
 
 class CreateAdvertBody{
   String title;
@@ -75,3 +74,38 @@ Future<Http.Response> uploadAdvertApi(String title, double price, String descrip
 
 }
 
+Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
+  List<Advert> _adverts = new List<Advert>();
+  var jsonBody = '''
+  {
+    "owner": "$owner"
+  }''';
+  var uri = new Uri.https(apiBaseURI, "/advert/owner");
+  print(jsonBody);
+  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"},body : jsonBody);
+  print(response.statusCode);
+  print(response.body);
+
+  if(response.statusCode == 200) {
+    var result = await jsonDecode(response.body);
+    result.forEach((item) {
+      List<String> photos = new List<String>.from(item["photos"]);
+
+      var advert = new Advert(
+          item["_id"],
+          item["title"],
+          item["price"].toDouble(),
+          item["description"],
+          photos,
+          item["owner"],
+          item["category"]
+      );
+
+      _adverts.add(advert);
+    });
+    return _adverts;
+  } else {
+    throw Exception("Failed to get adverts");
+  }
+
+}

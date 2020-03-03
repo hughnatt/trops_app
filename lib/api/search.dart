@@ -42,7 +42,7 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
       var advert = new Advert(
           item['_id'],
           item['title'],
-          item['price'],
+          item['price'].toDouble(),
           item['description'],
           photos,
           item['owner'],

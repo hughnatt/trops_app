@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
@@ -146,7 +147,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       print("Delete error " + response.statusCode.toString());
     }
   }
-
+  
+  bool _isPriceValid = true;
+  
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
@@ -154,10 +157,27 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       TextField(
         keyboardType: TextInputType.number,
         controller: _priceController,
+        inputFormatters: [BlacklistingTextInputFormatter(RegExp("[ ]?[,]?[-]?")),],
+        onChanged: (String text) {
+          try{
+            if(_priceController.text != ""){
+              double.parse(_priceController.text);
+              setState(() {
+                _isPriceValid = true;
+              });
+            }
+          }
+          catch(err){
+            setState(() {
+              _isPriceValid = false;
+            });
+          }
+        },
         decoration: InputDecoration(
           icon: Icon(Icons.euro_symbol),
           hintText: 'Coût de location (par jour)',
           border: InputBorder.none,
+          errorText: _isPriceValid ? null : "Format incorrect"
         ),
       ),
     );
@@ -220,66 +240,61 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       itemCount: _availability.length,
       physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
-        return Container(
-          height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                  "DU  ",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold
-                ),
-              ),
-              OutlineButton(
-                child: Text(
-                    DateFormat('dd-MM-yyyy').format(_availability[index].start)
-                ),
-                onPressed: () {
-                  _selectDate(context,index,true);
-                },
-                textColor: Colors.blueAccent,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                ),
-              ),
-              Text(
-                "  AU  ",
-                style: TextStyle(
+        return Wrap(
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: <Widget>[
+            Text(
+                "DU  ",
+              style: TextStyle(
                   fontWeight: FontWeight.bold
-                ),
               ),
-              OutlineButton(
-                child: Text(
-                    DateFormat('dd-MM-yyyy').format(_availability[index].end)
-                ),
-                onPressed: () {
-                  _selectDate(context,index,false);
-                },
-                textColor: Colors.blueAccent,
-                color: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                ),
+            ),
+            OutlineButton(
+              child: Text(
+                  DateFormat('dd/MM/yy').format(_availability[index].start)
               ),
-              Padding(
-                padding: EdgeInsets.only(left: 10)
+              onPressed: () {
+                _selectDate(context,index,true);
+              },
+              textColor: Colors.blueAccent,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
               ),
-              IconButton(
-                icon: Icon(Icons.delete),
-                color: Colors.red,
-                highlightColor: Colors.deepOrangeAccent,
-                onPressed: (_availability.length <= 1) ? null : () {
-                  {
-                    setState(() {
-                      _availability.removeAt(index);
-                    });
-                  }
-                },
+            ),
+            Text(
+              "  AU  ",
+              style: TextStyle(
+                fontWeight: FontWeight.bold
               ),
-            ],
-          ),
+            ),
+            OutlineButton(
+              child: Text(
+                  DateFormat('dd/MM/yy').format(_availability[index].end)
+              ),
+              onPressed: () {
+                _selectDate(context,index,false);
+              },
+              textColor: Colors.blueAccent,
+              color: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              color: Colors.red,
+              highlightColor: Colors.deepOrangeAccent,
+              onPressed: (_availability.length <= 1) ? null : () {
+                {
+                  setState(() {
+                    _availability.removeAt(index);
+                  });
+                }
+              },
+            ),
+          ],
         );
       }
     );
@@ -344,7 +359,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     List<String> splitedPaths = this._imagesManager.getAllFilePath();
 
 
-    if(_checkFields()){ //if the user have correctly completed the form
+    if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
 
       setState(() {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
@@ -446,6 +461,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text("Création d'une annonce", style: TextStyle(
+          fontSize: 25.0,
+        ),
+        ),
+      ),
       body: GestureDetector(
         onTap: (){
           FocusScope.of(context).requestFocus(new FocusNode());
@@ -454,13 +476,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                Container(
-                    padding: EdgeInsets.only(top: 25),
-                    child: Center(
-                      child: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0, fontWeight: FontWeight.bold),),
-                    )
-                ),
-
                 Container(
                   padding: EdgeInsets.all(25.0),
                   child: Material(
