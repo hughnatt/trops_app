@@ -87,7 +87,7 @@ Future<Http.Response> modifyAdvert(String title, double price, String descriptio
   }''';
   var uri = new Uri.https(apiBaseURI, "/advert/"+id);
   print(jsonBody);
-  var response = await Http.put(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
+  var response = await Http.put(uri,headers: {"Content-Type": "application/json","Authorization" : "Bearer $token"},body : jsonBody);
   print(response.statusCode);
   print(response.body);
   return response;
