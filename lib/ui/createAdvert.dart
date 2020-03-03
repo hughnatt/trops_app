@@ -348,7 +348,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != ""); //check if all REQUIRED field have a value
+    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null); //check if all REQUIRED field have a value
   }
 
 
