@@ -74,7 +74,7 @@ Future<Http.Response> uploadAdvertApi(String title, double price, String descrip
 
 }
 
-Future<Http.Response> modifyAdvert(String title, int price, String description,String category,String owner,DateTime beginDate, DateTime endDate, String id, String token) async {
+Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,DateTime beginDate, DateTime endDate, String id, String token) async {
   var jsonBody = '''
   {
     "title" : "$title",
@@ -85,9 +85,9 @@ Future<Http.Response> modifyAdvert(String title, int price, String description,S
     "startDate" : "$beginDate",
     "endDate" : "$endDate"
   }''';
-  var uri = new Uri.https(apiBaseURI, "/advert?_id=$id");
+  var uri = new Uri.https(apiBaseURI, "/advert/"+id);
   print(jsonBody);
-  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
+  var response = await Http.put(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
   print(response.body);
   return response;
@@ -132,26 +132,12 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
 }
 
 Future<Http.Response> deleteAdvert(String id, String token) async {
-  String temp = "/advert/?id=$id";
+  String temp = "/advert/"+id;
   var uri = new Uri.https(apiBaseURI, temp);
   print(uri);
   var response = await Http.delete(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
   print(response.statusCode);
   print(response.body);
-
-  /*Http.Request rq = Http.Request('DELETE', Uri.https(apiBaseURI, "/advert"))
-    ..headers.addAll({
-      "Authorization" : "Bearer $token",
-    });
-  rq.bodyFields = {
-    "_id" : "$id",
-  };
-
-  print(rq);
-
-  Http.StreamedResponse response = await Http.Client().send(rq);
-
-  Http.Response temp = await Http.Response.fromStream(response);*/
 
   return response;
 }

@@ -40,7 +40,6 @@ class _ProfilePageState extends State<ProfilePage>{
       setState(() {
         _adverts = res;
       });
-      print("finish getting avert");
     });
 
 

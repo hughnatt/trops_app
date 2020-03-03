@@ -15,7 +15,7 @@ class SlidingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAvertView(advert : this.advert))) ,
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert))) ,
       child: Card(
         margin: EdgeInsets.all(10.0),
         elevation: 2.0,

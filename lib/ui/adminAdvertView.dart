@@ -3,8 +3,10 @@ import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
+import 'package:carousel_pro/carousel_pro.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class AdminAvertView extends StatelessWidget {
+class AdminAdvertView extends StatelessWidget {
 
   final Advert advert;
 
@@ -12,7 +14,32 @@ class AdminAvertView extends StatelessWidget {
   TextEditingController descriptionController;
   TextEditingController priceController;
 
-  AdminAvertView({Key key, @required this.advert}) : super(key: key);
+  AdminAdvertView({Key key, @required this.advert,}) : super(key: key);
+
+  List<Widget> getImagesWidget(){
+
+    List<String> images = this.advert.getAllImages();
+    List<Widget> imagesWidget = new List<Widget>();
+
+    if(images != null){
+      images.forEach((item) {
+        imagesWidget.add(
+            Container(
+              child: CachedNetworkImage(
+                imageUrl: item,
+                fit: BoxFit.cover,
+              ),
+            )
+        );
+      });
+      return imagesWidget;
+    }
+    else {
+      return [Image.asset("assets/default_image.jpeg", fit: BoxFit.cover,)];
+    }
+
+  }
+
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
@@ -24,6 +51,11 @@ class AdminAvertView extends StatelessWidget {
           context: context,
           builder: (BuildContext context) => SimpleDialog(
             title: Text("Suppression réussie"),
+            children: <Widget>[
+              Container(
+                child: Text(""),
+              ),
+            ],
           )
       );
     } else {
@@ -32,7 +64,9 @@ class AdminAvertView extends StatelessWidget {
           builder: (BuildContext context) => SimpleDialog(
             title: Text("Echec"),
             children: <Widget>[
-              Text("La suppression a échoué, veuillez réessayer plus tard."),
+              Container(
+                child: Text("La suppression a échoué, veuillez réessayer plus tard."),
+              ),
 
             ],
           )
@@ -74,10 +108,31 @@ class AdminAvertView extends StatelessWidget {
     String price = priceController.text;
 
 
-    Http.Response res = await modifyAdvert(title,int.parse(price),description,advert.getCategory(),advert.getOwner(),DateTime.now(),DateTime.now(),advert.getId(), User.current.getToken());
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,advert.getCategory(),advert.getOwner(),DateTime.now(),DateTime.now(),advert.getId(), User.current.getToken());
 
     if(res.statusCode==200){
-      return
+      Navigator.pop(context);
+      return showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => SimpleDialog(
+            title: Text("Succès"),
+            children: <Widget>[
+              Text("L'annonce a été modifiée avec succès."),
+
+            ],
+          )
+      );
+    } else {
+      return showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => SimpleDialog(
+            title: Text("Echec"),
+            children: <Widget>[
+              Text("L'annonce n'a pas pu être modifiée, veuillez réessayez plus tard."),
+
+            ],
+          )
+      );
     }
 
   }
@@ -98,7 +153,24 @@ class AdminAvertView extends StatelessWidget {
           child: Column(
             children: <Widget>[
 
-              //Display carousel image
+              GestureDetector(
+                onTap: null,//open editing images
+                child: SizedBox(
+                  height: 250.0,
+                  width: MediaQuery.of(context).size.width,
+                  child: Hero(
+                    tag: 'heroAdvertImage_${advert.getId()}',
+                    child:Carousel(
+                      images: getImagesWidget(),
+                      autoplay: false,
+                      dotSize: 4,
+                      dotBgColor: Colors.grey[800].withOpacity(0),
+                    ),
+                  ),
+                ),
+              ),
+
+
               
               Padding(
                 padding: EdgeInsets.all(10),
@@ -133,6 +205,8 @@ class AdminAvertView extends StatelessWidget {
                 ),
               ),
 
+
+
             ],
           ),
         ),
@@ -153,5 +227,4 @@ class AdminAvertView extends StatelessWidget {
     );
   }
 
-  //TODO: Dispose
 }
