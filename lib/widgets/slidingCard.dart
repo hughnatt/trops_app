@@ -25,7 +25,8 @@ class SlidingCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               child: CachedNetworkImage(
-                imageUrl: "http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg",
+                imageUrl: advert.getFirstImage(),
+                height: 150,
               ),
             ),
             Container(
