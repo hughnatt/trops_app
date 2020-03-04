@@ -18,6 +18,10 @@ class Location {
     return this._postcode;
   }
 
+  String getRelativePosition(){
+    return this._city + " " + this._postcode;
+  }
+
   String setLabel(String label){
     this._label = label;
   }

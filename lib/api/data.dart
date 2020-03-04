@@ -4,6 +4,7 @@ import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
+import 'package:trops_app/models/Location.dart';
 
 Future<List<Advert>> getAllAdverts() async {
 
@@ -51,7 +52,9 @@ class CreateAdvertBody{
   String owner;
   List<String> photos;
   List<DateRange> availability;
-  CreateAdvertBody(this.title,this.price,this.description,this.category,this.owner,this.photos,this.availability);
+  Location location;
+
+  CreateAdvertBody(this.title,this.price,this.description,this.category,this.owner,this.photos,this.availability,this.location);
 
   Map<String,dynamic> toJson() => {
     'title' : title,
@@ -61,11 +64,12 @@ class CreateAdvertBody{
     'owner' : owner,
     'availability' : availability,
     'photos': photos,
+    'location' : location.getRelativePosition()
   };
 }
 
-Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability) async {
-  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability);
+Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
+  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability, location);
   Uri uri = new Uri.https(apiBaseURI, "/advert");
   Http.Response response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonEncode(body));
   print(response.statusCode);

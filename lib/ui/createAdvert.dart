@@ -38,6 +38,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
   List<TropsCategory> _categories = new List<TropsCategory>();
+  Autocomplete locationSearchBar = Autocomplete();
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
 
@@ -349,7 +350,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null); //check if all REQUIRED field have a value
+    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
   }
 
 
@@ -366,7 +367,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
 
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -598,7 +599,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                         ),
                         Padding(
                           padding: EdgeInsets.all(10.0),
-                          child: Autocomplete(),
+                          child: locationSearchBar,
                         )
                       ],
                     ),
