@@ -10,6 +10,7 @@ import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -37,6 +38,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
   List<TropsCategory> _categories = new List<TropsCategory>();
+  Autocomplete locationSearchBar = Autocomplete();
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
 
@@ -348,7 +350,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null); //check if all REQUIRED field have a value
+    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
   }
 
 
@@ -365,7 +367,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
 
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -580,6 +582,28 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                             )
                         )
                     )
+                ),
+
+                Container(
+                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: locationSearchBar,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
 
                 Container(
