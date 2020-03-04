@@ -116,8 +116,8 @@ class _ProfilePageState extends State<ProfilePage>{
                       child: PageView(
                         controller: pageController,
                         children: <Widget>[
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),),
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),)
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques"),),
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques"),)
                         ],
                       ),
                     ),
