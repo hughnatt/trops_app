@@ -48,7 +48,10 @@ class ImagesManager {
   Future<File> compressAndGetFile(File file) async { //allow us to compress a given file and return the result
 
     var targetPath = await getTemporaryDirectory(); //we get the path to the cache of the application
-    var compressedImagePath = targetPath.path+"/"+DateTime.now().millisecondsSinceEpoch.toString()+".jpeg"; //we named the compressed file the function will return
+
+    String fileName = file.path.split("/").last;
+
+    var compressedImagePath = targetPath.path+"/"+fileName+DateTime.now().millisecondsSinceEpoch.toString()+".jpeg"; //we named the compressed file the function will return
 
     var result = await FlutterImageCompress.compressAndGetFile( //we compressed the file given at the compressedImagePath path with 20% of base quality into jpeg
       file.absolute.path,

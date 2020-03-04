@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/api/image.dart';
+import 'package:http/http.dart' as Http;
 
 class ImageSelector extends StatefulWidget {
   @override
@@ -17,7 +18,13 @@ class _ImageSelectorState extends State<ImageSelector> {
 
 
   ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
+  bool _imageUploadProcessing;
 
+  @override
+  void initState(){
+    super.initState();
+    _imageUploadProcessing = false;
+  }
 
 
   Future<File> _openSource(BuildContext context, int index, SourceType source) async {
@@ -49,11 +56,28 @@ class _ImageSelectorState extends State<ImageSelector> {
 
     var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
 
-    this.setState((){
+    /*this.setState((){
       _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
+    });*/
+
+    this.setState((){
+      _imageUploadProcessing = true;
     });
 
-    uploadImage(compressedPicture); //compress & upload the image on server
+    Http.StreamedResponse uploadResponse = await uploadImage(compressedPicture); //compress & upload the image on server
+
+    if(uploadResponse.statusCode == 200){
+      Http.Response response = await Http.Response.fromStream(uploadResponse);
+      print(response.body);
+      this.setState((){
+        _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
+      });
+    }
+
+    this.setState((){
+      _imageUploadProcessing = false;
+    });
+
   }
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
@@ -109,21 +133,18 @@ class _ImageSelectorState extends State<ImageSelector> {
     }
   }
 
-
-
-
-
-
-
   Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null) {
+    if (_imagesManager.get(index) == null && !_imageUploadProcessing) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
-    else {
+    else if(_imagesManager.get(index) != null) {
       return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
+    }
+    else if(_imageUploadProcessing){
+      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent));
     }
   }
 
