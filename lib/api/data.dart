@@ -115,6 +115,8 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
     result.forEach((item) {
       List<String> photos = new List<String>.from(item["photos"]);
 
+      String categoryName = getCategoryNameByID(item['category']);
+
       var advert = new Advert(
           item["_id"],
           item["title"],
@@ -122,7 +124,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
           item["description"],
           photos,
           item["owner"],
-          item["category"]
+          categoryName
       );
 
       _adverts.add(advert);
