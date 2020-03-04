@@ -11,7 +11,7 @@ import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
-import 'package:trops_app/widgets/imagePicker.dart';
+import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -38,6 +38,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Autocomplete locationSearchBar = Autocomplete();
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
+  ImageSelector _imageSelector = ImageSelector();
 
   @override
   void initState(){
@@ -232,9 +233,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       setState(() {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
-
+      
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),null, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),_imageSelector.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -486,7 +487,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                           padding: EdgeInsets.all(10.0),
                           child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                         ),
-                        ImageSelector()
+                        _imageSelector
                       ],
                     ),
                   ),

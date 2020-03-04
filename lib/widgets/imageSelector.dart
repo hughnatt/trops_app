@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,8 +8,11 @@ import 'package:trops_app/api/image.dart';
 import 'package:http/http.dart' as Http;
 
 class ImageSelector extends StatefulWidget {
+
+  ImageSelector({Key key}) : super(key: key);
   @override
   _ImageSelectorState createState() => _ImageSelectorState();
+
 }
 
 
@@ -68,11 +72,12 @@ class _ImageSelectorState extends State<ImageSelector> {
 
     if(uploadResponse.statusCode == 200){
       Http.Response response = await Http.Response.fromStream(uploadResponse);
-      print(response.body);
       this.setState((){
-        _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
+        _imagesManager.loadFile(index, response.body); //add the file to the imageMangaer
       });
     }
+
+    print("IMAGE SELECTOR UPLOAD" + _imagesManager.getAll().toString());
 
     this.setState((){
       _imageUploadProcessing = false;
@@ -133,6 +138,10 @@ class _ImageSelectorState extends State<ImageSelector> {
     }
   }
 
+  getAllPaths(){
+    return _imagesManager.getAll();
+  }
+
   Widget _boxContent(int index) {
     if (_imagesManager.get(index) == null && !_imageUploadProcessing) {
       return Icon(
@@ -141,7 +150,8 @@ class _ImageSelectorState extends State<ImageSelector> {
       );
     }
     else if(_imagesManager.get(index) != null) {
-      return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
+      //return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
+      return CachedNetworkImage(imageUrl: _imagesManager.get(index),fit: BoxFit.cover);
     }
     else if(_imageUploadProcessing){
       return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent));
