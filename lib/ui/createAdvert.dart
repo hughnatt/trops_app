@@ -10,6 +10,7 @@ import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -561,6 +562,28 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                             )
                         )
                     )
+                ),
+
+                Container(
+                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Autocomplete(),
+                        )
+                      ],
+                    ),
+                  ),
                 ),
 
                 Container(
