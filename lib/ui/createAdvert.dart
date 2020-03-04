@@ -10,6 +10,7 @@ import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -37,6 +38,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
   List<TropsCategory> _categories = new List<TropsCategory>();
+  Autocomplete locationSearchBar = Autocomplete();
+
+  bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
 
   @override
   void initState(){
@@ -44,6 +48,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     loadCategories();
     setState(() {
       _availability.add(DateRange(DateTime.now(), DateTime.now()));
+      _isUploadProcessing = false;
     });
   }
 
@@ -185,16 +190,23 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
       child: MaterialButton(
         color: Colors.green,
-        textColor: Colors.white,
-        onPressed: () =>_uploadAdvert(),
+        onPressed: _isUploadProcessing ? null : _uploadAdvert,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
-        child: Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+        child: _buildButtonState(),
       ),
     );
   }
 
+  Widget _buildButtonState(){
+    if(!_isUploadProcessing){
+      return Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white));
+    }
+    else{
+      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black));
+    }
+  }
 
   ///
   ///
@@ -338,7 +350,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != ""); //check if all REQUIRED field have a value
+    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
   }
 
 
@@ -350,7 +362,16 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
     if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability); // we try to contact the APi to add the advert
+
+      setState(() {
+        _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
+      });
+
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+
+      setState(() {
+        _isUploadProcessing = false; //the button is show again (before pop context)
+      });
 
       if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
         _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
@@ -561,6 +582,28 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                             )
                         )
                     )
+                ),
+
+                Container(
+                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
+                  child: Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: locationSearchBar,
+                        )
+                      ],
+                    ),
+                  ),
                 ),
 
                 Container(
