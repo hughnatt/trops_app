@@ -35,6 +35,7 @@ dependencies:
   pull_to_refresh: ^1.5.8
   flutter_image_compress: ^0.6.5+1
   path_provider: ^1.6.0
+  flutter_cache_manager: ^1.1.3
 
   # Font Awesome Icons, notably used in login and register screens
   font_awesome_flutter: ^8.0.1
