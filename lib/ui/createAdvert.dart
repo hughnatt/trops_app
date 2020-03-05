@@ -15,8 +15,9 @@ import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
 import 'package:intl/intl.dart';
+import 'package:trops_app/widgets/categorySelector.dart';
 
-String _selectedCategoryID;
+
 
 class CreateAdvertPage extends StatefulWidget {
 
@@ -39,6 +40,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   List<TropsCategory> _categories = new List<TropsCategory>();
   Autocomplete locationSearchBar = Autocomplete();
+  CategorySelector _categorySelector;
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
 
@@ -49,6 +51,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     setState(() {
       _availability.add(DateRange(DateTime.now(), DateTime.now()));
       _isUploadProcessing = false;
+      _categorySelector = CategorySelector(categories: _categories,);
     });
   }
 
@@ -350,7 +353,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
+    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _categorySelector.selectedCategory() != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
   }
 
 
@@ -367,7 +370,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
 
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -641,64 +644,5 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
 }
 
-class CategorySelector extends StatefulWidget {
-
-  final List<TropsCategory> categories;
-  CategorySelector({Key key, this.categories}) : super(key: key);
-
-  @override
-  _CategorySelectorState createState() => _CategorySelectorState();
-}
-
-class _CategorySelectorState extends State<CategorySelector>{
 
 
-  Widget _buildTiles(TropsCategory root){
-    if (root.subcategories.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.only(left:20, right: 5),
-        child: Row(
-          children: <Widget>[
-            Text(root.title),
-              Spacer(),
-              Radio<String>(
-                value: root.id,
-                groupValue: _selectedCategoryID,
-                onChanged: (String value){
-                  setState(() {
-                    _selectedCategoryID = value;
-                  });
-                },
-            )
-          ],
-        ),
-      );
-    } else {
-      return ExpansionTile(
-        key: PageStorageKey<TropsCategory>(root),
-        title: Row(
-          children: <Widget>[
-            Text(
-              root.title,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16
-              ),
-            ),
-          ],
-        ),
-        children: root.subcategories.map(_buildTiles).toList(),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
-      itemCount: widget.categories.length,
-    );
-  }
-}
