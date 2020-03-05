@@ -6,6 +6,7 @@ import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class SearchResultPage extends StatefulWidget {
@@ -36,6 +37,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
   static const int PRICE_MAX = 500;
   static const int PRICE_MIN = 0;
 
+  static const String DEFAULT_CITY = "Toute la France";
+  String _city = DEFAULT_CITY;
+  int _distance = 5;
 
   List<TropsCategory> _categories = List<TropsCategory>();
 
@@ -95,6 +99,86 @@ class _SearchResultPageState extends State<SearchResultPage>{
     getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
       setState(() {
         _adverts = res;
+      });
+    });
+  }
+
+  String getLocationText(){
+    if(_city != DEFAULT_CITY){
+      return _city + " | " + _distance.toString()+"km";
+    }
+    else{
+      return _city;
+    }
+  }
+
+  Future<void> _showAlert(BuildContext context){
+
+    Autocomplete locationSearchBar = Autocomplete();
+    int _selectedDistance = 5;
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Choisir un lieu"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                      child: locationSearchBar,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 10.0),
+                            child: Text("Dans un rayon de : $_selectedDistance km"),
+                          ),
+                          Slider(
+                            value: _selectedDistance.toDouble(),
+                            min: 5.0,
+                            max: 55.0,
+                            divisions: 10,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                _selectedDistance = newValue.round();
+                              });
+                            },
+                          ),
+                        ],
+                    )
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Valider"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            );
+          },
+        );
+
+      }
+    ).then((returndata) {
+      setState(() {
+        _city = locationSearchBar.getSelectedLocation().getCity();
+        _distance = _selectedDistance;
       });
     });
   }
@@ -298,6 +382,19 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
               Center(
                 child: RaisedButton.icon(
+                  label: Text(getLocationText()),
+                  icon: Icon(Icons.gps_fixed),
+                  textColor: Colors.blueAccent,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  onPressed: () => _showAlert(context)
+                ),
+              ),
+
+              Center(
+                child: RaisedButton.icon(
                   label: Text("Appliquer"),
                   icon: Icon(Icons.search),
                   textColor: Colors.blueAccent,
@@ -405,6 +502,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
       _priceMaxController.text = PRICE_MAX.toString();
       _priceRange = RangeValues(0.0,1.0);
       _resetCategories(_categories);
+      _city = DEFAULT_CITY;
+      _distance = 0;
     });
   }
 
