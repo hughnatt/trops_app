@@ -15,10 +15,13 @@ Future<List<Location>> query(String query) async {
   try {
     result["features"].forEach((item) {
 
+      List<double> coordinates = new List<double>.from(item["geometry"]["coordinates"]);
+
       Location location = new Location(
         item["properties"]["label"],
         item["properties"]["city"],
-        item["properties"]["postcode"]
+        item["properties"]["postcode"],
+        coordinates
       );
 
       cityList.add(location);

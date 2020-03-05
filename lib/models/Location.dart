@@ -3,8 +3,16 @@ class Location {
   String _label;
   String _city;
   String _postcode;
+  List<double> _coordinates = List<double>(2);
 
-  Location(this._label, this._city, this._postcode);
+  Location(this._label, this._city, this._postcode, this._coordinates);
+
+  Map<String,dynamic> toJson() => {
+    'label' : _label,
+    'city' : _city,
+    'postcode' : _postcode,
+    'coordinates' : _coordinates
+  };
 
   String getLabel(){
     return this._label;
@@ -18,19 +26,24 @@ class Location {
     return this._postcode;
   }
 
-  String getRelativePosition(){
-    return this._city + " " + this._postcode;
+  List<double> getCoordinates(){
+    return this._coordinates;
   }
 
-  String setLabel(String label){
+  setLabel(String label){
     this._label = label;
   }
 
-  String setCity(String city){
+  setCity(String city){
     this._city = city;
   }
 
-  String setPostcode(String postcode){
+  setPostcode(String postcode){
     this._postcode = postcode;
   }
+
+  setCoordinates(List<double> coordinates){
+    this._coordinates = coordinates;
+  }
+
 }
