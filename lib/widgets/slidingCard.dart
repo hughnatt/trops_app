@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
 
@@ -77,7 +78,7 @@ class SlidingCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text(
-                            advert.getCategory(),
+                            getCategoryNameByID(advert.getCategory()),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
