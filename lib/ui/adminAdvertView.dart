@@ -9,8 +9,10 @@ import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/utils/imagesManager.dart';
-import 'package:trops_app/api/image.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/api/category.dart';
+import 'package:trops_app/widgets/categorySelector.dart';
 
 class AdminAdvertView extends StatefulWidget {
   final Advert advert;
@@ -29,9 +31,12 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   final Advert advert;
 
+  List<TropsCategory> _categories = new List<TropsCategory>();
+
   TextEditingController titleController;
   TextEditingController descriptionController;
   TextEditingController priceController;
+  String categorySelector;
 
   //List<DateRange> availability = List<DateRange>();
 
@@ -45,6 +50,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     titleController = TextEditingController(text: advert.getTitle());
     descriptionController = TextEditingController(text: advert.getDescription());
     priceController = TextEditingController(text: advert.getPrice().toString());
+    categorySelector = advert.getCategory();
     advert.getAllImages().forEach((item) {
 
       DefaultCacheManager().getSingleFile(item).then((res){
@@ -55,6 +61,14 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
       });
 
     });
+
+    getCategories().then( (List<TropsCategory> res) {
+      setState(() {
+        _categories = res;
+        categorySelector = advert.getCategory();
+      });
+    });
+
   }
 
   Future<File> _openSource(BuildContext context, int index, SourceType source) async {
@@ -95,28 +109,6 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
       _imagesManager.loadFile(index, compressedPicture);
     });
   }
-
-  void _imageUploadProcess(SourceType source, int index) async {
-    var picture = await _openSource(context, index, source); //return the file choosen by the user
-
-    var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
-
-    this.setState((){
-      _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
-    });
-
-    uploadImage(compressedPicture); //compress & upload the image on server
-  }
-
-  void _deleteImageProcess(BuildContext context, int index) async{
-
-    var response = await deleteImageFromUrl(advert.getAllImages()[index]);//First, delete the image from the server
-
-    if(response.statusCode != 200){
-      print("Delete error " + response.statusCode.toString());
-    }
-  }
-
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
 
@@ -233,42 +225,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = descriptionController.text;
     String price = priceController.text;
 
-    List<String> listImage = List<String>();
-    _imagesManager.getAll().forEach((image) {
-      var temp = image.path.split("/");
-      listImage.add("https://" + apiBaseURI + "/image/" + temp.last);
-    });
-
-
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,advert.getCategory(),advert.getOwner(),advert.getId(), User.current.getToken(),listImage);
-
-    advert.getAllImages().forEach((item){
-      bool found = false;
-      var itemAdvert = item.split("/").last;
-      _imagesManager.getAll().forEach((image){
-        if(image.path.split("/").last == itemAdvert){
-          found = true;
-        }
-      });
-
-      if(!found){
-        deleteImageFromUrl(itemAdvert);
-      }
-    });
-
-    _imagesManager.getAll().forEach((image) {
-      var imageImage = image.path.split("/").last;
-      bool found = false;
-      advert.getAllImages().forEach((item){
-        if(image.path.split("/").last == imageImage){
-          found = true;
-        }
-      });
-
-      if(!found){
-        uploadImage(image);
-      }
-    });
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),advert.getAllImages());
 
     if(res.statusCode==200){
       Navigator.pop(context);
@@ -295,6 +252,31 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
       );
     }
 
+  }
+
+  void updateCategory(BuildContext context, CategorySelector selector){
+    setState(() {
+      categorySelector = selector.selectedCategory();
+    });
+    Navigator.pop(context);
+  }
+
+  Future<void> chooseCategory(BuildContext context){
+    CategorySelector selector = CategorySelector(categories: _categories,);
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => SimpleDialog(
+        title: Text("Choississez une nouvelle catégorie"),
+        children: <Widget>[
+          selector,
+
+          FlatButton(
+            child: Text("Ok"),
+            onPressed: () => updateCategory(context,selector),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -369,6 +351,19 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                   controller: priceController,
                 ),
               ),
+
+
+              Container(
+                padding: EdgeInsets.all(25),
+                child: MaterialButton(
+                  color: Colors.white30,
+                  child: Text(getCategoryNameByID(categorySelector)),
+                  onPressed: () => chooseCategory(context),
+
+                ),
+              ),
+
+
 
             ],
           ),
