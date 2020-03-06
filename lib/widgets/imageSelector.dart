@@ -26,12 +26,13 @@ class ImageSelectorState extends State<ImageSelector> {
 
 
   ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
-  bool _imageUploadProcessing;
+  bool _imageUploadProcessing; //boolean to know if the an image is currently uploading into server (for UI purpose)
+  int _imageUploadProcessingIndex; //int to know at which index the image is currently uploaded
 
   @override
   void initState(){
     super.initState();
-    _imageUploadProcessing = false;
+    _imageUploadProcessing = false; //when the user launche this page, non uploading is done
   }
 
 
@@ -55,26 +56,33 @@ class ImageSelectorState extends State<ImageSelector> {
 
     var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
 
-    return picture;
+    return picture; //we return the FILE object choose by the user
   }
 
 
   void _imageUploadProcess(SourceType source, int index) async {
     var picture = await _openSource(context, index, source); //return the file choosen by the user
 
-    var compressedPicture = await _imagesManager.compressAndGetFile(picture);
+    var compressedPicture = await _imagesManager.compressAndGetFile(picture); //we get the compressed FILE object from the one choosed previously
 
     /*this.setState((){
       _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
     });*/
 
     this.setState((){
-      _imageUploadProcessing = true;
+      _imageUploadProcessing = true; //the user has choosed an image, so the upload is beginnin
+
+      if(_imagesManager.get(index) != null){ //we the user want to change the image at an index where there is already one
+        _imageUploadProcessingIndex = index; //the index is where we want to change
+      }else{
+        _imageUploadProcessingIndex = _imagesManager.getAll().length; //the image will be put at the end of the list
+      }
+
     });
 
-    Http.StreamedResponse uploadResponse = await uploadImage(compressedPicture); //compress & upload the image on server
+    Http.StreamedResponse uploadResponse = await uploadImage(compressedPicture); //upload the image on server
 
-    if(uploadResponse.statusCode == 200){
+    if(uploadResponse.statusCode == 200){ //if the upload is a success
       Http.Response response = await Http.Response.fromStream(uploadResponse);
       addLink(index, response.body);
     }
@@ -82,7 +90,8 @@ class ImageSelectorState extends State<ImageSelector> {
     print("IMAGE SELECTOR UPLOAD" + _imagesManager.getAll().toString());
 
     this.setState((){
-      _imageUploadProcessing = false;
+      _imageUploadProcessing = false; //in all case (success or failure, the upload process is done
+      _imageUploadProcessingIndex = null; //the upload process is done, no index is concerned by the upload atm
     });
 
   }
@@ -132,7 +141,7 @@ class ImageSelectorState extends State<ImageSelector> {
 
   _deletePicture(BuildContext context, int index){
     this.setState(() { //we reload the UI
-      _imagesManager.removeAt(index);
+      _imagesManager.removeAt(index); //we remove the link at the given index
     });
   }
 
@@ -148,22 +157,28 @@ class ImageSelectorState extends State<ImageSelector> {
   }
 
   getAllPaths(){
-    return _imagesManager.getAll();
+    return _imagesManager.getAll(); //we get the list of link
   }
 
   Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null && !_imageUploadProcessing) {
+    if (_imagesManager.get(index) == null && _imageUploadProcessingIndex != index) { //if the given index have no image or is not concerned by the current upload
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
-    else if(_imagesManager.get(index) != null) {
+    else if(_imagesManager.get(index) != null) { //if there is an image
       //return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
       return CachedNetworkImage(imageUrl: _imagesManager.get(index),fit: BoxFit.cover);
     }
-    else if(_imageUploadProcessing){
-      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent));
+    else if(_imageUploadProcessing && _imageUploadProcessingIndex == index){ //if there is an upload at the given index
+      return Container(
+          height: 50,
+          width: 50,
+          child: Center(
+            child: CircularProgressIndicator(),
+          )
+      );
     }
   }
 
