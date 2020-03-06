@@ -14,8 +14,11 @@ Future<List<TropsCategory>> getCategories() async {
   if(response.statusCode == 200) {
 
     var result = await jsonDecode(response.body);
+
+
+
     result.forEach((item) {
-      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], item['description'], item['thumbnail'], getSubcategories(item['name'],item['children']));
+      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], "", "", getSubcategories(item['name'],item['children']));
       categories.add(tropsCategory);
       _categoryNameCache.addAll({item['_id'] : item['name']});
     });
@@ -33,7 +36,7 @@ List<TropsCategory> getSubcategories(parentName,json) {
     json.forEach((item) {
       var name = parentName + "/" + item['name'];
       TropsCategory tropsCategory = TropsCategory(
-          item['_id'], item['name'], item['description'], item['thumbnail'], getSubcategories(name,item['children']));
+          item['_id'], item['name'], "", "", getSubcategories(name,item['children']));
       subcategories.add(tropsCategory);
       _categoryNameCache.addAll({item['_id'] : name});
     });
