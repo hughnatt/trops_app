@@ -11,6 +11,7 @@ import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
+import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
@@ -18,22 +19,18 @@ import 'package:intl/intl.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 
 
-
+String _selectedCategoryID;
 class CreateAdvertPage extends StatefulWidget {
 
   @override
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
 enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
-
-
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
   List<DateRange> _availability = new List<DateRange>();
-  ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
@@ -43,6 +40,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   CategorySelector _categorySelector;
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
+
+  GlobalKey<ImageSelectorState> _myWidgetState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
 
   @override
   void initState(){
@@ -64,95 +63,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     });
   }
 
-  Future<File> _openSource(BuildContext context, int index, SourceType source) async {
-
-    ImageSource sourceChoice; //object that represent the source form where to pick the imaes
-
-    switch (source) { //we check where to look, depending by the user's choice
-      case SourceType.camera:
-        {
-          sourceChoice = ImageSource.camera;
-        }
-        break;
-
-      case SourceType.gallery:
-        {
-          sourceChoice = ImageSource.gallery;
-        }
-        break;
-    }
-
-    var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
-
-    return picture;
-  }
-
-
-  void _imageUploadProcess(SourceType source, int index) async {
-    var picture = await _openSource(context, index, source); //return the file choosen by the user
-
-    var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
-
-    this.setState((){
-      _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
-    });
-
-    uploadImage(compressedPicture); //compress & upload the image on server
-  }
-
-  Future<void> _showChoiceDialog(BuildContext context, int index) {
-
-    return showDialog(context: context, builder: (BuildContext context) {
-      return SimpleDialog(
-        title: Text("Que voulez-vous faire ?"),
-        children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.image),
-            title: Text("Importer depuis la gallerie"),
-            onTap: () {
-              _imageUploadProcess(SourceType.gallery, index);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.photo_camera),
-            title: Text("Prendre une photo"),
-            onTap: () {
-              _imageUploadProcess(SourceType.camera, index);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
-          ),
-          ListTile(
-            enabled: (_imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
-            leading: Icon(Icons.delete),
-            title: Text("Supprimer la photo"),
-            onTap: () {
-              _deleteImageProcess(context, index);
-              Navigator.of(context).pop(); // we close the alertDialog
-            },
-          )
-        ],
-      );
-    });
-  }
-
-  _deletePicture(BuildContext context, int index){
-    this.setState(() { //we reload the UI
-      _imagesManager.removeAt(index);
-    });
-  }
-
-  void _deleteImageProcess(BuildContext context, int index) async{
-    var response = await deleteImage(_imagesManager.get(index));//First, delete the image from the server
-
-    if(response.statusCode == 200){//if the deletion is a success
-      _deletePicture(context, index); //we delete the image in client + refresh UI
-    }
-    else{
-      print("Delete error " + response.statusCode.toString());
-    }
-  }
-  
   bool _isPriceValid = true;
   
   Widget _buildValuePicker() {
@@ -309,48 +219,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     FocusScope.of(context).unfocus(); //make all the textfield loose focus
   }
 
-  Widget _buildPictureGrild() {
-    return GridView.count(
-      physics: const NeverScrollableScrollPhysics(), //prevent the user to scroll on the gridview instead of the list
-      crossAxisCount: 2,
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      children: List.generate(4, (index) {
-        return GestureDetector(
-          onTap: () {
-            _showChoiceDialog(context, index);
-          },
-          child: Container(
-              padding: EdgeInsets.all(10.0),
-              child: Material(
-                elevation: 2.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-                color: Colors.white,
-                child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    child: _boxContent(index),
-                  ),
-              )
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null) {
-      return Icon(
-        Icons.photo_camera,
-        size: 50,
-      );
-    }
-    else {
-      return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
-    }
-  }
-
 
   bool _checkFields(){
     return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _categorySelector.selectedCategory() != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
@@ -361,7 +229,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
 
     this.unfocus();
 
-    List<String> splitedPaths = this._imagesManager.getAllFilePath();
+    //List<String> splitedPaths = this._imagesManager.getAllFilePath();
 
 
     if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
@@ -370,7 +238,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
 
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -622,7 +491,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                           padding: EdgeInsets.all(10.0),
                           child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                         ),
-                        _buildPictureGrild()
+                        ImageSelector(key:_myWidgetState)
                       ],
                     ),
                   ),

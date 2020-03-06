@@ -68,29 +68,21 @@ class CreateAdvertBody{
   };
 }
 
-Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
+Future<Http.Response> uploadAdvertApi(String token,String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
   CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability, location);
   Uri uri = new Uri.https(apiBaseURI, "/advert");
-  Http.Response response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonEncode(body));
+  Http.Response response = await Http.post(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"},body : jsonEncode(body));
   print(response.statusCode);
   print(response.body);
   return response;
 
 }
 
-Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,String id, String token, List<String> photoList) async {
-  var jsonBody = '''
-  {
-    "title" : "$title",
-    "price" : $price,
-    "description" : "$description",
-    "category" : "$category",
-    "owner": "$owner",
-    "photos": "$photoList"
-  }''';
+Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,String id, String token, List<String> photoList,List<DateRange> availability, Location location) async {
+  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photoList, availability, location);
   var uri = new Uri.https(apiBaseURI, "/advert/"+id);
-  print(jsonBody);
-  var response = await Http.put(uri,headers: {"Content-Type": "application/json","Authorization" : "Bearer $token"},body : jsonBody);
+  print(body);
+  var response = await Http.put(uri,headers: {"Content-Type": "application/json","Authorization" : "Bearer $token"},body : jsonEncode(body));
   print(response.statusCode);
   print(response.body);
   return response;
