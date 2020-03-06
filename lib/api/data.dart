@@ -22,6 +22,8 @@ Future<List<Advert>> getAllAdverts() async {
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
 
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
+
       var advert = new Advert(
         item["_id"],
         item["title"],
@@ -29,7 +31,9 @@ Future<List<Advert>> getAllAdverts() async {
         item["description"],
         photos,
         item["owner"],
-        categoryName
+        categoryName,
+        item["availability"],
+        location,
       );
 
       _adverts.add(advert);
@@ -108,6 +112,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
       List<String> photos = new List<String>.from(item["photos"]);
 
       //String categoryName = getCategoryNameByID(item['category']);
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
 
       var advert = new Advert(
           item["_id"],
@@ -116,7 +121,9 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
           item["description"],
           photos,
           item["owner"],
-          item["category"]
+          item["category"],
+          item["availability"],
+          location,
       );
 
       _adverts.add(advert);
