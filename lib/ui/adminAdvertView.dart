@@ -201,7 +201,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
           child: Column(
             children: <Widget>[
 
-              ImageSelector(),
+              ImageSelector(key : _imageSelectorState),
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextField(

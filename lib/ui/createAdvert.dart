@@ -19,7 +19,7 @@ import 'package:intl/intl.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 
 
-
+String _selectedCategoryID;
 class CreateAdvertPage extends StatefulWidget {
 
   @override
