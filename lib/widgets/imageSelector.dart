@@ -27,6 +27,7 @@ class ImageSelectorState extends State<ImageSelector> {
 
   ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
   bool _imageUploadProcessing;
+  int _imageUploadProcessingIndex;
 
   @override
   void initState(){
@@ -70,6 +71,7 @@ class ImageSelectorState extends State<ImageSelector> {
 
     this.setState((){
       _imageUploadProcessing = true;
+      _imageUploadProcessingIndex = _imagesManager.getAll().length;
     });
 
     Http.StreamedResponse uploadResponse = await uploadImage(compressedPicture); //compress & upload the image on server
@@ -85,6 +87,7 @@ class ImageSelectorState extends State<ImageSelector> {
 
     this.setState((){
       _imageUploadProcessing = false;
+      _imageUploadProcessingIndex = null;
     });
 
   }
@@ -147,7 +150,7 @@ class ImageSelectorState extends State<ImageSelector> {
   }
 
   Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null && !_imageUploadProcessing) {
+    if (_imagesManager.get(index) == null && _imageUploadProcessingIndex != index) {
       return Icon(
         Icons.photo_camera,
         size: 50,
@@ -157,8 +160,14 @@ class ImageSelectorState extends State<ImageSelector> {
       //return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
       return CachedNetworkImage(imageUrl: _imagesManager.get(index),fit: BoxFit.cover);
     }
-    else if(_imageUploadProcessing){
-      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent));
+    else if(_imageUploadProcessing && _imageUploadProcessingIndex == index){
+      return Container(
+          height: 50,
+          width: 50,
+          child: Center(
+            child: CircularProgressIndicator(),
+          )
+      );
     }
   }
 
