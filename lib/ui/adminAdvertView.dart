@@ -5,6 +5,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/DateRange.dart';
@@ -139,7 +140,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = descriptionController.text;
     String price = priceController.text;
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),advert.getAllImages());
+    List<DateRange> test = [DateRange(DateTime.now(),DateTime.now())];
+
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),test,Location("","","",null));
 
     if(res.statusCode==200){
       Navigator.pop(context);
