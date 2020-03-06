@@ -3,20 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
+import 'package:trops_app/ui/detailedAdvert.dart';
 
 class SlidingCard extends StatelessWidget {
 
   final Advert advert;
 
+  final bool proprietary;
+
   const SlidingCard({
     Key key,
     @required this.advert,
+    @required this.proprietary,
   }) : super(key: key);
+
+  void openPage(BuildContext context){
+    if(proprietary){
+      Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert)));
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : this.advert)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert))) ,
+      onTap: () => openPage(context) ,
       child: Card(
         margin: EdgeInsets.all(10.0),
         elevation: 2.0,
@@ -95,16 +107,8 @@ class SlidingCard extends StatelessWidget {
             )
           ],
         ),
-      )
-
-
-
-
-
-      ,
+      ),
     );
-
-
   }
 
 }
