@@ -3,6 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/User.dart';
+import 'package:trops_app/ui/adminAdvertView.dart';
 
 class DetailedAdvertPage extends StatelessWidget {
 
@@ -34,6 +36,15 @@ class DetailedAdvertPage extends StatelessWidget {
 
   }
 
+  Widget trailingIcon(BuildContext context){
+
+    if(User.current != null && User.current.getEmail() == advert.getOwner()){
+      return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert))),);
+    } else {
+      return Icon(null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Color color = Theme.of(context).accentColor;
@@ -42,10 +53,14 @@ class DetailedAdvertPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Détails d'une annonce", style: TextStyle(
+        title: Text("Détails de l'annonce", style: TextStyle(
           fontSize: 25.0,
           ),
         ),
+        actions: <Widget>[
+          trailingIcon(context),
+        ],
+
       ),
       body: SafeArea(
         child:  SingleChildScrollView(

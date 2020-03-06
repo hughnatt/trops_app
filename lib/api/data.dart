@@ -78,6 +78,17 @@ Future<Http.Response> uploadAdvertApi(String token,String title, double price, S
 
 }
 
+Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,String id, String token, List<String> photoList,List<DateRange> availability, Location location) async {
+  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photoList, availability, location);
+  var uri = new Uri.https(apiBaseURI, "/advert/"+id);
+  print(body);
+  var response = await Http.put(uri,headers: {"Content-Type": "application/json","Authorization" : "Bearer $token"},body : jsonEncode(body));
+  print(response.statusCode);
+  print(response.body);
+  return response;
+
+}
+
 Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   List<Advert> _adverts = new List<Advert>();
   var jsonBody = '''
@@ -86,6 +97,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   }''';
   var uri = new Uri.https(apiBaseURI, "/advert/owner");
   print(jsonBody);
+  print(uri);
   var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
   print(response.body);
@@ -94,6 +106,8 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
     var result = await jsonDecode(response.body);
     result.forEach((item) {
       List<String> photos = new List<String>.from(item["photos"]);
+
+      //String categoryName = getCategoryNameByID(item['category']);
 
       var advert = new Advert(
           item["_id"],
@@ -113,3 +127,56 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   }
 
 }
+
+Future<Http.Response> deleteAdvert(String id, String token) async {
+  String temp = "/advert/"+id;
+  var uri = new Uri.https(apiBaseURI, temp);
+  print(uri);
+  var response = await Http.delete(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
+  print(response.statusCode);
+  print(response.body);
+
+  return response;
+}
+
+
+
+
+//Future<Http.Response> register(String name, String email, String password) async {
+//  var jsonBody = '''
+//  {
+//    "name" : "$name",
+//    "email" : "$email",
+//    "password" : "$password"
+//  }''';
+//  var uri = new Uri.https(_authBaseURI, "/users");
+//  print(jsonBody);
+//  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
+//
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}
+//
+//Future<Http.Response> login(String email, String password) async {
+//  var jsonBody = '''
+//  {
+//    "email" : "$email",
+//    "password" : "$password"
+//  }''';
+//  var uri = new Uri.https(_authBaseURI, "/users/login");
+//  var response = await Http.post(uri,headers:  {"Content-Type": "application/json"},body : jsonBody);
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}
+//
+//Future<Http.Response> signOff(User user) async {
+//  String token = user.getToken();
+//  print(token);
+//  var uri = new Uri.https(_authBaseURI, "/users/me/logout");
+//  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token"});
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}

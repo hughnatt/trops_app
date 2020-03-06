@@ -28,3 +28,9 @@ Future<Http.Response> deleteImage(String imageToDelete) async { //function that 
 
   return response;
 }
+
+Future<Http.Response> deleteImageFromUrl(String url) async {
+  var uri = new Uri.https(apiBaseURI, "/image/"+ url);
+  var response = await Http.delete(uri);
+  return response;
+}

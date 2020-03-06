@@ -84,9 +84,7 @@ class ImageSelectorState extends State<ImageSelector> {
 
     if(uploadResponse.statusCode == 200){ //if the upload is a success
       Http.Response response = await Http.Response.fromStream(uploadResponse);
-      this.setState((){
-        _imagesManager.loadFile(index, response.body); //add the LINK to the imageMangaer
-      });
+      addLink(index, response.body);
     }
 
     print("IMAGE SELECTOR UPLOAD" + _imagesManager.getAll().toString());
@@ -97,6 +95,13 @@ class ImageSelectorState extends State<ImageSelector> {
     });
 
   }
+
+  void addLink(int index, String link){
+    this.setState((){
+      _imagesManager.loadFile(index, link); //add the file to the imageMangaer
+    });
+  }
+
 
   Future<void> _showChoiceDialog(BuildContext context, int index) {
 
