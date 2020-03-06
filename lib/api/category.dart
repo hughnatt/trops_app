@@ -16,9 +16,14 @@ Future<List<TropsCategory>> getCategories() async {
     var result = await jsonDecode(response.body);
 
 
-
     result.forEach((item) {
-      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], "", "", getSubcategories(item['name'],item['children']));
+      if (item['description'] == null){
+        item['description'] = "";
+      }
+      if (item['thumbnail'] == null){
+        item['thumbnail'] = "";
+      }
+      TropsCategory tropsCategory = TropsCategory(item['_id'], item['name'], item['description'], item['thumbnail'], getSubcategories(item['name'],item['children']));
       categories.add(tropsCategory);
       _categoryNameCache.addAll({item['_id'] : item['name']});
     });
@@ -35,8 +40,14 @@ List<TropsCategory> getSubcategories(parentName,json) {
   if (json != null) {
     json.forEach((item) {
       var name = parentName + "/" + item['name'];
+      if (item['description'] == null){
+        item['description'] = "";
+      }
+      if (item['thumbnail'] == null){
+        item['thumbnail'] = "";
+      }
       TropsCategory tropsCategory = TropsCategory(
-          item['_id'], item['name'], "", "", getSubcategories(name,item['children']));
+          item['_id'], item['name'], item['description'], item['thumbnail'], getSubcategories(name,item['children']));
       subcategories.add(tropsCategory);
       _categoryNameCache.addAll({item['_id'] : name});
     });
