@@ -68,10 +68,10 @@ class CreateAdvertBody{
   };
 }
 
-Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
+Future<Http.Response> uploadAdvertApi(String token,String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
   CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability, location);
   Uri uri = new Uri.https(apiBaseURI, "/advert");
-  Http.Response response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonEncode(body));
+  Http.Response response = await Http.post(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"},body : jsonEncode(body));
   print(response.statusCode);
   print(response.body);
   return response;
