@@ -81,12 +81,12 @@ Future<Http.Response> uploadAdvertApi(String token,String title, double price, S
 Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,String id, String token, List<String> photoList) async {
   var jsonBody = '''
   {
-    "title" : "$title",
-    "price" : $price,
-    "description" : "$description",
-    "category" : "$category",
-    "owner": "$owner",
-    "photos": "$photoList"
+    'title' : "$title",
+    'price' : $price,
+    'description' : "$description",
+    'category' : "$category",
+    'owner': "$owner",
+    'photos': "$photoList"
   }''';
   var uri = new Uri.https(apiBaseURI, "/advert/"+id);
   print(jsonBody);

@@ -53,9 +53,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     priceController = TextEditingController(text: advert.getPrice().toString());
     categorySelector = advert.getCategory();
 
-    for(int i=0;i < advert.getAllImages().length;i++){
-      _imageSelectorState.currentState.addLink(i, advert.getAllImages()[i]);
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => loadImages()); //wait the build method to be done (avoid calling currentState on null ImageSelector in loadImages)
+
 
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
@@ -67,6 +67,11 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   }
 
 
+  void loadImages(){
+    for(int i=0;i < advert.getAllImages().length;i++){
+      _imageSelectorState.currentState.addLink(i, advert.getAllImages()[i]);
+    }
+  }
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
