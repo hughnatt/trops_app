@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
+import 'package:trops_app/widgets/imageSelector.dart';
 
 class AdminAdvertView extends StatefulWidget {
   final Advert advert;
@@ -40,7 +41,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   //List<DateRange> availability = List<DateRange>();
 
-  ImagesManager _imagesManager = ImagesManager();
+  GlobalKey<ImageSelectorState> _imageSelectorState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
 
   _AdminAdvertViewState({Key key, @required this.advert,}) ;
 
@@ -51,16 +52,10 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     descriptionController = TextEditingController(text: advert.getDescription());
     priceController = TextEditingController(text: advert.getPrice().toString());
     categorySelector = advert.getCategory();
-    advert.getAllImages().forEach((item) {
 
-      DefaultCacheManager().getSingleFile(item).then((res){
-        setState(() {
-          _imagesManager.add(res);
-        });
-
-      });
-
-    });
+    for(int i=0;i < advert.getAllImages().length;i++){
+      _imageSelectorState.currentState.addLink(i, advert.getAllImages()[i]);
+    }
 
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
@@ -71,92 +66,6 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   }
 
-  Future<File> _openSource(BuildContext context, int index, SourceType source) async {
-
-    ImageSource sourceChoice; //object that represent the source form where to pick the imaes
-
-    switch (source) { //we check where to look, depending by the user's choice
-      case SourceType.camera:
-        {
-          sourceChoice = ImageSource.camera;
-        }
-        break;
-
-      case SourceType.gallery:
-        {
-          sourceChoice = ImageSource.gallery;
-        }
-        break;
-    }
-
-    var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
-
-    return picture;
-  }
-
-  _deletePicture(BuildContext context, int index){
-    this.setState(() { //we reload the UI
-      _imagesManager.removeAt(index);
-    });
-  }
-
-  _uploadPicture(int index, SourceType source) async {
-    var picture = await _openSource(context, index, source);
-
-    var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
-
-    this.setState((){
-      _imagesManager.loadFile(index, compressedPicture);
-    });
-  }
-
-  Future<void> _showChoiceDialog(BuildContext context, int index) {
-
-    return showDialog(context: context, builder: (BuildContext context) {
-      return SimpleDialog(
-        title: Text("Que voulez-vous faire ?"),
-        children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.image),
-            title: Text("Importer depuis la gallerie"),
-            onTap: () {
-              _uploadPicture(index, SourceType.gallery);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.photo_camera),
-            title: Text("Prendre une photo"),
-            onTap: () {
-              _uploadPicture(index, SourceType.camera);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
-          ),
-          ListTile(
-            enabled: (_imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
-            leading: Icon(Icons.delete),
-            title: Text("Supprimer la photo"),
-            onTap: () {
-              _deletePicture(context, index);
-              Navigator.of(context).pop(); // we close the alertDialog
-            },
-          )
-        ],
-      );
-    });
-  }
-
-  Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null) {
-      return Icon(
-        Icons.photo_camera,
-        size: 50,
-      );
-    }
-    else {
-      return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
-    }
-  }
 
 
   Future<void> _deleteFromDB(BuildContext context) async {
@@ -292,35 +201,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
           child: Column(
             children: <Widget>[
 
-              GridView.count(
-                physics: const NeverScrollableScrollPhysics(), //prevent the user to scroll on the gridview instead of the list
-                crossAxisCount: 2,
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                children: List.generate(4, (index) {
-                  return GestureDetector(
-                    onTap: () {
-                      _showChoiceDialog(context, index);
-                    },
-                  child: Container(
-                    padding: EdgeInsets.all(10.0),
-                    child: Material(
-                      elevation: 2.0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      ),
-                      color: Colors.white,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                        child: _boxContent(index),
-                      ),
-                    )
-                  ),
-                );}),
-              ),
-
-
-              
+              ImageSelector(),
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextField(
