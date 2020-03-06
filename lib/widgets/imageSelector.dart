@@ -9,23 +9,23 @@ import 'package:http/http.dart' as Http;
 
 
 
-ImagesManager imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
 
 class ImageSelector extends StatefulWidget {
 
   ImageSelector({Key key}) : super(key: key);
+
   @override
-  _ImageSelectorState createState() => _ImageSelectorState();
+  ImageSelectorState createState() => ImageSelectorState();
   
 }
 
 
 enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
 
-class _ImageSelectorState extends State<ImageSelector> {
+class ImageSelectorState extends State<ImageSelector> {
 
 
-  
+  ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
   bool _imageUploadProcessing;
 
   @override
@@ -62,10 +62,10 @@ class _ImageSelectorState extends State<ImageSelector> {
   void _imageUploadProcess(SourceType source, int index) async {
     var picture = await _openSource(context, index, source); //return the file choosen by the user
 
-    var compressedPicture = await imagesManager.compressAndGetFile(picture);
+    var compressedPicture = await _imagesManager.compressAndGetFile(picture);
 
     /*this.setState((){
-      imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
+      _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
     });*/
 
     this.setState((){
@@ -77,11 +77,11 @@ class _ImageSelectorState extends State<ImageSelector> {
     if(uploadResponse.statusCode == 200){
       Http.Response response = await Http.Response.fromStream(uploadResponse);
       this.setState((){
-        imagesManager.loadFile(index, response.body); //add the file to the imageMangaer
+        _imagesManager.loadFile(index, response.body); //add the file to the imageMangaer
       });
     }
 
-    print("IMAGE SELECTOR UPLOAD" + imagesManager.getAll().toString());
+    print("IMAGE SELECTOR UPLOAD" + _imagesManager.getAll().toString());
 
     this.setState((){
       _imageUploadProcessing = false;
@@ -112,7 +112,7 @@ class _ImageSelectorState extends State<ImageSelector> {
             },
           ),
           ListTile(
-            enabled: (imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
+            enabled: (_imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
             leading: Icon(Icons.delete),
             title: Text("Supprimer la photo"),
             onTap: () {
@@ -127,12 +127,12 @@ class _ImageSelectorState extends State<ImageSelector> {
 
   _deletePicture(BuildContext context, int index){
     this.setState(() { //we reload the UI
-      imagesManager.removeAt(index);
+      _imagesManager.removeAt(index);
     });
   }
 
   void _deleteImageProcess(BuildContext context, int index) async{
-    var response = await deleteImage(imagesManager.get(index));//First, delete the image from the server
+    var response = await deleteImage(_imagesManager.get(index));//First, delete the image from the server
 
     if(response.statusCode == 200){//if the deletion is a success
       _deletePicture(context, index); //we delete the image in client + refresh UI
@@ -143,19 +143,19 @@ class _ImageSelectorState extends State<ImageSelector> {
   }
 
   getAllPaths(){
-    return imagesManager.getAll();
+    return _imagesManager.getAll();
   }
 
   Widget _boxContent(int index) {
-    if (imagesManager.get(index) == null && !_imageUploadProcessing) {
+    if (_imagesManager.get(index) == null && !_imageUploadProcessing) {
       return Icon(
         Icons.photo_camera,
         size: 50,
       );
     }
-    else if(imagesManager.get(index) != null) {
-      //return Image.file(imagesManager.get(index), fit: BoxFit.cover);
-      return CachedNetworkImage(imageUrl: imagesManager.get(index),fit: BoxFit.cover);
+    else if(_imagesManager.get(index) != null) {
+      //return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
+      return CachedNetworkImage(imageUrl: _imagesManager.get(index),fit: BoxFit.cover);
     }
     else if(_imageUploadProcessing){
       return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent));

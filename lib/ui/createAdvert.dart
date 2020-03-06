@@ -38,7 +38,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   Autocomplete locationSearchBar = Autocomplete();
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
-  ImageSelector _imageSelector = ImageSelector();
+
+  GlobalKey<ImageSelectorState> _myWidgetState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
 
   @override
   void initState(){
@@ -235,7 +236,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       });
 
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),imagesManager.getAll(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -487,7 +488,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                           padding: EdgeInsets.all(10.0),
                           child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
                         ),
-                        _imageSelector
+                        ImageSelector(key:_myWidgetState)
                       ],
                     ),
                   ),
