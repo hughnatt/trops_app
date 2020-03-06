@@ -238,12 +238,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
         _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
       });
 
-<<<<<<< HEAD
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-=======
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
       var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
->>>>>>> d09600a0e191764ce298908360411debe705d1d0
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
