@@ -25,7 +25,7 @@ Future<List<Advert>> getAllAdverts() async {
       List<double> coordinates = List<double>.from(item['location']['coordinates']);
 
       Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
-
+      
       List<DateRange> availability = List<DateRange>();
 
       List temp = List.from(item["availability"]);
@@ -41,7 +41,7 @@ Future<List<Advert>> getAllAdverts() async {
         photos,
         item["owner"],
         categoryName,
-        item["availability"],
+        availability,
         location,
       );
 
@@ -164,7 +164,9 @@ Future<Http.Response> deleteAdvert(String id, String token) async {
   return response;
 }
 
-
+DateRange makeDateRange(Map<String,dynamic> fromJSON){
+  return DateRange(DateTime.parse(fromJSON["start"]),DateTime.parse(fromJSON["end"]));
+}
 
 
 //Future<Http.Response> register(String name, String email, String password) async {
