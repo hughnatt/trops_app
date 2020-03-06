@@ -19,7 +19,6 @@ class Autocomplete extends StatelessWidget {
       noItemsFoundBuilder: (context) {
         return ListTile(
           title: Text("Aucune suggestion"),
-          leading: Icon(Icons.error_outline),
         );
       },
       autoFlipDirection: true,
@@ -27,12 +26,12 @@ class Autocomplete extends StatelessWidget {
           controller: this._typeAheadController,
           decoration: InputDecoration(
             hintText: 'Adresse',
+            icon: Icon(Icons.gps_fixed),
             border: InputBorder.none,
           )
       ),
       itemBuilder: (context, suggestion) {
         return ListTile(
-          leading: Icon(Icons.gps_fixed),
           title: Text(suggestion.getLabel()),
         );
       },

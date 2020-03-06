@@ -64,7 +64,7 @@ class CreateAdvertBody{
     'owner' : owner,
     'availability' : availability,
     'photos': photos,
-    'location' : location.getRelativePosition()
+    'location' : location
   };
 }
 
