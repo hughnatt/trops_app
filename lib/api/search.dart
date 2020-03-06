@@ -11,19 +11,24 @@ class SearchBody{
   int priceMin;
   int priceMax;
   List<String> categories;
-  SearchBody(this.text,this.priceMin,this.priceMax,this.categories);
+  List<double> location;
+  int distance;
+
+  SearchBody(this.text,this.priceMin,this.priceMax,this.categories, this.location, this.distance);
 
   Map<String,dynamic> toJson() => {
     'text': text,
     'priceMin': priceMin,
     'priceMax': priceMax,
-    'categories': categories
+    'categories': categories,
+    'location': location,
+    'distance': distance*1000
   };
 }
 
-Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories) async {
+Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories, List<double> location, int distance) async {
 
-  SearchBody body = new SearchBody(text, priceMin, priceMax, categories);
+  SearchBody body = new SearchBody(text, priceMin, priceMax, categories, location, distance);
 
   var uri = new Uri.https(apiBaseURI, "/search");
   var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));

@@ -100,7 +100,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       }
     });
 
-    getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
+    getResults(_keywordController.text, priceMin, priceMax, categories, _selectedLocation?.getCoordinates(), _distance).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -515,7 +515,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
       _priceRange = RangeValues(0.0,1.0);
       _resetCategories(_categories);
       _city = DEFAULT_CITY;
-      _distance = 0;
+      _distance = DEFAULT_DISTANCE;
+      _selectedLocation = null;
     });
   }
 
