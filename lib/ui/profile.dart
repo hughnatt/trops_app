@@ -7,6 +7,8 @@ import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/Location.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key : key);
 
@@ -116,8 +118,8 @@ class _ProfilePageState extends State<ProfilePage>{
                       child: PageView(
                         controller: pageController,
                         children: <Widget>[
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques"),proprietary: false,),
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques"),proprietary: false)
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques",[],Location("","","",[0.0,0.0])),proprietary: false,),
+                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques",[],Location("","","",[0.0,0.0])),proprietary: false)
                         ],
                       ),
                     ),

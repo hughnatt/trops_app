@@ -3,6 +3,7 @@ import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/Location.dart';
 
 const String _dataBaseURI = "trops.sauton.xyz";
 
@@ -43,6 +44,7 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
 
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
 
       var advert = new Advert(
           item['_id'],
@@ -51,7 +53,9 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
           item['description'],
           photos,
           item['owner'],
-          categoryName
+          categoryName,
+          item['availability'],
+          location
       );
 
       _adverts.add(advert);
