@@ -41,7 +41,7 @@ class DetailedAdvertPage extends StatelessWidget {
     if(User.current != null && User.current.getEmail() == advert.getOwner()){
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert))),);
     } else {
-      return null;
+      return Icon(null);
     }
   }
 

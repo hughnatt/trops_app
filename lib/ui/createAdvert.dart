@@ -19,7 +19,6 @@ import 'package:intl/intl.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 
 
-String _selectedCategoryID;
 class CreateAdvertPage extends StatefulWidget {
 
   @override
@@ -50,8 +49,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     setState(() {
       _availability.add(DateRange(DateTime.now(), DateTime.now()));
       _isUploadProcessing = false;
-      _categorySelector = CategorySelector(categories: _categories,);
     });
+    _categorySelector = CategorySelector(categories: [],);
+
   }
 
   loadCategories() async {
@@ -59,6 +59,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
+        _categorySelector = CategorySelector(categories: _categories,);
       });
     });
   }
@@ -239,7 +240,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       });
 
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -410,7 +411,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                                 "Catégorie",
                                 style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                             ),
-                            CategorySelector(categories: _categories),
+                            _categorySelector,
                           ],
                         )
                     ),
