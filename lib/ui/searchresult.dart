@@ -4,6 +4,7 @@ import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
@@ -38,8 +39,11 @@ class _SearchResultPageState extends State<SearchResultPage>{
   static const int PRICE_MIN = 0;
 
   static const String DEFAULT_CITY = "Toute la France";
+  static const int DEFAULT_DISTANCE = 5;
+
   String _city = DEFAULT_CITY;
-  int _distance = 5;
+  int _distance = DEFAULT_DISTANCE;
+  Location _selectedLocation;
 
   List<TropsCategory> _categories = List<TropsCategory>();
 
@@ -105,7 +109,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   String getLocationText(){
     if(_city != DEFAULT_CITY){
-      return _city + " | " + _distance.toString()+"km";
+      return _city + " (" + _distance.toString()+"km)";
     }
     else{
       return _city;
@@ -177,8 +181,16 @@ class _SearchResultPageState extends State<SearchResultPage>{
       }
     ).then((returndata) {
       setState(() {
-        _city = locationSearchBar.getSelectedLocation().getCity();
-        _distance = _selectedDistance;
+        try{
+          _city = locationSearchBar.getSelectedLocation().getCity();
+          _distance = _selectedDistance;
+        }
+        catch(err){
+          _city = DEFAULT_CITY;
+          _distance = DEFAULT_DISTANCE;
+        }
+        _selectedLocation = locationSearchBar.getSelectedLocation();
+
       });
     });
   }
