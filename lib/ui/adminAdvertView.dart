@@ -142,7 +142,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     List<DateRange> test = [DateRange(DateTime.now(),DateTime.now())];
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),test,Location("","","",null));
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),test,Location("","","",[0.1,0.1]));
 
     if(res.statusCode==200){
       Navigator.pop(context);
@@ -151,7 +151,15 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
           builder: (BuildContext context) => SimpleDialog(
             title: Text("Succès"),
             children: <Widget>[
-              Text("L'annonce a été modifiée avec succès."),
+              Column(
+                children: <Widget>[
+                  Text("L'annonce a bien été mise à jour."),
+                  FlatButton(
+                    child: Text("Ok"),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
 
             ],
           )
@@ -162,7 +170,15 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
           builder: (BuildContext context) => SimpleDialog(
             title: Text("Echec"),
             children: <Widget>[
-              Text("L'annonce n'a pas pu être modifiée, veuillez réessayez plus tard."),
+              Column(
+                children: <Widget>[
+                  Text("L'annonce n'a pas été mise à jour, veuillez réessayer plus tard"),
+                  FlatButton(
+                    child: Text("Ok"),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
 
             ],
           )
@@ -213,8 +229,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextField(
-                  //textAlign: TextAlign.center,
-
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.title),
+                  ),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -227,6 +244,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                 padding: EdgeInsets.all(10),
                 child: TextField(
                   maxLines: 3,
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.insert_drive_file),
+                  ),
                   style: TextStyle(fontSize: 18,),
                   controller: descriptionController,
                 ),
@@ -235,6 +255,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Padding(
                 padding: EdgeInsets.all(10),
                 child: TextField(
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.euro_symbol),
+                  ),
                   style: TextStyle(fontSize: 18,),
                   keyboardType: TextInputType.number,
                   controller: priceController,
