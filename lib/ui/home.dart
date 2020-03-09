@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
@@ -22,33 +24,42 @@ class _HomePageState extends State<HomePage> {
 
   List<Advert> _adverts = new List<Advert>();
   List<TropsCategory> _categories = new List<TropsCategory>();
+  bool _loadingCategories = true;
+  bool _loadingAdverts = true;
 
   @override
   void initState(){
     super.initState();
     loadCategories();
-    loadAdverts();
   }
 
   loadCategories() async {
-
+    setState(() {
+      _loadingCategories = true;
+    });
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
+        _loadingCategories = false;
+        loadAdverts();
       });
     });
   }
 
   loadAdverts() async {
-
+    setState(() {
+      _loadingAdverts = true;
+    });
     getAllAdverts().then( (List<Advert> res) {
       setState(() {
         _adverts = res;
+        _loadingAdverts = false;
       });
     });
   }
 
   Widget _getListViewWidget(){
+
     var list = ListView.builder(
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
@@ -59,13 +70,22 @@ class _HomePageState extends State<HomePage> {
       },
     );
 
-    return list;
-
+    if (_loadingAdverts){
+      return SpinKitDoubleBounce(
+        color: Colors.blueAccent,
+        size: 50,
+      );
+    } else if (_adverts.length == 0){
+      return Center(child: Text("Aucune annonce"));
+    } else {
+      return list;
+    }
   }
 
   Widget _getListCategories(){
 
-    ListView _listCategories = ListView.builder(
+    ListView _listCategories = ListView.separated(
+      separatorBuilder: (context,index) => SizedBox(width: 10),
       scrollDirection: Axis.horizontal,
       itemCount: _categories.length,
       itemBuilder: (context, index) {
@@ -73,30 +93,81 @@ class _HomePageState extends State<HomePage> {
       }
     );
 
-    return Container(
-      child: _listCategories,
-    );
+    if (_loadingCategories){
+      return SpinKitDoubleBounce(
+        color: Colors.blueAccent,
+        size: 50,
+      );
+    } else {
+      return Padding(
+        padding: EdgeInsets.only(left: 10, right: 10),
+        child: NotificationListener<OverscrollIndicatorNotification>(
+          onNotification: (overscroll) {
+            overscroll.disallowGlow();
+            return false;
+          },
+          child : _listCategories,
+        ),
+      );
+    }
   }
 
   Widget _categoryItemWidget(index) {
 
     return Center(
-      child: Padding(
-        padding: EdgeInsets.only(left: 10),
-        child: RaisedButton(
-          onPressed: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => SearchResultPage(preSelectedCategories: [_categories[index].id],),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => SearchResultPage(preSelectedCategories: [_categories[index].id],),
+            ),
+          );
+        },
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: <Widget>[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10.0),
+              child: Container(
+                height:108,
+                width: 192,
+                child: Image.network(_categories[index].thumbnail)
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(bottom: 50),
+              child: Material(
+                elevation: 10,
+                color: Colors.transparent,
+                child: Text(
+                    _categories[index].title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                    )
                 )
-            );
-          },
-          color: Colors.blue,
-          textColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25.0),
-          ),
-          child: Text(_categories[index].title),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(bottom: 5),
+              child: Material(
+                  elevation: 10,
+                  color: Colors.transparent,
+                  child: Text(
+                      _categories[index].description,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.white,
+                      )
+                  )
+              ),
+            )
+          ],
         ),
       ),
     );
@@ -106,9 +177,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    Widget searchBar =
-    Container(
-      padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 0),
+    Widget searchBar = Padding(
+      padding: EdgeInsets.only(top: 10, left: 10,right: 10),
       child: Hero(
         tag: 'heroSearchBar',
         child: Material(
@@ -131,8 +201,8 @@ class _HomePageState extends State<HomePage> {
                         border: InputBorder.none),
                     onTap: ()  => Navigator.pushNamed(context, "/search"),
                     readOnly: true,
-                  )
-                )
+                  ),
+                ),
               ],
             ),
           ),
@@ -141,31 +211,55 @@ class _HomePageState extends State<HomePage> {
     );
 
     return WillPopScope(
-        onWillPop: () async => false,
-        child: TropsScaffold(
-          body: SafeArea(
-            child: Column(
-              children: <Widget>[
-                searchBar,
-                SizedBox(
-                  height: 50,
-                  child: _getListCategories(),
-                ),
-                Flexible(
-                  child: SmartRefresher(
-                    controller: _refreshController,
-                    onRefresh: () {
-                      loadAdverts();
-                      _refreshController.refreshCompleted();
-                    },
-                    child: _getListViewWidget(),
+      onWillPop: () async => false,
+      child: TropsScaffold(
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              searchBar,
+              Padding(
+                padding: EdgeInsets.only(left: 10, top: 10),
+                child: Text(
+                  'Catégories',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      fontSize: 22,
                   ),
-                )
-              ],
-            ),
+                ),
+              ),
+              SizedBox(
+                height: 120,
+                child:  _getListCategories(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 10, bottom: 5),
+                child: Text(
+                  'Dernières annonces',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      fontSize: 22,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: SmartRefresher(
+                  controller: _refreshController,
+                  onRefresh: () {
+                    loadAdverts();
+                    _refreshController.refreshCompleted();
+                  },
+                  child: _getListViewWidget(),
+                ),
+              )
+            ],
           ),
-        )
+        ),
+      ),
     );
-
   }
 }
