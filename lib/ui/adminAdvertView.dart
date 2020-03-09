@@ -7,6 +7,7 @@ import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/api/category.dart';
+import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
@@ -35,6 +36,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   TextEditingController priceController;
   String categorySelector;
   Location locationselector;
+  AvailabilityList availabilityList;
 
   //List<DateRange> availability = List<DateRange>();
 
@@ -51,6 +53,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     categorySelector = advert.getCategory();
     locationselector = advert.getLocation();
+    availabilityList = AvailabilityList(availability: advert.getAvailability(),);
 
 
     WidgetsBinding.instance.addPostFrameCallback((_) => loadImages()); //wait the build method to be done (avoid calling currentState on null ImageSelector in loadImages)
@@ -140,7 +143,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     List<DateRange> test = [DateRange(DateTime.now(),DateTime.now())];
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),test,locationselector);
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),availabilityList.availability,locationselector);
 
     if(res.statusCode==200){
       Navigator.pop(context);
@@ -304,7 +307,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Container(
                 padding: EdgeInsets.all(25),
                 child: MaterialButton(
-                  color: Colors.white30,
+                  color: Colors.white54,
                   child: Text(getCategoryNameByID(categorySelector)),
                   onPressed: () => chooseCategory(context),
 
@@ -314,10 +317,18 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Container(
                 padding: EdgeInsets.all(25),
                 child: RaisedButton.icon(
+                  color: Colors.white54,
                   icon: Icon(Icons.gps_fixed),
                   label: Text(locationselector.getCity()),
                   onPressed: () => chooseLocation(context),
 
+                ),
+              ),
+
+              Container(
+                padding: EdgeInsets.all(25),
+                child: Material(
+                  child: availabilityList,
                 ),
               ),
 
