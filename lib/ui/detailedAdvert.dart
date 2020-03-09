@@ -45,6 +45,20 @@ class DetailedAdvertPage extends StatelessWidget {
     }
   }
 
+  Widget _buildAvailibilityButton(){
+    return Container(
+      padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
+      child: MaterialButton(
+        color: Colors.green,
+        onPressed: _buildAvailibilityButton,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0)),
+        ),
+        child : Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Color color = Theme.of(context).accentColor;
@@ -154,6 +168,7 @@ class DetailedAdvertPage extends StatelessWidget {
                   ),
                 ],
               ),
+              _buildAvailibilityButton(),
             ],
           ),
         ),
