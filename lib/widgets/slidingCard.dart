@@ -1,21 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
+import 'package:trops_app/ui/detailedAdvert.dart';
 
 class SlidingCard extends StatelessWidget {
 
   final Advert advert;
 
+  final bool proprietary;
+
   const SlidingCard({
     Key key,
     @required this.advert,
+    @required this.proprietary,
   }) : super(key: key);
+
+  void openPage(BuildContext context){
+    if(proprietary){
+      Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : this.advert)));
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder : (context) => DetailedAdvertPage(advert : this.advert)));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAvertView(advert : this.advert))) ,
+      onTap: () => openPage(context) ,
       child: Card(
         margin: EdgeInsets.all(10.0),
         elevation: 2.0,
@@ -25,7 +38,8 @@ class SlidingCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               child: CachedNetworkImage(
-                imageUrl: "http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg",
+                imageUrl: advert.getFirstImage(),
+                height: 150,
               ),
             ),
             Container(
@@ -76,7 +90,7 @@ class SlidingCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text(
-                            advert.getCategory(),
+                            getCategoryNameByID(advert.getCategory()),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
@@ -93,16 +107,8 @@ class SlidingCard extends StatelessWidget {
             )
           ],
         ),
-      )
-
-
-
-
-
-      ,
+      ),
     );
-
-
   }
 
 }

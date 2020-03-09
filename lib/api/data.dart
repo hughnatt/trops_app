@@ -22,6 +22,19 @@ Future<List<Advert>> getAllAdverts() async {
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
 
+      List<double> coordinates = List<double>.from(item['location']['coordinates']);
+
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
+
+
+
+      List<DateRange> availability = List<DateRange>();
+
+      List temp = List.from(item["availability"]);
+      temp.forEach((item){
+        availability.add(makeDateRange(item));
+      });
+
       var advert = new Advert(
         item["_id"],
         item["title"],
@@ -29,7 +42,9 @@ Future<List<Advert>> getAllAdverts() async {
         item["description"],
         photos,
         item["owner"],
-        categoryName
+        categoryName,
+        availability,
+        location,
       );
 
       _adverts.add(advert);
@@ -68,10 +83,21 @@ class CreateAdvertBody{
   };
 }
 
-Future<Http.Response> uploadAdvertApi(String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
+Future<Http.Response> uploadAdvertApi(String token,String title, double price, String description,String category,String owner,List<String> photos, List<DateRange> availability, Location location) async {
   CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photos, availability, location);
   Uri uri = new Uri.https(apiBaseURI, "/advert");
-  Http.Response response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonEncode(body));
+  Http.Response response = await Http.post(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"},body : jsonEncode(body));
+  print(response.statusCode);
+  print(response.body);
+  return response;
+
+}
+
+Future<Http.Response> modifyAdvert(String title, double price, String description,String category,String owner,String id, String token, List<String> photoList,List<DateRange> availability, Location location) async {
+  CreateAdvertBody body = CreateAdvertBody(title, price, description, category, owner, photoList, availability, location);
+  var uri = new Uri.https(apiBaseURI, "/advert/"+id);
+  print(body);
+  var response = await Http.put(uri,headers: {"Content-Type": "application/json","Authorization" : "Bearer $token"},body : jsonEncode(body));
   print(response.statusCode);
   print(response.body);
   return response;
@@ -86,6 +112,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   }''';
   var uri = new Uri.https(apiBaseURI, "/advert/owner");
   print(jsonBody);
+  print(uri);
   var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"},body : jsonBody);
   print(response.statusCode);
   print(response.body);
@@ -95,6 +122,9 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
     result.forEach((item) {
       List<String> photos = new List<String>.from(item["photos"]);
 
+      //String categoryName = getCategoryNameByID(item['category']);
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
+
       var advert = new Advert(
           item["_id"],
           item["title"],
@@ -102,7 +132,9 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
           item["description"],
           photos,
           item["owner"],
-          item["category"]
+          item["category"],
+          item["availability"],
+          location,
       );
 
       _adverts.add(advert);
@@ -113,3 +145,58 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
   }
 
 }
+
+Future<Http.Response> deleteAdvert(String id, String token) async {
+  String temp = "/advert/"+id;
+  var uri = new Uri.https(apiBaseURI, temp);
+  print(uri);
+  var response = await Http.delete(uri,headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
+  print(response.statusCode);
+  print(response.body);
+
+  return response;
+}
+
+DateRange makeDateRange(Map<String,dynamic> fromJSON){
+  return DateRange(DateTime.parse(fromJSON["start"]),DateTime.parse(fromJSON["end"]));
+}
+
+
+//Future<Http.Response> register(String name, String email, String password) async {
+//  var jsonBody = '''
+//  {
+//    "name" : "$name",
+//    "email" : "$email",
+//    "password" : "$password"
+//  }''';
+//  var uri = new Uri.https(_authBaseURI, "/users");
+//  print(jsonBody);
+//  var response = await Http.post(uri,headers: {"Content-Type": "application/json"},body : jsonBody);
+//
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}
+//
+//Future<Http.Response> login(String email, String password) async {
+//  var jsonBody = '''
+//  {
+//    "email" : "$email",
+//    "password" : "$password"
+//  }''';
+//  var uri = new Uri.https(_authBaseURI, "/users/login");
+//  var response = await Http.post(uri,headers:  {"Content-Type": "application/json"},body : jsonBody);
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}
+//
+//Future<Http.Response> signOff(User user) async {
+//  String token = user.getToken();
+//  print(token);
+//  var uri = new Uri.https(_authBaseURI, "/users/me/logout");
+//  var response = await Http.post(uri,headers: {"Authorization" : "Bearer $token"});
+//  print(response.statusCode);
+//  print(response.body);
+//  return response;
+//}
