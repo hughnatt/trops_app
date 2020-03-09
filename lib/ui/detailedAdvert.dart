@@ -211,7 +211,6 @@ class DetailedAdvertPage extends StatelessWidget {
                   ),
                 ],
               ),
-              _buildAvailibilityButton(context),
             ],
           ),
         ),
