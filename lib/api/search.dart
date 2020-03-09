@@ -4,6 +4,7 @@ import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
+import 'package:trops_app/models/DateRange.dart';
 
 const String _dataBaseURI = "trops.sauton.xyz";
 
@@ -44,7 +45,17 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
 
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
-      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
+
+      List<double> coordinates = List<double>.from(item['location']['coordinates']);
+
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
+
+      List<DateRange> availability = List<DateRange>();
+
+      List temp = List.from(item["availability"]);
+      temp.forEach((item){
+        availability.add(makeDateRange(item));
+      });
 
       var advert = new Advert(
           item['_id'],
@@ -54,7 +65,7 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
           photos,
           item['owner'],
           categoryName,
-          item['availability'],
+          availability,
           location
       );
 
@@ -65,4 +76,8 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
   } else {
     throw Exception("Failed to get adverts");
   }
+}
+
+DateRange makeDateRange(Map<String,dynamic> fromJSON){
+  return DateRange(DateTime.parse(fromJSON["start"]),DateTime.parse(fromJSON["end"]));
 }
