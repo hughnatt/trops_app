@@ -54,7 +54,7 @@ class DetailedAdvertPage extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
-        child : Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
+        child : Text("Voir les disponibilités",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
       ),
     );
   }
