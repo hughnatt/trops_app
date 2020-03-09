@@ -44,6 +44,9 @@ dependencies:
   #HTTP plugin for communicating with our REST APIs
   http: ^0.12.0+4
 
+  # Loading Animations
+  flutter_spinkit: "^2.1.0"
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

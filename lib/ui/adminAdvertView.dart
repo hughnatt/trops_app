@@ -1,20 +1,16 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:trops_app/api/api.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/DateRange.dart';
-import 'package:trops_app/utils/imagesManager.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/api/category.dart';
+import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 
 class AdminAdvertView extends StatefulWidget {
   final Advert advert;
@@ -39,6 +35,8 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   TextEditingController descriptionController;
   TextEditingController priceController;
   String categorySelector;
+  Location locationselector;
+  AvailabilityList availabilityList;
 
   //List<DateRange> availability = List<DateRange>();
 
@@ -52,7 +50,10 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     titleController = TextEditingController(text: advert.getTitle());
     descriptionController = TextEditingController(text: advert.getDescription());
     priceController = TextEditingController(text: advert.getPrice().toString());
+
     categorySelector = advert.getCategory();
+    locationselector = advert.getLocation();
+    availabilityList = AvailabilityList(availability: advert.getAvailability(),);
 
 
     WidgetsBinding.instance.addPostFrameCallback((_) => loadImages()); //wait the build method to be done (avoid calling currentState on null ImageSelector in loadImages)
@@ -142,7 +143,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     List<DateRange> test = [DateRange(DateTime.now(),DateTime.now())];
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),test,Location("","","",[0.1,0.1]));
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),availabilityList.availability,locationselector);
 
     if(res.statusCode==200){
       Navigator.pop(context);
@@ -203,10 +204,48 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
         children: <Widget>[
           selector,
 
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                child: Text("Ok"),
+                onPressed: () => updateCategory(context,selector),
+              ),
+
+              FlatButton(
+                child: Text("Annuler"),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          )
+
+        ],
+      ),
+    );
+  }
+
+  void updateLocation(BuildContext context,Autocomplete selector){
+
+    setState(() {
+      locationselector = selector.getSelectedLocation();
+    });
+
+    Navigator.pop(context);
+  }
+
+  Future<void> chooseLocation(BuildContext context,){
+    Autocomplete locationselector = Autocomplete();
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => SimpleDialog(
+        title: Text("choisissez une nouvelle catégorie"),
+        children: <Widget>[
+          locationselector,
           FlatButton(
             child: Text("Ok"),
-            onPressed: () => updateCategory(context,selector),
-          ),
+            onPressed: () => updateLocation(context, locationselector),
+          )
         ],
       ),
     );
@@ -268,14 +307,30 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Container(
                 padding: EdgeInsets.all(25),
                 child: MaterialButton(
-                  color: Colors.white30,
+                  color: Colors.white54,
                   child: Text(getCategoryNameByID(categorySelector)),
                   onPressed: () => chooseCategory(context),
 
                 ),
               ),
 
+              Container(
+                padding: EdgeInsets.all(25),
+                child: RaisedButton.icon(
+                  color: Colors.white54,
+                  icon: Icon(Icons.gps_fixed),
+                  label: Text(locationselector.getCity()),
+                  onPressed: () => chooseLocation(context),
 
+                ),
+              ),
+
+              Container(
+                padding: EdgeInsets.all(25),
+                child: Material(
+                  child: availabilityList,
+                ),
+              ),
 
             ],
           ),
