@@ -23,8 +23,13 @@ class Advert {
     return this._title;
   }
 
-  double getPrice(){
-    return this._price;
+  String getPrice(){
+    if(this._price%1 == 0){
+      return this._price.toInt().toString();
+    }
+    else{
+      return this._price.toString();
+    }
   }
 
   String getDescription(){
