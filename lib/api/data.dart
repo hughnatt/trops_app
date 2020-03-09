@@ -25,9 +25,7 @@ Future<List<Advert>> getAllAdverts() async {
       List<double> coordinates = List<double>.from(item['location']['coordinates']);
 
       Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
-
-
-
+      
       List<DateRange> availability = List<DateRange>();
 
       List temp = List.from(item["availability"]);
@@ -123,7 +121,16 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
       List<String> photos = new List<String>.from(item["photos"]);
 
       //String categoryName = getCategoryNameByID(item['category']);
-      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],item['location']['coordinates']);
+      List<double> coordinates = List<double>.from(item['location']['coordinates']);
+
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
+
+      List<DateRange> availability = List<DateRange>();
+
+      List temp = List.from(item["availability"]);
+      temp.forEach((item){
+        availability.add(makeDateRange(item));
+      });
 
       var advert = new Advert(
           item["_id"],
@@ -133,7 +140,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
           photos,
           item["owner"],
           item["category"],
-          item["availability"],
+          availability,
           location,
       );
 
