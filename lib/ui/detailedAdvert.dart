@@ -81,23 +81,7 @@ class DetailedAdvertPage extends StatelessWidget {
         },
      );
   }
-
-  Widget _buildAvailibilityButton(BuildContext context){
-    return Container(
-      padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
-      child: MaterialButton(
-        color: Colors.green,
-        onPressed:() {
-          _showAvailibityCalendar(context);
-        },
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        child : Text("Voir les disponibilités",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
-      ),
-    );
-  }
-
+  
   _onNavigationBarTapped(BuildContext context){
     _showAvailibityCalendar(context);
   }
