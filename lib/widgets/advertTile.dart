@@ -91,7 +91,7 @@ class AdvertTile extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.only(right: 10.0, top: 10.0),
                             child: Text(
-                              prettyPrintPrice().toString() + "€",
+                              prettyPrintPrice().toString() + "€/j",
                               maxLines: 1,
                               textAlign: TextAlign.left,
                               style: TextStyle(
