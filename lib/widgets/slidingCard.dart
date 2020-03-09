@@ -90,7 +90,7 @@ class SlidingCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text(
-                            getCategoryNameByID(advert.getCategory()),
+                            advert.getCategory(),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(
