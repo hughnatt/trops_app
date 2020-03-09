@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 class DetailedAdvertPage extends StatelessWidget {
 
   final Advert advert;
+  int _index = 0;
 
   DetailedAdvertPage({Key key, @required this.advert}) : super(key: key);
 
@@ -95,6 +96,10 @@ class DetailedAdvertPage extends StatelessWidget {
         child : Text("Voir les disponibilités",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
       ),
     );
+  }
+
+  _onNavigationBarTapped(BuildContext context){
+    _showAvailibityCalendar(context);
   }
 
   @override
@@ -219,7 +224,7 @@ class DetailedAdvertPage extends StatelessWidget {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
-            title: Text('Réserver'),
+            title: Text('Disponibilités'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.message),
@@ -228,6 +233,19 @@ class DetailedAdvertPage extends StatelessWidget {
         ],
         selectedItemColor: Colors.black54,
         unselectedItemColor: Colors.black54,
+        onTap: (int index){
+          switch(index){
+            case 0:
+              break;
+            case 1:
+              _onNavigationBarTapped(context);
+              break;
+            case 2:
+              break;
+          }
+
+        },
+        currentIndex: _index,
       ),
     );
   }
