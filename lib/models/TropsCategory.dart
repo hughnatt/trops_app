@@ -1,9 +1,11 @@
 
 
 class TropsCategory {
-  const TropsCategory(this.id, this.title, [this.subcategories = const <TropsCategory>[]]);
+  const TropsCategory(this.id, this.title, this.description, this.thumbnail, [this.subcategories = const <TropsCategory>[]]);
   final String id;
   final String title;
+  final String description;
+  final String thumbnail;
   final List<TropsCategory> subcategories;
 }
 
