@@ -3,8 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
+import 'package:intl/intl.dart';
 
 class DetailedAdvertPage extends StatelessWidget {
 
@@ -45,12 +47,48 @@ class DetailedAdvertPage extends StatelessWidget {
     }
   }
 
-  Widget _buildAvailibilityButton(){
+  _showAvailibityCalendar(BuildContext context){
+
+    List<DateRange> allAvailibility = advert.getAvailability();
+
+     showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return AlertDialog(
+              title: Text("Disponibilités"),
+              content: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: allAvailibility.length,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    String textContent = "Du " + DateFormat('dd/MM/yy').format(allAvailibility[index].start) + " au " + DateFormat('dd/MM/yy').format(allAvailibility[index].end);
+                    return Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          textContent,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+              ),
+          );
+        },
+     );
+  }
+
+  Widget _buildAvailibilityButton(BuildContext context){
     return Container(
       padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
       child: MaterialButton(
         color: Colors.green,
-        onPressed: _buildAvailibilityButton,
+        onPressed:() {
+          _showAvailibityCalendar(context);
+        },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(10.0)),
         ),
@@ -168,7 +206,7 @@ class DetailedAdvertPage extends StatelessWidget {
                   ),
                 ],
               ),
-              _buildAvailibilityButton(),
+              _buildAvailibilityButton(context),
             ],
           ),
         ),
