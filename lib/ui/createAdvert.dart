@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
-import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
@@ -11,7 +10,6 @@ import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
 import 'package:trops_app/widgets/advertField.dart';
-import 'package:intl/intl.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 
 

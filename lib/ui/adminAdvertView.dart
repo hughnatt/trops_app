@@ -17,43 +17,36 @@ class AdminAdvertView extends StatefulWidget {
 
   const AdminAdvertView({Key key, @required this.advert}) : super(key : key);
 
-  @override
-  _AdminAdvertViewState createState() {
-    return _AdminAdvertViewState(advert: advert);
-  }
+  _AdminAdvertViewState createState() => _AdminAdvertViewState();
 }
 
 enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
 
 class _AdminAdvertViewState extends State<AdminAdvertView> {
 
-  final Advert advert;
-
   List<TropsCategory> _categories = new List<TropsCategory>();
 
-  TextEditingController titleController;
-  TextEditingController descriptionController;
-  TextEditingController priceController;
-  String categorySelector;
-  Location locationselector;
-  AvailabilityList availabilityList;
+  TextEditingController _titleController;
+  TextEditingController _descriptionController;
+  TextEditingController _priceController;
+  String _categorySelector;
+  Location _locationSelector;
+  AvailabilityList _availabilityList;
 
   //List<DateRange> availability = List<DateRange>();
 
   GlobalKey<ImageSelectorState> _imageSelectorState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
 
-  _AdminAdvertViewState({Key key, @required this.advert,}) ;
-
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: advert.getTitle());
-    descriptionController = TextEditingController(text: advert.getDescription());
-    priceController = TextEditingController(text: advert.getPrice().toString());
+    _titleController = TextEditingController(text: widget.advert.getTitle());
+    _descriptionController = TextEditingController(text: widget.advert.getDescription());
+    _priceController = TextEditingController(text: widget.advert.getPrice().toString());
 
-    categorySelector = advert.getCategory();
-    locationselector = advert.getLocation();
-    availabilityList = AvailabilityList(availability: advert.getAvailability(),);
+    _categorySelector = widget.advert.getCategory();
+    _locationSelector = widget.advert.getLocation();
+    _availabilityList = AvailabilityList(availability: widget.advert.getAvailability(),);
 
 
     WidgetsBinding.instance.addPostFrameCallback((_) => loadImages()); //wait the build method to be done (avoid calling currentState on null ImageSelector in loadImages)
@@ -62,7 +55,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
-        categorySelector = advert.getCategory();
+        _categorySelector = widget.advert.getCategory();
       });
     });
 
@@ -70,14 +63,14 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
 
   void loadImages(){
-    for(int i=0;i < advert.getAllImages().length;i++){
-      _imageSelectorState.currentState.addLink(i, advert.getAllImages()[i]);
+    for(int i=0;i < widget.advert.getAllImages().length;i++){
+      _imageSelectorState.currentState.addLink(i, widget.advert.getAllImages()[i]);
     }
   }
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
-    Http.Response res = await deleteAdvert(advert.getId(), User.current.getToken());
+    Http.Response res = await deleteAdvert(widget.advert.getId(), User.current.getToken());
 
     if(res.statusCode == 202){
       Navigator.pop(context);
@@ -137,13 +130,11 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   Future<void> onSavePressed(BuildContext context) async {
 
-    String title = titleController.text;
-    String description = descriptionController.text;
-    String price = priceController.text;
+    String title = _titleController.text;
+    String description = _descriptionController.text;
+    String price = _priceController.text;
 
-    List<DateRange> test = [DateRange(DateTime.now(),DateTime.now())];
-
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,categorySelector,advert.getOwner(),advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),availabilityList.availability,locationselector);
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
 
     if(res.statusCode==200){
       Navigator.pop(context);
@@ -189,9 +180,12 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   }
 
   void updateCategory(BuildContext context, CategorySelector selector){
-    setState(() {
-      categorySelector = selector.selectedCategory();
-    });
+    String cat = getCategoryNameByID(selector.selectedCategory());
+    if(cat != ""){
+      setState(() {
+        _categorySelector = cat;
+      });
+    }
     Navigator.pop(context);
   }
 
@@ -227,10 +221,11 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   void updateLocation(BuildContext context,Autocomplete selector){
 
-    setState(() {
-      locationselector = selector.getSelectedLocation();
-    });
-
+    if(selector.getSelectedLocation()!=null){
+      setState(() {
+        _locationSelector = selector.getSelectedLocation();
+      });
+    }
     Navigator.pop(context);
   }
 
@@ -239,13 +234,23 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
-        title: Text("choisissez une nouvelle catégorie"),
+        title: Text("choisissez une nouvelle location"),
         children: <Widget>[
           locationselector,
-          FlatButton(
-            child: Text("Ok"),
-            onPressed: () => updateLocation(context, locationselector),
-          )
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                child: Text("Ok"),
+                onPressed: () => updateLocation(context, locationselector),
+              ),
+              FlatButton(
+                child: Text("Annuler"),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          ),
+
         ],
       ),
     );
@@ -275,7 +280,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
-                  controller: titleController,
+                  controller: _titleController,
                 ),
               ),
 
@@ -287,7 +292,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                     icon: Icon(Icons.insert_drive_file),
                   ),
                   style: TextStyle(fontSize: 18,),
-                  controller: descriptionController,
+                  controller: _descriptionController,
                 ),
               ),
 
@@ -299,7 +304,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                   ),
                   style: TextStyle(fontSize: 18,),
                   keyboardType: TextInputType.number,
-                  controller: priceController,
+                  controller: _priceController,
                 ),
               ),
 
@@ -308,7 +313,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                 padding: EdgeInsets.all(25),
                 child: MaterialButton(
                   color: Colors.white54,
-                  child: Text(getCategoryNameByID(categorySelector)),
+                  child: Text(_categorySelector),
                   onPressed: () => chooseCategory(context),
 
                 ),
@@ -319,7 +324,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
                 child: RaisedButton.icon(
                   color: Colors.white54,
                   icon: Icon(Icons.gps_fixed),
-                  label: Text(locationselector.getCity()),
+                  label: Text(_locationSelector.getCity()),
                   onPressed: () => chooseLocation(context),
 
                 ),
@@ -328,7 +333,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
               Container(
                 padding: EdgeInsets.all(25),
                 child: Material(
-                  child: availabilityList,
+                  child: _availabilityList,
                 ),
               ),
 
@@ -354,9 +359,9 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   @override
   void dispose(){
-    titleController.dispose();
-    descriptionController.dispose();
-    priceController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _priceController.dispose();
     super.dispose();
   }
 

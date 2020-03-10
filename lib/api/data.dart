@@ -120,7 +120,8 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
     result.forEach((item) {
       List<String> photos = new List<String>.from(item["photos"]);
 
-      //String categoryName = getCategoryNameByID(item['category']);
+      String categoryName = getCategoryNameByID(item['category']);
+
       List<double> coordinates = List<double>.from(item['location']['coordinates']);
 
       Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
@@ -139,7 +140,7 @@ Future<List<Advert>> getAdvertOfUser(String owner, String token) async {
           item["description"],
           photos,
           item["owner"],
-          item["category"],
+          categoryName,
           availability,
           location,
       );
