@@ -35,6 +35,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
   Icon _fabIcon;
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
+  bool _hasAcceptedEULA;
+  bool _isPriceValid;
+
 
   GlobalKey<ImageSelectorState> _imageSelector = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
 
@@ -64,6 +67,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     });
 
     _isUploadProcessing = false;
+    _hasAcceptedEULA = false;
+    _isPriceValid = true;
   }
 
   @override
@@ -230,13 +235,33 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.only(top: 25.0, left:25.0, right: 25.0, bottom: 10.0),
-        child: MaterialButton(
-          color: Colors.green,
-          onPressed: _isUploadProcessing ? null : _uploadAdvert,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)),
-          ),
-          child: _buildButtonState(),
+        child: Column(
+          children: <Widget>[
+            Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _hasAcceptedEULA,
+                    onChanged: (newValue){
+                      setState(() {
+                        _hasAcceptedEULA = newValue;
+                      });
+                    },
+                  ),
+                  Flexible(
+                      child : Text("J'accepte les conditions générales de l'application TROPS")
+                  )
+                ]
+            ),
+            MaterialButton(
+              color: Colors.green,
+              onPressed: _isUploadProcessing ? null : _uploadAdvert,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              ),
+              child: (_isUploadProcessing) ? CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black))
+                                           : Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
+            ),
+          ],
         ),
       ),
     );
@@ -250,8 +275,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     }
   }
 
-  bool _isPriceValid = true;
-  
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
@@ -285,37 +308,34 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     );
   }
 
-  Widget _buildButtonState(){
-    if(!_isUploadProcessing){
-      return Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white));
-    }
-    else{
-      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black));
-    }
-  }
-
-  void unfocus(){
-    FocusScope.of(context).unfocus(); //make all the textfield loose focus
-  }
-
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategory() != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
+    return (
+        _titleController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty &&
+        _isPriceValid &&
+        _selectedCategory() != null &&
+        locationSearchBar.getSelectedLocation() != null
+    ); //check if all REQUIRED field have a value
   }
 
   void _uploadAdvert() async {
 
-    this.unfocus();
+    FocusScope.of(context).unfocus();
 
-    //List<String> splitedPaths = this._imagesManager.getAllFilePath();
+    if(!_checkFields()) { //if the user have correctly completed the form
+      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
+      return;
+    }
 
+    if (!_hasAcceptedEULA){
+      return;
+    }
 
-    if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
+    setState(() {
+      _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
+    });
 
-      setState(() {
-        _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
-      });
-
-      //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+    try {
       var response = await uploadAdvertApi(
           User.current.getToken(),
           _titleController.text,
@@ -327,21 +347,20 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           _availabilityList.availability,
           locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert
 
-      setState(() {
-        _isUploadProcessing = false; //the button is show again (before pop context)
-      });
-
       if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
         _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
       }
       else{ // the response is 201, the creation was a sucess
         _showUploadResult(context,ResultType.success); // we warn him that it's a success
       }
+    } catch (error){
+      print(error);
+      _showUploadResult(context,ResultType.failure);
+    } finally {
+      setState(() {
+        _isUploadProcessing = false; //the button is show again (before pop context)
+      });
     }
-    else{ // the user doesn't correctly complete the form
-      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
-    }
-
   }
 
   Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
@@ -438,16 +457,23 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
         title: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0)),
       ),
       bottomNavigationBar: TropsBottomAppBar(),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        child: _fabIcon,
-        onPressed: (){
-          setState(() {
-            if (!_tabController.indexIsChanging){
-              _tabController.animateTo(_tabController.index+1);
-            }
-          });
-        },
+      floatingActionButton: Visibility(
+        visible: _dockedFabVisibility(context),
+        child:FloatingActionButton(
+          backgroundColor: Colors.green,
+          child: _fabIcon,
+          onPressed: (){
+            setState(() {
+              if (!_tabController.indexIsChanging){
+                if (_tabController.index < _kPanes.length-1){
+                  _tabController.animateTo(_tabController.index+1);
+                } else {
+                  _uploadAdvert();
+                }
+              }
+            });
+          },
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
@@ -472,6 +498,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           ),
         )
     );
+  }
+
+  static _dockedFabVisibility(context) {
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      return false;
+    } else {
+      return true;
+    }
   }
 }
 
