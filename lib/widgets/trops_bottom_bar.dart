@@ -32,7 +32,7 @@ class TropsBottomAppBar extends StatelessWidget {
       }
 
     } else if(ModalRoute.of(context).settings.name != "/auth"){
-      Navigator.pushNamed(context, "/auth");
+      Navigator.pushNamed(context, "/auth", arguments: "/profile");
     }
   }
 

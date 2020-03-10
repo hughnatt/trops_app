@@ -12,15 +12,6 @@ class AdvertTile extends StatelessWidget {
     @required this.advert
   }) : super(key: key);
 
-  num prettyPrintPrice(){
-    if(this.advert.getPrice()%1 == 0){
-      return this.advert.getPrice().toInt();
-    }
-    else{
-      return this.advert.getPrice();
-    }
-  }
-
   Widget _getImageWidget(){
 
     if(this.advert.getFirstImage() != null){
@@ -91,7 +82,7 @@ class AdvertTile extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.only(right: 10.0, top: 10.0),
                             child: Text(
-                              prettyPrintPrice().toString() + "€/j",
+                              this.advert.getPrice() + "€/j",
                               maxLines: 1,
                               textAlign: TextAlign.left,
                               style: TextStyle(

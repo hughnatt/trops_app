@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/ui/auth.dart';
+import 'package:trops_app/ui/createAdvert.dart';
 import 'package:trops_app/ui/profile.dart';
 import 'package:trops_app/ui/searchresult.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,6 +21,7 @@ class TropsApp extends StatelessWidget {
         '/auth' : (context) => AuthPage(),
         '/profile' : (context) => ProfilePage(),
         '/home' : (context) => HomePage(),
+        '/create' : (context) => CreateAdvertPage()
       },
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate
