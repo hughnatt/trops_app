@@ -1,19 +1,15 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/data.dart';
 import 'package:trops_app/models/DateRange.dart';
-import 'package:trops_app/api/image.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
+import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
-import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
 import 'package:intl/intl.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
@@ -29,7 +25,6 @@ enum ResultType {success, failure, denied} //enum for the different case of the 
 
 class _CreateAdvertPage extends State<CreateAdvertPage> {
 
-  List<DateRange> _availability = new List<DateRange>();
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
@@ -37,6 +32,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
   List<TropsCategory> _categories = new List<TropsCategory>();
   Autocomplete locationSearchBar = Autocomplete();
   CategorySelector _categorySelector;
+  AvailabilityList _availabilityList = AvailabilityList(availability: []);
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
 
@@ -47,7 +43,6 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     super.initState();
     loadCategories();
     setState(() {
-      _availability.add(DateRange(DateTime.now(), DateTime.now()));
       _isUploadProcessing = false;
     });
     _categorySelector = CategorySelector(categories: [],);
@@ -122,99 +117,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     }
   }
 
-  ///
-  ///
-  ///
-  Future<Null> _selectDate(BuildContext context, int index, bool start) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: start ? DateTime.now() : _availability[index].start,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked.isAfter(DateTime.now())){
-      if (start){
-        setState(() {
-          _availability[index].start = picked;
-          if (picked.isAfter(_availability[index].end)){
-            _availability[index].end = picked;
-          }
-        });
-      } else {
-        setState(() {
-          _availability[index].end = picked;
-          if (picked.isBefore(_availability[index].start)){
-            _availability[index].start = picked;
-          }
-        });
-      }
-    }
-  }
 
-  Widget _buildAvailabilityList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _availability.length,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: <Widget>[
-            Text(
-                "DU  ",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold
-              ),
-            ),
-            OutlineButton(
-              child: Text(
-                  DateFormat('dd/MM/yy').format(_availability[index].start)
-              ),
-              onPressed: () {
-                _selectDate(context,index,true);
-              },
-              textColor: Colors.blueAccent,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              ),
-            ),
-            Text(
-              "  AU  ",
-              style: TextStyle(
-                fontWeight: FontWeight.bold
-              ),
-            ),
-            OutlineButton(
-              child: Text(
-                  DateFormat('dd/MM/yy').format(_availability[index].end)
-              ),
-              onPressed: () {
-                _selectDate(context,index,false);
-              },
-              textColor: Colors.blueAccent,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete),
-              color: Colors.red,
-              highlightColor: Colors.deepOrangeAccent,
-              onPressed: (_availability.length <= 1) ? null : () {
-                {
-                  setState(() {
-                    _availability.removeAt(index);
-                  });
-                }
-              },
-            ),
-          ],
-        );
-      }
-    );
-  }
 
   void unfocus(){
     FocusScope.of(context).unfocus(); //make all the textfield loose focus
@@ -240,7 +143,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       });
 
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availabilityList.availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -433,24 +336,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
                                     "Disponibilités",
                                     style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
                                 ),
-                                _buildAvailabilityList(),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 10),
-                                ),
-                                RaisedButton.icon(
-                                  label: Text("Ajouter une période"),
-                                  icon: Icon(Icons.add),
-                                  textColor: Colors.blueAccent,
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _availability.add(DateRange(DateTime.now(), DateTime.now()));
-                                    });
-                                  },
-                                ),
+                                _availabilityList,
+
                               ],
                             )
                         )
