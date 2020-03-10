@@ -254,7 +254,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
             ),
             MaterialButton(
               color: Colors.green,
-              onPressed: _isUploadProcessing ? null : _uploadAdvert,
+              onPressed: _isUploadProcessing ? null : _submitAdvert,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(10.0)),
               ),
@@ -318,7 +318,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     ); //check if all REQUIRED field have a value
   }
 
-  void _uploadAdvert() async {
+  void _submitAdvert() async {
 
     FocusScope.of(context).unfocus();
 
@@ -336,7 +336,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     });
 
     try {
-      var response = await uploadAdvertApi(
+      var response = await uploadAdvert(
           User.current.getToken(),
           _titleController.text,
           double.parse(_priceController.text),
@@ -347,14 +347,15 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           _availabilityList.availability,
           locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert
 
-      if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
-        _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
-      }
-      else{ // the response is 201, the creation was a sucess
-        _showUploadResult(context,ResultType.success); // we warn him that it's a success
+      switch(response){
+        case AdvertUploadStatus.FAILURE:
+          _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
+          return;
+        case AdvertUploadStatus.SUCCESS:
+          _showUploadResult(context,ResultType.success); // we warn him that it's a success
+          return;
       }
     } catch (error){
-      print(error);
       _showUploadResult(context,ResultType.failure);
     } finally {
       setState(() {
@@ -468,7 +469,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
                 if (_tabController.index < _kPanes.length-1){
                   _tabController.animateTo(_tabController.index+1);
                 } else {
-                  _uploadAdvert();
+                  _submitAdvert();
                 }
               }
             });
