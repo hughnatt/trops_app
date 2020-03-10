@@ -180,9 +180,12 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   }
 
   void updateCategory(BuildContext context, CategorySelector selector){
-    setState(() {
-      _categorySelector = getCategoryNameByID(selector.selectedCategory());
-    });
+    String cat = getCategoryNameByID(selector.selectedCategory());
+    if(cat != ""){
+      setState(() {
+        _categorySelector = cat;
+      });
+    }
     Navigator.pop(context);
   }
 
@@ -218,10 +221,11 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   void updateLocation(BuildContext context,Autocomplete selector){
 
-    setState(() {
-      _locationSelector = selector.getSelectedLocation();
-    });
-
+    if(selector.getSelectedLocation()!=null){
+      setState(() {
+        _locationSelector = selector.getSelectedLocation();
+      });
+    }
     Navigator.pop(context);
   }
 
@@ -230,13 +234,23 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
-        title: Text("choisissez une nouvelle catégorie"),
+        title: Text("choisissez une nouvelle location"),
         children: <Widget>[
           locationselector,
-          FlatButton(
-            child: Text("Ok"),
-            onPressed: () => updateLocation(context, locationselector),
-          )
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              FlatButton(
+                child: Text("Ok"),
+                onPressed: () => updateLocation(context, locationselector),
+              ),
+              FlatButton(
+                child: Text("Annuler"),
+                onPressed: () => Navigator.pop(context),
+              )
+            ],
+          ),
+
         ],
       ),
     );
