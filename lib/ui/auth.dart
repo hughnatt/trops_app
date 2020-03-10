@@ -55,6 +55,7 @@ class _AuthPageState extends State<AuthPage>
   final FocusNode _focusRegisterEmail = FocusNode();
   final FocusNode _focusRegisterPassword = FocusNode();
   final FocusNode _focusRegisterConfirmPassword = FocusNode();
+  final FocusNode _focusRegisterPhone = FocusNode();
 
   TextEditingController _ctrlLoginEmail = new TextEditingController();
   TextEditingController _ctrlLoginPassword = new TextEditingController();
@@ -62,6 +63,7 @@ class _AuthPageState extends State<AuthPage>
   TextEditingController _ctrlRegisterName = new TextEditingController();
   TextEditingController _ctrlRegisterPassword = new TextEditingController();
   TextEditingController _ctrlRegisterConfirmPassword = new TextEditingController();
+  TextEditingController _ctrlRegisterPhone = new TextEditingController();
 
   bool _obscureLoginPassword = true;
   bool _obscureRegisterPassword = true;
@@ -96,6 +98,13 @@ class _AuthPageState extends State<AuthPage>
     super.dispose();
   }
 
+  bool _validatePhonenumber(String text){
+    String pattern = r'^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}';
+    RegExp regex = RegExp(pattern);
+    if(regex.hasMatch(text) || text.isEmpty) return true;
+    else return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return TropsScaffold(
@@ -122,7 +131,7 @@ class _AuthPageState extends State<AuthPage>
                 child: _buildMenuBar(context),
               ),
               Container(
-                height: 500,
+                height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
                 child: PageView(
                   controller: _pageController,
@@ -174,7 +183,7 @@ class _AuthPageState extends State<AuthPage>
           children: <Widget>[
             Expanded(
               child: FlatButton(
-                splashColor: Colors.transparent,
+                //splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,
                 onPressed: _onSignInButtonPress,
                 child: Text(
@@ -313,7 +322,7 @@ class _AuthPageState extends State<AuthPage>
                 ),
                 child: MaterialButton(
                     highlightColor: Colors.transparent,
-                    splashColor: Theme.Colors.loginGradientEnd,
+                    //splashColor: Theme.Colors.loginGradientEnd,
                     //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -453,7 +462,7 @@ class _AuthPageState extends State<AuthPage>
                 ),
                 child: Container(
                   width: 300.0,
-                  height: 360.0,
+                  height: 450.0,
                   child: Column(
                     children: <Widget>[
                       Padding(
@@ -508,6 +517,36 @@ class _AuthPageState extends State<AuthPage>
                                 fontFamily: "WorkSansSemiBold", fontSize: 16.0),
                           ),
                           onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterPassword)
+                        ),
+                      ),
+                      Container(
+                        width: 250.0,
+                        height: 1.0,
+                        color: Colors.grey[400],
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
+                        child: TextField(
+                          focusNode: _focusRegisterPhone,
+                          controller: _ctrlRegisterPhone,
+                          keyboardType: TextInputType.phone,
+                          textCapitalization: TextCapitalization.words,
+                          style: TextStyle(
+                              fontFamily: "WorkSansSemiBold",
+                              fontSize: 16.0,
+                              color: Colors.black),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            icon: Icon(
+                              FontAwesomeIcons.phoneAlt,
+                              color: Colors.black,
+                            ),
+                            hintText: "Téléphone",
+                            hintStyle: TextStyle(
+                                fontFamily: "WorkSansSemiBold", fontSize: 16.0),
+                          ),
+                          onSubmitted: (value) => FocusScope.of(context).requestFocus(_focusRegisterPhone),
                         ),
                       ),
                       Container(
@@ -587,7 +626,7 @@ class _AuthPageState extends State<AuthPage>
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 340.0),
+                margin: EdgeInsets.only(top: 440.0),
                 decoration: new BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   boxShadow: <BoxShadow>[
@@ -606,7 +645,7 @@ class _AuthPageState extends State<AuthPage>
                 ),
                 child: MaterialButton(
                     highlightColor: Colors.transparent,
-                    splashColor: Theme.Colors.loginGradientEnd,
+                    //splashColor: Theme.Colors.loginGradientEnd,
                     //shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -633,11 +672,11 @@ class _AuthPageState extends State<AuthPage>
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text("ERREUR"),
+        title: Text("Erreur"),
         content: Text(text),
         actions: [
           FlatButton(
-            child: Text("ANNULER"),
+            child: Text("Annuler"),
             onPressed: () {Navigator.pop(context);},
           ),
         ],
@@ -672,23 +711,31 @@ class _AuthPageState extends State<AuthPage>
   }
 
   void _register() async {
-    if (_ctrlRegisterPassword.text == _ctrlRegisterConfirmPassword.text){
+    if (_ctrlRegisterPassword.text != _ctrlRegisterConfirmPassword.text){
+      _displayAlert("Les mots de passe ne correspondent pas.");
+      FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
+    }
+    else if(!_validatePhonenumber(_ctrlRegisterPhone.text)){
+      _displayAlert("Le numéro de téléphone n'est pas valide.");
+      FocusScope.of(context).requestFocus(_focusRegisterPhone);
+    }
+    else if(_ctrlRegisterName.text.isEmpty){
+      _displayAlert("Le nom n'est pas renseigné.");
+      FocusScope.of(context).requestFocus(_focusRegisterName);
+    }
+    else if(_ctrlRegisterEmail.text.isEmpty){
+      _displayAlert("Le mail n'est pas renseigné.");
+      FocusScope.of(context).requestFocus(_focusLoginEmail);
+    }
+    else{
       Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
       if (response.statusCode >= 300){
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
-        _ctrlRegisterPassword.clear();
-        _ctrlRegisterConfirmPassword.clear();
       } else {
-        _displayAlert("Inscription réussie.");
-        _ctrlRegisterName.clear();
-        _ctrlRegisterEmail.clear();
-        _ctrlRegisterPassword.clear();
-        _ctrlRegisterConfirmPassword.clear();
+        Navigator.pop(context);
+        Navigator.pushNamed(context, '/auth');
       }
-    } else {
-      _displayAlert("Les mots de passe ne correspondent pas.");
-      FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
     }
   }
 
@@ -702,7 +749,7 @@ class _AuthPageState extends State<AuthPage>
       User user = User(json['user']['name'],json['user']['email'],json['token']);
       User.current = user;
       Navigator.pop(context);
-      Navigator.pushNamed(context, "/profile", arguments: User.current);
+      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);
     }
   }
 }
