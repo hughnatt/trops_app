@@ -2,12 +2,13 @@ import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/api.dart';
 import 'package:trops_app/models/User.dart';
 
-Future<Http.Response> register(String name, String email, String password) async {
+Future<Http.Response> register(String name, String email, String password, String phone) async {
   var jsonBody = '''
   {
     "name" : "$name",
     "email" : "$email",
-    "password" : "$password"
+    "password" : "$password",
+    "phoneNumber" : "$phone"
   }''';
   var uri = new Uri.https(apiBaseURI, "/users");
   print(jsonBody);

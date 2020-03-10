@@ -94,6 +94,7 @@ class _AuthPageState extends State<AuthPage>
     _focusRegisterName.dispose();
     _focusRegisterEmail.dispose();
     _focusRegisterPassword.dispose();
+    _focusRegisterPhone.dispose();
     _pageController?.dispose();
     super.dispose();
   }
@@ -728,7 +729,7 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
       if (response.statusCode >= 300){
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
