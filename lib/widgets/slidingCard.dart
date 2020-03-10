@@ -39,7 +39,9 @@ class SlidingCard extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               child: CachedNetworkImage(
                 imageUrl: advert.getFirstImage(),
+                fit: BoxFit.cover,
                 height: 150,
+                width: MediaQuery.of(context).size.width * 0.8,
               ),
             ),
             Container(
