@@ -22,7 +22,7 @@ class ImageSelector extends StatefulWidget {
 
 enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
 
-class ImageSelectorState extends State<ImageSelector> {
+class ImageSelectorState extends State<ImageSelector> with AutomaticKeepAliveClientMixin<ImageSelector> {
 
 
   ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
@@ -214,5 +214,6 @@ class ImageSelectorState extends State<ImageSelector> {
     );
   }
 
-
+  @override
+  bool get wantKeepAlive => true;
 }

@@ -37,6 +37,7 @@ dependencies:
   path_provider: ^1.6.0
   flutter_cache_manager: ^1.1.3
   flutter_typeahead: ^1.8.0
+  splashscreen: ^1.2.0
 
   # Font Awesome Icons, notably used in login and register screens
   font_awesome_flutter: ^8.0.1
@@ -71,8 +72,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/Rolling-1s-200px.gif
-    - assets/default_image.jpeg
+    - assets/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
