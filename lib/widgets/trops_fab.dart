@@ -9,9 +9,9 @@ class TropsFloatingActionButton extends StatelessWidget {
 
   void _onButtonPressed(BuildContext context){
     if(User.current != null){
-      Navigator.push(context, MaterialPageRoute(builder: (context) => CreateAdvertPage()));
+      Navigator.pushNamed(context, "/create");
     } else {
-      Navigator.pushNamed(context, "/auth");
+      Navigator.pushNamed(context, "/auth", arguments: "/create");
     }
 
   }
