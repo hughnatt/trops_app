@@ -1,5 +1,5 @@
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
 
 Future<Http.Response> register(String name, String email, String password) async {

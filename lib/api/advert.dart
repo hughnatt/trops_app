@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
