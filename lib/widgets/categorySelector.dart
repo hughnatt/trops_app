@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 
-String _selectedCategoryID;
+
 
 class CategorySelector extends StatefulWidget {
 
   final List<TropsCategory> categories;
+
+  String _selectedCategoryID;
+
   CategorySelector({Key key, this.categories}) : super(key: key);
 
   @override
@@ -29,10 +32,10 @@ class _CategorySelectorState extends State<CategorySelector>{
             Spacer(),
             Radio<String>(
               value: root.id,
-              groupValue: _selectedCategoryID,
+              groupValue: widget._selectedCategoryID,
               onChanged: (String value){
                 setState(() {
-                  _selectedCategoryID = value;
+                  widget._selectedCategoryID = value;
                 });
               },
             )

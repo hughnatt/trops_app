@@ -39,7 +39,9 @@ class SlidingCard extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
               child: CachedNetworkImage(
                 imageUrl: advert.getFirstImage(),
+                fit: BoxFit.cover,
                 height: 150,
+                width: MediaQuery.of(context).size.width * 0.8,
               ),
             ),
             Container(
@@ -90,7 +92,7 @@ class SlidingCard extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.only(right: 10.0),
                           child: Text(
-                            getCategoryNameByID(advert.getCategory()),
+                            advert.getCategory(),
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: TextStyle(

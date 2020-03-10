@@ -62,3 +62,16 @@ String getCategoryNameByID(String id) {
   }
   return name;
 }
+
+String getIDByCategoryName(String name) {
+  String id;
+  _categoryNameCache.forEach((key,value){
+    if(value == name){
+      id = key;
+    }
+  });
+  if (id == null){
+    id = "";
+  }
+  return id;
+}
