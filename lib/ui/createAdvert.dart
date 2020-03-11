@@ -343,7 +343,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           double.parse(_priceController.text),
           _descriptionController.text,
           _selectedCategory(),
-          User.current.getEmail(),
+          User.current.getId(),
           _imageSelector.currentState.getAllPaths(),
           _availabilityList.availability,
           locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert
