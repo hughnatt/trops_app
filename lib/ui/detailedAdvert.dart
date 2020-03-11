@@ -73,7 +73,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
       return IconButton(icon: Icon(Icons.star_border),onPressed: () => null); //display a empty star if the current advert is not in the user's favorites
     }
     else{ //the user is not logged
-      return IconButton(icon: Icon(null));
+      return IconButton(icon: Icon(null),onPressed: () => null);
     }
   }
 

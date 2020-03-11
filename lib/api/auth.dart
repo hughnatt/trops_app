@@ -45,6 +45,8 @@ User parseAuthUser(Map json) {
 
   List<String> favorites = new List<String>.from(json['user']['favorites']);
 
+  print(favorites);
+
   return User(
       json['user']['_id'],
       json['user']['name'],

@@ -30,7 +30,7 @@ class User {
     return _favorites;
   }
 
-  isInFavorites(String advertId){
+  bool isInFavorites(String advertId){
     return this._favorites.contains(advertId);
   }
 }
