@@ -49,6 +49,30 @@ Future<List<Advert>> getAdvertsByUser(User user) async {
 }
 
 
+Future<Advert> getAdvertsById(String id) async {
+  Uri uri = Uri.https(apiBaseURI, '/advert/' + id);
+  Http.Response response;
+
+
+  response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+
+
+  Advert _advert;
+
+  switch (response.statusCode){
+    case 200:
+      Map json = await jsonDecode(response.body);
+      _advert = decodeAdvert(json);
+      break;
+    default:
+      print(response.statusCode);
+      break;
+  }
+
+  return _advert;
+}
+
+
 
 class CreateAdvertBody{
   String title;

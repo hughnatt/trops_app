@@ -24,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage>{
   PageController pageController;
 
   List<Advert> _adverts = new List<Advert>();
+  List<Advert> _advertsFavorites = new List<Advert>();
 
   User _user;
 
@@ -49,7 +50,20 @@ class _ProfilePageState extends State<ProfilePage>{
       });
     });
 
+    Session.currentUser.getFavorites().forEach((advertId) {
+      getAdvertsById(advertId).then((advertResult) {
+        setState(() {
+          _advertsFavorites.add(advertResult);
+        });
+      });
+    });
+
+
     _user = Session.currentUser;
+  }
+
+  Widget _buildFavoriteContent(int index){
+    return _advertsFavorites[index] != null ? SlidingCard(advert:_advertsFavorites[index] , proprietary: false) : CircularProgressIndicator();
   }
 
   @override
@@ -114,17 +128,16 @@ class _ProfilePageState extends State<ProfilePage>{
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 15.0),
-                      child: Text("Réservations en cours", style: TextStyle(fontSize: 18),),
+                      child: Text("Mes favoris", style: TextStyle(fontSize: 18),),
                     ),
                     SizedBox(
                       height: 275,
-                      child: PageView(
+                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {
+                        return _buildFavoriteContent(index);
+                        },
+                        itemCount: _advertsFavorites.length,
                         controller: pageController,
-                        children: <Widget>[
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques",[],Location("","","",[0.0,0.0])),proprietary: false,),
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",["http://weirdotoys.com/WeirdoToys-V2/wp-content/uploads/2008/11/hulkball-prev-692x386.jpg"],"ariane@ancrenaz.fr","Sports Nautiques",[],Location("","","",[0.0,0.0])),proprietary: false)
-                        ],
-                      ),
+                      )
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 15.0),
@@ -132,7 +145,8 @@ class _ProfilePageState extends State<ProfilePage>{
                     ),
                     SizedBox(
                       height: 275,
-                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {return SlidingCard(
+                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {
+                        return SlidingCard(
                         advert: _adverts[index],
                         proprietary: true,
                       );},
