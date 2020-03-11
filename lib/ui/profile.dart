@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/api/auth.dart';
-import 'package:trops_app/api/user.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

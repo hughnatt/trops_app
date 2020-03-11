@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/ui/profile.dart';
-import 'package:trops_app/models/User.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:trops_app/utils/session.dart';

@@ -22,21 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 Original Version :  https://github.com/huextrat/TheGorgeousLogin/
  */
-
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/api/auth.dart';
-import 'package:trops_app/api/user.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
-import 'package:http/http.dart' as Http;
-import 'package:trops_app/models/User.dart';
-import 'package:trops_app/utils/session.dart';
-import 'package:trops_app/utils/sharedPreferences.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 

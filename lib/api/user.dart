@@ -1,12 +1,7 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
-import 'package:trops_app/utils/session.dart';
-import 'package:trops_app/utils/sharedPreferences.dart';
-
 
 User parseUser(Map json) {
   return User(
