@@ -24,6 +24,32 @@ class SlidingCard extends StatelessWidget {
     }
   }
 
+
+  Widget _getImageWidget(BuildContext context){
+
+    if(this.advert.getFirstImage() != null){
+
+      return CachedNetworkImage(
+        imageUrl: advert.getFirstImage(),
+        fit: BoxFit.cover,
+        height: 150,
+        width: MediaQuery.of(context).size.width * 0.8,
+        placeholder: (context, url) => Center(
+          child: Container(
+            height: 50,
+            width: 50,
+            child: CircularProgressIndicator(),
+          ),
+        ),
+        errorWidget: (context, url, error) => Icon(Icons.broken_image),
+      );
+    }
+    else {
+      return Image.asset("assets/default_image.jpeg", fit: BoxFit.cover,);
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -36,12 +62,7 @@ class SlidingCard extends StatelessWidget {
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-              child: CachedNetworkImage(
-                imageUrl: advert.getFirstImage(),
-                fit: BoxFit.cover,
-                height: 150,
-                width: MediaQuery.of(context).size.width * 0.8,
-              ),
+              child: _getImageWidget(context),
             ),
             Container(
               child: Flexible(
