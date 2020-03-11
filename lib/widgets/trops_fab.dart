@@ -6,12 +6,11 @@ import 'package:trops_app/utils/session.dart';
 class TropsFloatingActionButton extends StatelessWidget {
 
   void _onButtonPressed(BuildContext context){
-    if(Session.currentUser != null){
+    if(Session.isAuthenticated){
       Navigator.pushNamed(context, "/create");
-    } else {
+    } else if (ModalRoute.of(context).settings.name != "/auth"){
       Navigator.pushNamed(context, "/auth", arguments: "/create");
     }
-
   }
 
   @override

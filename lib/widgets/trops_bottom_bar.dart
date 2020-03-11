@@ -6,11 +6,9 @@ import 'package:trops_app/utils/session.dart';
 class TropsBottomAppBar extends StatelessWidget {
 
   void _onHomePressed(BuildContext context){
-
     if(ModalRoute.of(context).settings.name != "/"){
       Navigator.pushNamed(context, "/");
     }
-
   }
 
   void _onSearchPressed(BuildContext context){
@@ -20,31 +18,22 @@ class TropsBottomAppBar extends StatelessWidget {
   }
 
   void _onNotificationsPressed(BuildContext context){
-
   }
 
   void _onProfilePressed(BuildContext context){
-    if (Session.isAuthenticated)
-    {
+    if (Session.isAuthenticated){
       if(ModalRoute.of(context).settings.name != "/profile"){
-        Navigator.pushNamed(context, "/profile", arguments: Session.currentUser);
+        Navigator.pushNamed(context, "/profile");
       }
-
-    } else if(ModalRoute.of(context).settings.name != "/auth"){
-      Navigator.pushNamed(context, "/auth", arguments: "/profile");
+    } else {
+      if(ModalRoute.of(context).settings.name != "/auth"){
+        Navigator.pushNamed(context, "/auth");
+      }
     }
   }
 
   Color _whatColorToPaint(BuildContext context, String path){
     if(ModalRoute.of(context).settings.name == path){
-      return Colors.blue;
-    } else {
-      return Colors.black54;
-    }
-  }
-
-  Color _whatColorToPaintProfile(BuildContext context){
-    if(ModalRoute.of(context).settings.name == "/auth" || ModalRoute.of(context).settings.name == "/profile"){
       return Colors.blue;
     } else {
       return Colors.black54;
@@ -65,12 +54,11 @@ class TropsBottomAppBar extends StatelessWidget {
             IconButton(icon: Icon(Icons.search,size: 30,color: _whatColorToPaint(context, "/search")), onPressed: () => _onSearchPressed(context),),
             SizedBox(width: 40), // The dummy child
             IconButton(icon: Icon(FontAwesomeIcons.bell,color: _whatColorToPaint(context, "")), onPressed: () => _onNotificationsPressed(context),),
-            IconButton(icon: Icon(FontAwesomeIcons.user,color: _whatColorToPaintProfile(context)), onPressed: ()=> _onProfilePressed(context),),
+            IconButton(icon: Icon(FontAwesomeIcons.user,color: _whatColorToPaint(context, "/profile")), onPressed: ()=> _onProfilePressed(context),),
             SizedBox(width: 1),
           ],
         ),
       ),
     );
   }
-
 }

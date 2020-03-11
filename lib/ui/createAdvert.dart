@@ -50,6 +50,8 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
   void initState(){
     super.initState();
 
+
+
     _fabIcon = Icon(Icons.navigate_next);
 
     _tabController = TabController(vsync: this, length: 6);

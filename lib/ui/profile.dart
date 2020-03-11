@@ -31,7 +31,6 @@ class _ProfilePageState extends State<ProfilePage>{
   void initState() {
     super.initState();
 
-    pageController = PageController(viewportFraction: 0.8);
     // Make sure we have an user logged in
     // If not, redirect to authentication screen
     if (!Session.isAuthenticated){
@@ -40,6 +39,9 @@ class _ProfilePageState extends State<ProfilePage>{
         Navigator.of(context).pushNamed("/auth");
       });
     }
+
+    pageController = PageController(viewportFraction: 0.8);
+
 
     getAdvertsByUser(Session.currentUser).then((res) {
       setState(() {
