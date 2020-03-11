@@ -67,7 +67,8 @@ Future<UserResult> getSessionByToken(String token) async {
             json['name'],
             json['email'],
             token,
-            json['phoneNumber']
+            json['phoneNumber'],
+            json['favorites']
         );
         userResult.isAuthenticated = true;
         userResult.user = user;

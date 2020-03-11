@@ -748,7 +748,10 @@ class _AuthPageState extends State<AuthPage>
       _displayAlert("Les identifiants fournis sont incorrects.");
     } else {
       Map json = jsonDecode(response.body);
-      User user = User(json['user']['name'],json['user']['email'],json['token'],json['phoneNumber'],json['user']['_id']);
+
+      List<String> favorites = List<String>.from(json['user']["favorites"]);
+
+      User user = User(json['user']['name'],json['user']['email'],json['token'],json['phoneNumber'],json['user']['_id'],favorites);
       User.current = user;
       print(User.current.getId());
       Navigator.pop(context);

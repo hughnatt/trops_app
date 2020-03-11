@@ -11,13 +11,16 @@ Future<User> getUser(String uid) async {
   var response = await Http.get(uri, headers: {"Content-Type": "application/json"});
 
   if(response.statusCode == 200) {
+
     var result = await jsonDecode(response.body);
+
     User user = User(
         result['name'],
         result['email'],
         null,
         result['phoneNumber'],
-        result['_id']
+        result['_id'],
+        null //we don't want to get the user's favorites
     );
     return user;
   }

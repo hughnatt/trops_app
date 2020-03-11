@@ -16,13 +16,17 @@ Future<List<Advert>> getAllAdverts()  async {
 
 Future<List<Advert>> getAdvertsByUser(User user) async {
   Uri uri;
+  Http.Response response;
   if (user == null){
     uri = Uri.https(apiBaseURI, '/advert');
+    response = await Http.post(uri, headers: {"Content-Type": "application/json"});
+    
   } else {
     uri = Uri.https(apiBaseURI, '/advert/owner/' + user.getId());
-  }
+    String token = user.getToken();
+    response = await Http.post(uri, headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
 
-  Http.Response response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+  }
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -36,6 +40,7 @@ Future<List<Advert>> getAdvertsByUser(User user) async {
       });
       break;
     default:
+      print(response.statusCode);
       break;
   }
 
