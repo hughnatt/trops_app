@@ -65,11 +65,15 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
     if(Session.currentUser != null && Session.currentUser.getId() == widget.advert.getOwner()){
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
-    } else if (Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner()) { //&& isInUserFavorite(widget.advert.getId())
+    }
+    else if (Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && Session.currentUser.isInFavorites(widget.advert.getId())) { //&& isInUserFavorite(widget.advert.getId())
       return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a star if the current advert is in the user's favorites
     }
-    else {
-      return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a empty star if the current advert is not in the user's favorites
+    else if(Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && !Session.currentUser.isInFavorites(widget.advert.getId())) {
+      return IconButton(icon: Icon(Icons.star_border),onPressed: () => null); //display a empty star if the current advert is not in the user's favorites
+    }
+    else{ //the user is not logged
+      return IconButton(icon: Icon(null));
     }
   }
 
