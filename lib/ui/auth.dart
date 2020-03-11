@@ -22,19 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 Original Version :  https://github.com/huextrat/TheGorgeousLogin/
  */
-
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
-import 'package:trops_app/api/auth.dart' as Auth;
-import 'package:http/http.dart' as Http;
-import 'package:trops_app/models/User.dart';
-import 'package:trops_app/utils/sharedPreferences.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 
@@ -297,7 +291,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
-                          onSubmitted: (value) => _login(),
+                          onSubmitted: (value) => _handleLogin(),
                         ),
                       ),
                     ],
@@ -337,7 +331,7 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => _login()
+                    onPressed: () => _handleLogin()
                 ),
               ),
             ],
@@ -620,7 +614,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
-                          onSubmitted: (value) => _register(),
+                          onSubmitted: (value) => _handleRegister(),
                         ),
                       ),
                     ],
@@ -660,7 +654,7 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => _register()
+                    onPressed: () => _handleRegister()
                 ),
               ),
             ],
@@ -712,7 +706,7 @@ class _AuthPageState extends State<AuthPage>
     });
   }
 
-  void _register() async {
+  void _handleRegister() async {
     if (_ctrlRegisterPassword.text != _ctrlRegisterConfirmPassword.text){
       _displayAlert("Les mots de passe ne correspondent pas.");
       FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
@@ -730,32 +724,24 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
-      if (response.statusCode >= 300){
+      AuthResult authResult = await register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
+      if(authResult.isAuthenticated && authResult != null){
+        Navigator.pop(context);
+        Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
+      } else {
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
-      } else {
-        Navigator.pop(context);
-        Navigator.pushNamed(context, '/auth');
       }
     }
   }
 
-  void _login() async {
-    Http.Response response;
-    response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
-    if (response.statusCode != 200){
-      _displayAlert("Les identifiants fournis sont incorrects.");
-    } else {
-      Map json = jsonDecode(response.body);
-
-      List<String> favorites = List<String>.from(json['user']["favorites"]);
-
-      User user = User(json['user']['name'],json['user']['email'],json['token'],json['phoneNumber'],json['user']['_id'],favorites);
-      User.current = user;
-      print(User.current.getId());
+  void _handleLogin() async {
+    AuthResult authResult = await login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
+    if (authResult.isAuthenticated && authResult.user != null){
       Navigator.pop(context);
-      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);
+      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
+    } else {
+      _displayAlert("Les identifiants fournis sont incorrects.");
     }
   }
 }

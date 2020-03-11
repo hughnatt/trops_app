@@ -1,20 +1,18 @@
-
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trops_app/api/auth.dart';
-import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/session.dart';
 
-final String _SP_KEY_TOKEN = 'token';
+const String _SP_KEY_TOKEN = 'token';
 
 void restoreCurrentUser() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = (prefs.getString(_SP_KEY_TOKEN) ?? null);
   if (token != null){
-    UserResult userResult = await getSessionByToken(token);
-    if (userResult.isAuthenticated && userResult.user != null){
-      print(userResult.user);
-      User.current = userResult.user;
-      print(User.current.getEmail());
+    AuthResult authResult = await getSession(token);
+    if (authResult.isAuthenticated && authResult.user != null){
+      Session.currentUser = authResult.user;
+      Session.token = token;
+      Session.isAuthenticated = true;
     } else {
       //Do nothing, token has probably expired
     }

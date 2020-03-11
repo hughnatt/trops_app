@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/models/Advert.dart';
 
 class AdvertField extends StatelessWidget {
 

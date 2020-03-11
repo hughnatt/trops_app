@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
-import 'package:trops_app/models/User.dart';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/api/category.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
@@ -24,7 +23,7 @@ enum SourceType {gallery, camera} //enum for the different sources of the images
 
 class _AdminAdvertViewState extends State<AdminAdvertView> {
 
-  List<TropsCategory> _categories = new List<TropsCategory>();
+  //List<TropsCategory> _categories = new List<TropsCategory>();
 
   TextEditingController _titleController;
   TextEditingController _descriptionController;
@@ -36,6 +35,8 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   //List<DateRange> availability = List<DateRange>();
 
   GlobalKey<ImageSelectorState> _imageSelectorState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
+  GlobalKey<AutocompleteState> _autocompleteState = GlobalKey<AutocompleteState>();
+  GlobalKey<CategorySelectorState> _categorySelectorState = GlobalKey<CategorySelectorState>();
 
   @override
   void initState() {
@@ -54,7 +55,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
-        _categories = res;
+        //_categories = res;
         _categorySelector = widget.advert.getCategory();
       });
     });
@@ -70,7 +71,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
-    Http.Response res = await deleteAdvert(widget.advert.getId(), User.current.getToken());
+    Http.Response res = await deleteAdvert(widget.advert.getId(), Session.token);
 
     if(res.statusCode == 202){
       Navigator.pop(context);
@@ -134,7 +135,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = _descriptionController.text;
     String price = _priceController.text;
 
-    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
+    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), Session.token,_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
 
     switch(advertUploadStatus){
     case AdvertUploadStatus.SUCCESS:
@@ -177,8 +178,8 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     }
   }
 
-  void updateCategory(BuildContext context, CategorySelector selector){
-    String cat = getCategoryNameByID(selector.selectedCategory());
+  void updateCategory(BuildContext context){
+    String cat = getCategoryNameByID(_categorySelectorState.currentState.selectedCategory());
     if(cat != ""){
       setState(() {
         _categorySelector = cat;
@@ -188,21 +189,19 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   }
 
   Future<void> chooseCategory(BuildContext context){
-    CategorySelector selector = CategorySelector(categories: _categories,);
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
         title: Text("Choississez une nouvelle catégorie"),
         children: <Widget>[
-          selector,
-
+          CategorySelector(key: _categorySelectorState),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               FlatButton(
                 child: Text("Ok"),
-                onPressed: () => updateCategory(context,selector),
+                onPressed: () => updateCategory(context),
               ),
 
               FlatButton(
@@ -217,30 +216,29 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     );
   }
 
-  void updateLocation(BuildContext context,Autocomplete selector){
+  void updateLocation(BuildContext context){
 
-    if(selector.getSelectedLocation()!=null){
+    if(_autocompleteState.currentState.getSelectedLocation()!=null){
       setState(() {
-        _locationSelector = selector.getSelectedLocation();
+        _locationSelector = _autocompleteState.currentState.getSelectedLocation();
       });
     }
     Navigator.pop(context);
   }
 
   Future<void> chooseLocation(BuildContext context,){
-    Autocomplete locationselector = Autocomplete();
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => SimpleDialog(
         title: Text("choisissez une nouvelle location"),
         children: <Widget>[
-          locationselector,
+          Autocomplete(key: _autocompleteState),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               FlatButton(
                 child: Text("Ok"),
-                onPressed: () => updateLocation(context, locationselector),
+                onPressed: () => updateLocation(context),
               ),
               FlatButton(
                 child: Text("Annuler"),

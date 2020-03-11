@@ -3,6 +3,7 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 import 'package:trops_app/api/advert.dart';
@@ -24,33 +25,35 @@ class _ProfilePageState extends State<ProfilePage>{
 
   List<Advert> _adverts = new List<Advert>();
 
+  User _user;
+
   @override
   void initState() {
     super.initState();
 
-    pageController = PageController(viewportFraction: 0.8);
     // Make sure we have an user logged in
     // If not, redirect to authentication screen
-    if (User.current == null){
+    if (!Session.isAuthenticated){
       SchedulerBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
         Navigator.of(context).pushNamed("/auth");
       });
     }
 
-    getAdvertsByUser(User.current).then((res) {
+    pageController = PageController(viewportFraction: 0.8);
+
+
+    getAdvertsByUser(Session.currentUser).then((res) {
       setState(() {
         _adverts = res;
       });
     });
 
-
-
+    _user = Session.currentUser;
   }
 
   @override
   Widget build(BuildContext context) {
-    final User user = ModalRoute.of(context).settings.arguments;
     return TropsScaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -91,7 +94,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(top: 10.0),
                       child: Text(
-                          user.getName(),
+                          _user.getName(),
                           textAlign: TextAlign.center,
                           textScaleFactor: 2.0,
                           style: TextStyle(fontWeight: FontWeight.bold)
@@ -100,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(bottom: 10.0),
                       child: Text(
-                        user.getEmail(),
+                        _user.getEmail(),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -154,9 +157,7 @@ class _ProfilePageState extends State<ProfilePage>{
   }
 
   void _logout() {
-    print("Logging out");
-    signOff(User.current);
-    User.current = null;
+    signOff();
     Navigator.pop(context);
     Navigator.pushNamed(context, "/auth", arguments: "home");
   }

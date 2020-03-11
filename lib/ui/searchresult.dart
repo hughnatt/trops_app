@@ -3,7 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
@@ -25,6 +24,7 @@ Map<String,bool> _categorySelected = Map<String,bool>();
 
 class _SearchResultPageState extends State<SearchResultPage>{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  GlobalKey<AutocompleteState> _autocomplete = GlobalKey<AutocompleteState>();
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -118,7 +118,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
   Future<void> _showAlert(BuildContext context){
 
-    Autocomplete locationSearchBar = Autocomplete();
     int _selectedDistance = 5;
 
     return showDialog(
@@ -138,7 +137,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
                     ),
                     child: Padding(
                       padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                      child: locationSearchBar,
+                      child: Autocomplete(key: _autocomplete),
                     ),
                   ),
                   Padding(
@@ -182,14 +181,14 @@ class _SearchResultPageState extends State<SearchResultPage>{
     ).then((returndata) {
       setState(() {
         try{
-          _city = locationSearchBar.getSelectedLocation().getCity();
+          _city = _autocomplete.currentState.getSelectedLocation().getCity();
           _distance = _selectedDistance;
         }
         catch(err){
           _city = DEFAULT_CITY;
           _distance = DEFAULT_DISTANCE;
         }
-        _selectedLocation = locationSearchBar.getSelectedLocation();
+        _selectedLocation = _autocomplete.currentState.getSelectedLocation();
 
       });
     });
@@ -530,7 +529,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     loadAdverts();
   }
 
-  void _pickDateTime() async {
+/*  void _pickDateTime() async {
     DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
     DateTime lastDate;
 
@@ -553,7 +552,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     if(returnedDates != null){ //Allow to handle the cancel button that pop the context
       picked = returnedDates;
     }
-  }
+  }*/
 }
 
 void _applyValueToSubcategories(TropsCategory cat, bool value){

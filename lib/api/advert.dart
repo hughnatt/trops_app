@@ -6,6 +6,7 @@ import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/session.dart';
 
 
 enum AdvertUploadStatus {SUCCESS,FAILURE}
@@ -23,7 +24,7 @@ Future<List<Advert>> getAdvertsByUser(User user) async {
     
   } else {
     uri = Uri.https(apiBaseURI, '/advert/owner/' + user.getId());
-    String token = user.getToken();
+    String token = Session.token;
     response = await Http.post(uri, headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
 
   }

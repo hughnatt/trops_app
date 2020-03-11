@@ -1,9 +1,17 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/models/User.dart';
 import 'package:trops_app/api/constants.dart';
+import 'package:trops_app/models/User.dart';
 
+User parseUser(Map json) {
+  return User(
+      json['_id'],
+      json['name'],
+      json['email'],
+      json['phoneNumber'],
+      json['favorites']
+  );
+}
 
 Future<User> getUser(String uid) async {
 
@@ -17,7 +25,6 @@ Future<User> getUser(String uid) async {
     User user = User(
         result['name'],
         result['email'],
-        null,
         result['phoneNumber'],
         result['_id'],
         null //we don't want to get the user's favorites
@@ -27,5 +34,6 @@ Future<User> getUser(String uid) async {
   else{
     return null;
   }
-
 }
+
+

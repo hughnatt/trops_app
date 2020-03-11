@@ -8,6 +8,7 @@ import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
 import 'package:intl/intl.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailedAdvertPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   @override
   void initState() {
+    super.initState();
     getUser(widget.advert.getOwner()).then((User user) {
       setState(() {
         this._owner = user;
@@ -61,9 +63,9 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   Widget trailingIcon(BuildContext context){
 
-    if(User.current != null && User.current.getId() == widget.advert.getOwner()){
+    if(Session.currentUser != null && Session.currentUser.getId() == widget.advert.getOwner()){
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
-    } else if (User.current != null && User.current.getId() != widget.advert.getOwner()) { //&& isInUserFavorite(widget.advert.getId())
+    } else if (Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner()) { //&& isInUserFavorite(widget.advert.getId())
       return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a star if the current advert is in the user's favorites
     }
     else {
@@ -247,9 +249,6 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Theme.of(context).accentColor;
-    const double edgeAllPadding = 32;
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -288,7 +287,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
           switch(index){
             case 0:
               if(_owner.getPhoneNumber() != null) _onPhoneTapped(context);
-              else _showErrorAlert(context, "Aucun numéro de téléphone renseigné");;
+              else _showErrorAlert(context, "Aucun numéro de téléphone renseigné");
               break;
             case 1:
               _onCalendarTapped(context);
