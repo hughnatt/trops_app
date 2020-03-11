@@ -63,8 +63,11 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
     if(User.current != null && User.current.getId() == widget.advert.getOwner()){
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
-    } else {
-      return Icon(null);
+    } else if (User.current != null && User.current.getId() != widget.advert.getOwner()) { //&& isInUserFavorite(widget.advert.getId())
+      return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a star if the current advert is in the user's favorites
+    }
+    else {
+      return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a empty star if the current advert is not in the user's favorites
     }
   }
 
