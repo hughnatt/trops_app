@@ -183,35 +183,67 @@ class _HomePageState extends State<HomePage> {
 
     Widget searchBar = Padding(
       padding: EdgeInsets.only(top: 10, left: 10,right: 10),
-      child: Hero(
-        tag: 'heroSearchBar',
-        child: Material(
-          borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
-          elevation: 2.0,
-          child: Container(
-            height: 45.0,
-            margin: EdgeInsets.only(left: 16.0, right: 16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Expanded(
-                  child: TextField(
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                        icon: Icon(
-                          Icons.search,
-                          color: Theme.of(context).accentColor,
-                        ),
-                        border: InputBorder.none),
-                    onTap: ()  => Navigator.pushNamed(context, "/search"),
-                    readOnly: true,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(context, "/search");
+        },
+        child: Hero(
+          tag: 'heroSearchBar',
+          child: Material(
+            borderRadius: const BorderRadius.all(const Radius.circular(25.0)),
+            elevation: 2.0,
+            child: Container(
+              height: 45.0,
+              margin: EdgeInsets.only(left: 16.0, right: 16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.search,
+                    color: Theme.of(context).accentColor,
                   ),
+
+                  Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Image(
+                            image: AssetImage("assets/trops_logo_866.png"),
+                            height: 28,
+                          ),
+                          Text(
+                              "  TROPS",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.black45,
+                                fontWeight: FontWeight.bold)
+                          )
+                        ],
+                      )
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 40),
+                  )
+
+                  /*Expanded(
+                child: TextField(
+                  maxLines: 1,
+                  decoration: InputDecoration(
+                      icon: Icon(
+                        Icons.search,
+                        color: Theme.of(context).accentColor,
+                      ),
+                      border: InputBorder.none),
+                  onTap: ()  => Navigator.pushNamed(context, "/search"),
+                  readOnly: true,
                 ),
-              ],
+              ),*/
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
 
     return WillPopScope(
@@ -223,14 +255,14 @@ class _HomePageState extends State<HomePage> {
             children: <Widget>[
               searchBar,
               Padding(
-                padding: EdgeInsets.only(left: 10, top: 10),
+                padding: EdgeInsets.all(10),
                 child: Text(
                   'Catégories',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
-                      fontSize: 22,
+                      fontSize: 20,
                   ),
                 ),
               ),
@@ -239,14 +271,14 @@ class _HomePageState extends State<HomePage> {
                 child:  _getListCategories(),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 10, bottom: 5),
+                padding: EdgeInsets.all(10),
                 child: Text(
                   'Dernières annonces',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
-                      fontSize: 22,
+                      fontSize: 20,
                   ),
                 ),
               ),
