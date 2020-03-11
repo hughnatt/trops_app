@@ -19,7 +19,7 @@ Future<List<Advert>> getAdvertsByUser(User user) async {
   Http.Response response;
   if (user == null){
     uri = Uri.https(apiBaseURI, '/advert');
-    response = await Http.post(uri, headers: {"Content-Type": "application/json"});
+    response = await Http.get(uri, headers: {"Content-Type": "application/json"});
     
   } else {
     uri = Uri.https(apiBaseURI, '/advert/owner/' + user.getId());
