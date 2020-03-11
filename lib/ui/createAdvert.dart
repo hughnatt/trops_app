@@ -20,7 +20,7 @@ class CreateAdvertPage extends StatefulWidget  {
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
+enum _AlertType {success, failure, denied, eulaNotAccepted} //enum for the different case of the creation of an advert
 
 class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProviderStateMixin {
 
@@ -323,11 +323,12 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     FocusScope.of(context).unfocus();
 
     if(!_checkFields()) { //if the user have correctly completed the form
-      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
+      _showUploadResult(context, _AlertType.denied); // we warn him that he can't create the advert
       return;
     }
 
     if (!_hasAcceptedEULA){
+      _showUploadResult(context, _AlertType.eulaNotAccepted);
       return;
     }
 
@@ -349,14 +350,14 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
 
       switch(response){
         case AdvertUploadStatus.FAILURE:
-          _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
+          _showUploadResult(context,_AlertType.failure); //we warn the user that the process failed
           return;
         case AdvertUploadStatus.SUCCESS:
-          _showUploadResult(context,ResultType.success); // we warn him that it's a success
+          _showUploadResult(context,_AlertType.success); // we warn him that it's a success
           return;
       }
     } catch (error){
-      _showUploadResult(context,ResultType.failure);
+      _showUploadResult(context,_AlertType.failure);
     } finally {
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
@@ -364,7 +365,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     }
   }
 
-  Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
+  Future<void> _showUploadResult(BuildContext context, _AlertType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
     String title;
     String content;
     int popCount;
@@ -373,7 +374,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     Color color;
 
     switch(result){
-      case ResultType.success:
+      case _AlertType.eulaNotAccepted:
+        title = "Pas si vite !";
+        content = "Veuillez accepter les conditions générales d'utilisation";
+        popCount = 1;
+        color = Colors.redAccent;
+        break;
+      case _AlertType.success:
         {
           title = "Opération terminée";
           content = "Votre annonce a été créée avec succès";
@@ -381,7 +388,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           color = Colors.greenAccent;
           break;
         }
-      case ResultType.failure:
+      case _AlertType.failure:
         {
           title = "Opération échouée";
           content = "Malheureusement, votre annonce n'a pas pu être créée";
@@ -389,7 +396,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           color = Colors.redAccent;
           break;
         }
-      case ResultType.denied:
+      case _AlertType.denied:
         {
           title = "Pas si vite !";
           content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Catégorie, Dates)";
