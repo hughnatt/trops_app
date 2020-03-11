@@ -29,10 +29,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:trops_app/api/users.dart';
+import 'package:trops_app/api/auth.dart';
+import 'package:trops_app/api/user.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
-import 'package:trops_app/api/users.dart' as Auth;
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/utils/session.dart';
@@ -299,7 +299,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
-                          onSubmitted: (value) => _login(),
+                          onSubmitted: (value) => _handleLogin(),
                         ),
                       ),
                     ],
@@ -339,7 +339,7 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => _login()
+                    onPressed: () => _handleLogin()
                 ),
               ),
             ],
@@ -622,7 +622,7 @@ class _AuthPageState extends State<AuthPage>
                               ),
                             ),
                           ),
-                          onSubmitted: (value) => _register(),
+                          onSubmitted: (value) => _handleRegister(),
                         ),
                       ),
                     ],
@@ -662,7 +662,7 @@ class _AuthPageState extends State<AuthPage>
                             fontFamily: "WorkSansBold"),
                       ),
                     ),
-                    onPressed: () => _register()
+                    onPressed: () => _handleRegister()
                 ),
               ),
             ],
@@ -714,7 +714,7 @@ class _AuthPageState extends State<AuthPage>
     });
   }
 
-  void _register() async {
+  void _handleRegister() async {
     if (_ctrlRegisterPassword.text != _ctrlRegisterConfirmPassword.text){
       _displayAlert("Les mots de passe ne correspondent pas.");
       FocusScope.of(context).requestFocus(_focusRegisterConfirmPassword);
@@ -732,11 +732,10 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      UserResult userResult = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
-      if(userResult.isAuthenticated && userResult != null){
-        Session.currentUser = userResult.user;
+      AuthResult authResult = await register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
+      if(authResult.isAuthenticated && authResult != null){
         Navigator.pop(context);
-        Navigator.pushNamed(context, '/auth');
+        Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
       } else {
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
@@ -744,13 +743,11 @@ class _AuthPageState extends State<AuthPage>
     }
   }
 
-  void _login() async {
-    UserResult userResult = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
-    if (userResult.isAuthenticated && userResult.user != null){
-      Session.currentUser = userResult.user;
-
+  void _handleLogin() async {
+    AuthResult authResult = await login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
+    if (authResult.isAuthenticated && authResult.user != null){
       Navigator.pop(context);
-      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: Session.currentUser);
+      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
     } else {
       _displayAlert("Les identifiants fournis sont incorrects.");
     }

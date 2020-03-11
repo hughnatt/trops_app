@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
-import 'package:trops_app/api/users.dart';
+import 'package:trops_app/api/user.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/User.dart';

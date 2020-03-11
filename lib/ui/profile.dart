@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/users.dart';
+import 'package:trops_app/api/auth.dart';
+import 'package:trops_app/api/user.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -25,6 +26,8 @@ class _ProfilePageState extends State<ProfilePage>{
 
   List<Advert> _adverts = new List<Advert>();
 
+  User _user;
+
   @override
   void initState() {
     super.initState();
@@ -45,13 +48,11 @@ class _ProfilePageState extends State<ProfilePage>{
       });
     });
 
-
-
+    _user = Session.currentUser;
   }
 
   @override
   Widget build(BuildContext context) {
-    final User user = ModalRoute.of(context).settings.arguments;
     return TropsScaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -92,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(top: 10.0),
                       child: Text(
-                          user.getName(),
+                          _user.getName(),
                           textAlign: TextAlign.center,
                           textScaleFactor: 2.0,
                           style: TextStyle(fontWeight: FontWeight.bold)
@@ -101,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(bottom: 10.0),
                       child: Text(
-                        user.getEmail(),
+                        _user.getEmail(),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -155,8 +156,7 @@ class _ProfilePageState extends State<ProfilePage>{
   }
 
   void _logout() {
-    signOff(Session.currentUser);
-    Session.currentUser = null;
+    signOff();
     Navigator.pop(context);
     Navigator.pushNamed(context, "/auth", arguments: "home");
   }
