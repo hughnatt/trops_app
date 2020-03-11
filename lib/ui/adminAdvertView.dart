@@ -134,7 +134,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = _descriptionController.text;
     String price = _priceController.text;
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
+    Http.Response res = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getId(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
 
     if(res.statusCode==200){
       Navigator.pop(context);

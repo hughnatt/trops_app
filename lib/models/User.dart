@@ -7,8 +7,10 @@ class User {
   String _token;
   String _name;
   String _email;
+  String _phoneNumber;
+  String _id;
 
-  User(this._name,this._email,this._token);
+  User(this._name,this._email,this._token,this._phoneNumber,this._id);
 
   getName(){
     return _name;
@@ -20,5 +22,13 @@ class User {
 
   getToken(){
     return _token;
+  }
+
+  getPhoneNumber(){
+    return _phoneNumber;
+  }
+
+  getId(){
+    return _id;
   }
 }

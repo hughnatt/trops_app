@@ -141,7 +141,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       });
 
       //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getEmail(),_myWidgetState.currentState.getAllPaths(), _availabilityList.availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
+      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getId(),_myWidgetState.currentState.getAllPaths(), _availabilityList.availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
 
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
