@@ -11,7 +11,7 @@ class CategorySelector extends StatefulWidget {
   CategorySelectorState createState() => CategorySelectorState();
 }
 
-class CategorySelectorState extends State<CategorySelector>{
+class CategorySelectorState extends State<CategorySelector> with AutomaticKeepAliveClientMixin<CategorySelector> {
 
   String _selectedCategoryID;
 
@@ -60,6 +60,7 @@ class CategorySelectorState extends State<CategorySelector>{
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
@@ -67,4 +68,7 @@ class CategorySelectorState extends State<CategorySelector>{
       itemCount: widget.categories.length,
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

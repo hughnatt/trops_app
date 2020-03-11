@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 
-final String _SP_KEY_TOKEN = 'token';
+const String _SP_KEY_TOKEN = 'token';
 
 void restoreCurrentUser() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();

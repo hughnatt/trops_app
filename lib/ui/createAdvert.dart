@@ -64,7 +64,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _loadingCategory = false;
-        _categorySelector = CategorySelector(categories: res);
+        _categorySelector = CategorySelector(key: _categorySelectorState,categories: res);
       });
     });
 
@@ -345,7 +345,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           double.parse(_priceController.text),
           _descriptionController.text,
           _selectedCategory(),
-          User.current.getEmail(),
+          User.current.getId(),
           _imageSelector.currentState.getAllPaths(),
           _availabilityList.availability,
           _autocomplete.currentState.getSelectedLocation()); // we try to contact the API to add the advert

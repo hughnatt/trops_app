@@ -10,7 +10,7 @@ class Autocomplete extends StatefulWidget {
   AutocompleteState createState() => AutocompleteState();
 }
 
-class AutocompleteState extends State<Autocomplete> {
+class AutocompleteState extends State<Autocomplete> with AutomaticKeepAliveClientMixin<Autocomplete>{
 
   final TextEditingController _typeAheadController = TextEditingController();
   Location _selectedLocation;
@@ -21,7 +21,7 @@ class AutocompleteState extends State<Autocomplete> {
 
   @override
   Widget build(BuildContext context) {
-
+    super.build(context);
     return TypeAheadField(
       noItemsFoundBuilder: (context) {
         return ListTile(
@@ -51,4 +51,8 @@ class AutocompleteState extends State<Autocomplete> {
       },
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
