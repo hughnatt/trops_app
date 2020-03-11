@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:splashscreen/splashscreen.dart';
 import 'package:trops_app/ui/home.dart';
+import 'package:trops_app/utils/sharedPreferences.dart';
 
 class SplashPage extends StatefulWidget {
   @override
@@ -10,6 +11,13 @@ class SplashPage extends StatefulWidget {
 }
 
 class SplashPageState extends State<SplashPage>{
+
+  @override
+  void initState() {
+    super.initState();
+    restoreCurrentUser();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
