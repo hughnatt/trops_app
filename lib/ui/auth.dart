@@ -95,6 +95,7 @@ class _AuthPageState extends State<AuthPage>
     _focusRegisterName.dispose();
     _focusRegisterEmail.dispose();
     _focusRegisterPassword.dispose();
+    _focusRegisterPhone.dispose();
     _pageController?.dispose();
     super.dispose();
   }
@@ -729,7 +730,7 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text);
+      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
       if (response.statusCode >= 300){
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
@@ -747,9 +748,9 @@ class _AuthPageState extends State<AuthPage>
       _displayAlert("Les identifiants fournis sont incorrects.");
     } else {
       Map json = jsonDecode(response.body);
-      User user = User(json['user']['_id'],json['user']['name'],json['user']['email'],json['token']);
+      User user = User(json['user']['name'],json['user']['email'],json['token'],json['phoneNumber'],json['user']['_id']);
       User.current = user;
-      saveToken(user.getToken());
+      print(User.current.getId());
       Navigator.pop(context);
       Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);
     }

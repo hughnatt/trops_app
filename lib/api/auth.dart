@@ -5,12 +5,13 @@ import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/utils/sharedPreferences.dart';
 
-Future<Http.Response> register(String name, String email, String password) async {
+Future<Http.Response> register(String name, String email, String password, String phone) async {
   var jsonBody = '''
   {
     "name" : "$name",
     "email" : "$email",
-    "password" : "$password"
+    "password" : "$password",
+    "phoneNumber" : "$phone"
   }''';
   var uri = new Uri.https(apiBaseURI, "/users");
   print(jsonBody);
@@ -66,6 +67,7 @@ Future<UserResult> getSessionByToken(String token) async {
             json['name'],
             json['email'],
             token,
+            json['phoneNumber']
         );
         userResult.isAuthenticated = true;
         userResult.user = user;
