@@ -9,7 +9,7 @@ User parseUser(Map json) {
       json['name'],
       json['email'],
       json['phoneNumber'],
-      json['favorites']
+      null //We don't want to get the favorite of the owner of the advert
   );
 }
 

@@ -42,12 +42,15 @@ class LoginBody{
 }
 
 User parseAuthUser(Map json) {
+
+  List<String> favorites = new List<String>.from(json['user']['favorites']);
+
   return User(
       json['user']['_id'],
       json['user']['name'],
       json['user']['email'],
       json['user']['phoneNumber'],
-      json['user']['favorites']
+      favorites
   );
 }
 
