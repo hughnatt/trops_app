@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/ui/searchresult.dart';

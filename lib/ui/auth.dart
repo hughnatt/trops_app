@@ -746,7 +746,7 @@ class _AuthPageState extends State<AuthPage>
       _displayAlert("Les identifiants fournis sont incorrects.");
     } else {
       Map json = jsonDecode(response.body);
-      User user = User(json['user']['name'],json['user']['email'],json['token']);
+      User user = User(json['user']['_id'],json['user']['name'],json['user']['email'],json['token']);
       User.current = user;
       Navigator.pop(context);
       Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);

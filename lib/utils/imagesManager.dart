@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:trops_app/api/image.dart';
-import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/constants.dart';
 
 class ImagesManager {
   final _imagesLink = List<String>(); // we declare a dynamic list (at beginning, none index is checkable !!)
