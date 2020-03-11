@@ -34,6 +34,7 @@ import 'package:trops_app/style/theme.dart' as Theme;
 import 'package:trops_app/api/auth.dart' as Auth;
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/sharedPreferences.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 
@@ -748,6 +749,7 @@ class _AuthPageState extends State<AuthPage>
       Map json = jsonDecode(response.body);
       User user = User(json['user']['_id'],json['user']['name'],json['user']['email'],json['token']);
       User.current = user;
+      saveToken(user.getToken());
       Navigator.pop(context);
       Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);
     }
