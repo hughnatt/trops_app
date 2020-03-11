@@ -6,7 +6,6 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/api/user.dart';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/auth.dart';
 
 class MenuProfile extends StatefulWidget{
 
@@ -23,24 +22,86 @@ class _MenuProfileState extends State<MenuProfile>{
   TextEditingController _newPassword = TextEditingController();
   TextEditingController _confirmationPassword = TextEditingController();
 
+  Color _backgroundCurrentPassword = Colors.white;
+  Color _backgroundNewPassword = Colors.white;
+
+  bool _isUpdatingPassword = false;
+  bool _isUpdatingEmail = false;
 
   void changeEmail() async{
+    setState(() {
+      _isUpdatingEmail = true;
+    });
     Http.Response res = await modifyEmail(_emailController.text);
+    setState(() {
+      _isUpdatingEmail = false;
+    });
     print(res.statusCode);
   }
 
   void changePassword() async {
 
+    setState(() {
+      _isUpdatingPassword = true;
+    });
     AuthResult resLogin = await login(Session.currentUser.getEmail(),_currentPassword.text);
 
     if(resLogin.token != null){
+      setState(() {
+        _backgroundCurrentPassword = Colors.white;
+      });
       if(_newPassword.text == _confirmationPassword.text){
+        setState(() {
+          _backgroundNewPassword = Colors.white;
+          _backgroundCurrentPassword = Colors.white;
+        });
         Http.Response resModif = await modifyPassword(_newPassword.text);
         print(resModif.statusCode);
+        if(resModif.statusCode == 200){
+          setState(() {
+            _confirmationPassword.text = "";
+            _newPassword.text = "";
+            _currentPassword.text = "";
+          });
+        }
+      } else {
+        setState(() {
+          _backgroundNewPassword = Colors.redAccent;
+        });
       }
+    } else {
+      setState(() {
+        _backgroundCurrentPassword = Colors.redAccent;
+      });
     }
 
+    setState(() {
+      _isUpdatingPassword = false;
+    });
+  }
 
+  Widget _confirmEmail(){
+    if(_isUpdatingEmail){
+      return CircularProgressIndicator(
+
+      );
+    } else {
+      return FlatButton(
+        child: Text("Confirmer"),
+        onPressed: () => changeEmail(),
+      );
+    }
+  }
+
+  Widget _confirmPassword(){
+    if(_isUpdatingPassword){
+      return CircularProgressIndicator();
+    } else {
+      return FlatButton(
+        child: Text("Confirmer"),
+        onPressed: () => changePassword(),
+      );
+    }
   }
 
   @override
@@ -65,10 +126,7 @@ class _MenuProfileState extends State<MenuProfile>{
                     TextField(
                       controller: _emailController,
                     ),
-                    FlatButton(
-                      child: Text("Confirmer"),
-                      onPressed: () => changeEmail(),
-                    ),
+                    _confirmEmail(),
                   ],
                 ),
               ),
@@ -85,6 +143,8 @@ class _MenuProfileState extends State<MenuProfile>{
                       controller: _currentPassword,
                       decoration: InputDecoration(
                         hintText: "Ancien mot de passe",
+                        filled: true,
+                        fillColor: _backgroundCurrentPassword,
                       ),
                     ),
                     TextField(
@@ -92,6 +152,8 @@ class _MenuProfileState extends State<MenuProfile>{
                       controller: _newPassword,
                       decoration: InputDecoration(
                         hintText: "Nouveau mot de passe",
+                        filled: true,
+                        fillColor: _backgroundNewPassword,
                       ),
                     ),
                     TextField(
@@ -99,12 +161,11 @@ class _MenuProfileState extends State<MenuProfile>{
                       controller: _confirmationPassword,
                       decoration: InputDecoration(
                         hintText: "Confirmation du nouveau mot de passe",
+                        filled: true,
+                        fillColor: _backgroundNewPassword,
                       ),
                     ),
-                    FlatButton(
-                      child: Text("Confirmer"),
-                      onPressed: () => changePassword(),
-                    ),
+                    _confirmPassword(),
                   ],
                 ),
               ),
