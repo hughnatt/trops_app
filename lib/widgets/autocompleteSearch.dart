@@ -3,7 +3,14 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:trops_app/api/location.dart';
 import 'package:trops_app/models/Location.dart';
 
-class Autocomplete extends StatelessWidget {
+class Autocomplete extends StatefulWidget {
+  const Autocomplete({ Key key }) : super(key: key);
+
+  @override
+  AutocompleteState createState() => AutocompleteState();
+}
+
+class AutocompleteState extends State<Autocomplete> with AutomaticKeepAliveClientMixin<Autocomplete>{
 
   final TextEditingController _typeAheadController = TextEditingController();
   Location _selectedLocation;
@@ -14,7 +21,7 @@ class Autocomplete extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    super.build(context);
     return TypeAheadField(
       noItemsFoundBuilder: (context) {
         return ListTile(
@@ -44,4 +51,8 @@ class Autocomplete extends StatelessWidget {
       },
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

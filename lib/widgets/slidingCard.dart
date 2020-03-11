@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
 import 'package:trops_app/ui/detailedAdvert.dart';
