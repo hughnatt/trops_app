@@ -6,6 +6,7 @@ import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
@@ -338,12 +339,12 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
 
     try {
       var response = await uploadAdvert(
-          User.current.getToken(),
+          Session.token,
           _titleController.text,
           double.parse(_priceController.text),
           _descriptionController.text,
           _selectedCategory(),
-          User.current.getEmail(),
+          Session.currentUser.getId(),
           _imageSelector.currentState.getAllPaths(),
           _availabilityList.availability,
           locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert

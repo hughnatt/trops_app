@@ -29,11 +29,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/api/users.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
-import 'package:trops_app/api/auth.dart' as Auth;
+import 'package:trops_app/api/users.dart' as Auth;
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/utils/sharedPreferences.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
@@ -730,29 +732,27 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      Http.Response response = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
-      if (response.statusCode >= 300){
-        _displayAlert("Echec de l'inscription.");
-        FocusScope.of(context).requestFocus(_focusRegisterName);
-      } else {
+      UserResult userResult = await Auth.register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
+      if(userResult.isAuthenticated && userResult != null){
+        Session.currentUser = userResult.user;
         Navigator.pop(context);
         Navigator.pushNamed(context, '/auth');
+      } else {
+        _displayAlert("Echec de l'inscription.");
+        FocusScope.of(context).requestFocus(_focusRegisterName);
       }
     }
   }
 
   void _login() async {
-    Http.Response response;
-    response = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
-    if (response.statusCode != 200){
-      _displayAlert("Les identifiants fournis sont incorrects.");
-    } else {
-      Map json = jsonDecode(response.body);
-      User user = User(json['user']['name'],json['user']['email'],json['token'],json['phoneNumber'],json['user']['_id']);
-      User.current = user;
-      print(User.current.getId());
+    UserResult userResult = await Auth.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
+    if (userResult.isAuthenticated && userResult.user != null){
+      Session.currentUser = userResult.user;
+
       Navigator.pop(context);
-      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: User.current);
+      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments, arguments: Session.currentUser);
+    } else {
+      _displayAlert("Les identifiants fournis sont incorrects.");
     }
   }
 }

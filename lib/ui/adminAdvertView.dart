@@ -7,6 +7,7 @@ import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/api/category.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/availabilityList.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 import 'package:trops_app/widgets/imageSelector.dart';
@@ -70,7 +71,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
-    Http.Response res = await deleteAdvert(widget.advert.getId(), User.current.getToken());
+    Http.Response res = await deleteAdvert(widget.advert.getId(), Session.token);
 
     if(res.statusCode == 202){
       Navigator.pop(context);
@@ -134,7 +135,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = _descriptionController.text;
     String price = _priceController.text;
 
-    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
+    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), Session.token,_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
 
     switch(advertUploadStatus){
     case AdvertUploadStatus.SUCCESS:

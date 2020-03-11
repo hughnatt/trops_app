@@ -3,6 +3,7 @@ import 'package:trops_app/ui/profile.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:trops_app/utils/session.dart';
 
 class TropsBottomAppBar extends StatelessWidget {
 
@@ -25,10 +26,10 @@ class TropsBottomAppBar extends StatelessWidget {
   }
 
   void _onProfilePressed(BuildContext context){
-    if (User.current != null)
+    if (Session.isAuthenticated)
     {
       if(ModalRoute.of(context).settings.name != "/profile"){
-        Navigator.pushNamed(context, "/profile", arguments: User.current);
+        Navigator.pushNamed(context, "/profile", arguments: Session.currentUser);
       }
 
     } else if(ModalRoute.of(context).settings.name != "/auth"){

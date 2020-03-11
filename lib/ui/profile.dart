@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/auth.dart';
+import 'package:trops_app/api/users.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 import 'package:trops_app/api/advert.dart';
@@ -31,14 +32,14 @@ class _ProfilePageState extends State<ProfilePage>{
     pageController = PageController(viewportFraction: 0.8);
     // Make sure we have an user logged in
     // If not, redirect to authentication screen
-    if (User.current == null){
+    if (!Session.isAuthenticated){
       SchedulerBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
         Navigator.of(context).pushNamed("/auth");
       });
     }
 
-    getAdvertsByUser(User.current).then((res) {
+    getAdvertsByUser(Session.currentUser).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -154,9 +155,8 @@ class _ProfilePageState extends State<ProfilePage>{
   }
 
   void _logout() {
-    print("Logging out");
-    signOff(User.current);
-    User.current = null;
+    signOff(Session.currentUser);
+    Session.currentUser = null;
     Navigator.pop(context);
     Navigator.pushNamed(context, "/auth", arguments: "home");
   }

@@ -2,12 +2,13 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_pro/carousel_pro.dart';
-import 'package:trops_app/api/user.dart';
+import 'package:trops_app/api/users.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/ui/adminAdvertView.dart';
 import 'package:intl/intl.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailedAdvertPage extends StatefulWidget {
@@ -61,7 +62,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   Widget trailingIcon(BuildContext context){
 
-    if(User.current != null && User.current.getEmail() == widget.advert.getOwner()){
+    if(Session.currentUser != null && Session.currentUser.getEmail() == widget.advert.getOwner()){
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
     } else {
       return Icon(null);
