@@ -28,7 +28,9 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
-  Autocomplete locationSearchBar = Autocomplete();
+  GlobalKey<AutocompleteState> _autocomplete = GlobalKey<AutocompleteState>();
+  GlobalKey<CategorySelectorState> _categorySelectorState = GlobalKey<CategorySelectorState>();
+
   CategorySelector _categorySelector;
   bool _loadingCategory;
   AvailabilityList _availabilityList = AvailabilityList(availability: []);
@@ -173,7 +175,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: locationSearchBar,
+                child: Autocomplete(key: _autocomplete),
               )
             ],
           ),
@@ -271,7 +273,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     if (_loadingCategory){
       return null;
     } else {
-      return _categorySelector.selectedCategory();
+      return _categorySelectorState.currentState.selectedCategory();
     }
   }
 
@@ -314,7 +316,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
         _priceController.text.isNotEmpty &&
         _isPriceValid &&
         _selectedCategory() != null &&
-        locationSearchBar.getSelectedLocation() != null
+        _autocomplete.currentState.getSelectedLocation() != null
     ); //check if all REQUIRED field have a value
   }
 
@@ -346,7 +348,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
           User.current.getEmail(),
           _imageSelector.currentState.getAllPaths(),
           _availabilityList.availability,
-          locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert
+          _autocomplete.currentState.getSelectedLocation()); // we try to contact the API to add the advert
 
       switch(response){
         case AdvertUploadStatus.FAILURE:
@@ -412,7 +414,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
       builder: (BuildContext context) {
         // return object of type Dialog
         return WillPopScope(
-            onWillPop: () {},
+            onWillPop: () {return null;},
             child : AlertDialog(
               title: new Text(title),
               content: Row(

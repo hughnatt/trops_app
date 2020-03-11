@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 
-
-
 class CategorySelector extends StatefulWidget {
 
   final List<TropsCategory> categories;
 
-  String _selectedCategoryID;
-
   CategorySelector({Key key, this.categories}) : super(key: key);
 
   @override
-  _CategorySelectorState createState() => _CategorySelectorState();
+  CategorySelectorState createState() => CategorySelectorState();
+}
+
+class CategorySelectorState extends State<CategorySelector>{
+
+  String _selectedCategoryID;
 
   String selectedCategory(){
     return _selectedCategoryID;
   }
-}
-
-class _CategorySelectorState extends State<CategorySelector>{
-
 
   Widget _buildTiles(TropsCategory root){
     if (root.subcategories.isEmpty) {
@@ -32,10 +29,10 @@ class _CategorySelectorState extends State<CategorySelector>{
             Spacer(),
             Radio<String>(
               value: root.id,
-              groupValue: widget._selectedCategoryID,
+              groupValue: _selectedCategoryID,
               onChanged: (String value){
                 setState(() {
-                  widget._selectedCategoryID = value;
+                  _selectedCategoryID = value;
                 });
               },
             )

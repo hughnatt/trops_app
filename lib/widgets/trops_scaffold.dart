@@ -7,7 +7,7 @@ class TropsScaffold extends StatelessWidget {
   final Widget body;
   final Drawer drawer;
   final Key scaffoldKey;
-  Widget appBar;
+  final Widget appBar;
 
   TropsScaffold({Key key, this.scaffoldKey, @required this.body, this.drawer, this.appBar}) : super(key : key);
 

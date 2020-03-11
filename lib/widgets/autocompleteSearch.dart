@@ -3,7 +3,14 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:trops_app/api/location.dart';
 import 'package:trops_app/models/Location.dart';
 
-class Autocomplete extends StatelessWidget {
+class Autocomplete extends StatefulWidget {
+  const Autocomplete({ Key key }) : super(key: key);
+
+  @override
+  AutocompleteState createState() => AutocompleteState();
+}
+
+class AutocompleteState extends State<Autocomplete> {
 
   final TextEditingController _typeAheadController = TextEditingController();
   Location _selectedLocation;

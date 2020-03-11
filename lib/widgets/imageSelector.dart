@@ -180,11 +180,15 @@ class ImageSelectorState extends State<ImageSelector> with AutomaticKeepAliveCli
           )
       );
     }
+    else {
+      return null;
+    }
   }
 
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return GridView.count(
       physics: const NeverScrollableScrollPhysics(), //prevent the user to scroll on the gridview instead of the list
       crossAxisCount: 2,

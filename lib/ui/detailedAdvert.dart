@@ -28,6 +28,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   @override
   void initState() {
+    super.initState();
     getUser(widget.advert.getOwner()).then((User user) {
       setState(() {
         this._owner = user;
@@ -244,9 +245,6 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Theme.of(context).accentColor;
-    const double edgeAllPadding = 32;
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -285,7 +283,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
           switch(index){
             case 0:
               if(_owner.getPhoneNumber() != null) _onPhoneTapped(context);
-              else _showErrorAlert(context, "Aucun numéro de téléphone renseigné");;
+              else _showErrorAlert(context, "Aucun numéro de téléphone renseigné");
               break;
             case 1:
               _onCalendarTapped(context);

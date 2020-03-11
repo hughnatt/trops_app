@@ -6,8 +6,6 @@ import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/DateRange.dart';
 
-const String _dataBaseURI = "trops.sauton.xyz";
-
 class SearchBody{
   String text;
   int priceMin;
