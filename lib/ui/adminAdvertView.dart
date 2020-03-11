@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/User.dart';
@@ -134,49 +134,47 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = _descriptionController.text;
     String price = _priceController.text;
 
-    Http.Response res = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getId(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
+    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), User.current.getToken(),_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
 
-    if(res.statusCode==200){
+    switch(advertUploadStatus){
+    case AdvertUploadStatus.SUCCESS:
       Navigator.pop(context);
       return showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => SimpleDialog(
-            title: Text("Succès"),
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Text("L'annonce a bien été mise à jour."),
-                  FlatButton(
-                    child: Text("Ok"),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-
-            ],
-          )
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+          title: Text("Succès"),
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Text("L'annonce a bien été mise à jour."),
+                FlatButton(
+                  child: Text("Ok"),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ],
+        )
       );
-    } else {
+    case AdvertUploadStatus.FAILURE:
       return showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => SimpleDialog(
-            title: Text("Echec"),
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Text("L'annonce n'a pas été mise à jour, veuillez réessayer plus tard"),
-                  FlatButton(
-                    child: Text("Ok"),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-
-            ],
-          )
+        context: context,
+        builder: (BuildContext context) => SimpleDialog(
+          title: Text("Echec"),
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Text("L'annonce n'a pas été mise à jour, veuillez réessayer plus tard"),
+                FlatButton(
+                  child: Text("Ok"),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ],
+        )
       );
     }
-
   }
 
   void updateCategory(BuildContext context, CategorySelector selector){

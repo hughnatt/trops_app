@@ -3,12 +3,11 @@
 class User {
 
   static User current;
-
+  String _id;
   String _token;
   String _name;
   String _email;
   String _phoneNumber;
-  String _id;
 
   User(this._name,this._email,this._token,this._phoneNumber,this._id);
 

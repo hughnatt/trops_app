@@ -3,12 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/ui/searchresult.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:trops_app/widgets/monetization.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class HomePage extends StatefulWidget {
@@ -64,8 +65,11 @@ class _HomePageState extends State<HomePage> {
       itemCount: _adverts.length,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
+        if (index == 0){
+          return MonetizedTile();
+        }
         return AdvertTile(
-          advert: _adverts[index],
+          advert: _adverts[index-1],
         );
       },
     );

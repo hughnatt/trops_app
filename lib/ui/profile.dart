@@ -5,7 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
 
@@ -38,7 +38,7 @@ class _ProfilePageState extends State<ProfilePage>{
       });
     }
 
-    getAdvertOfUser(User.current.getEmail(),User.current.getToken()).then((res) {
+    getAdvertsByUser(User.current).then((res) {
       setState(() {
         _adverts = res;
       });

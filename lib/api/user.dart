@@ -1,8 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/api.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/api/constants.dart';
+
 
 Future<User> getUser(String uid) async {
 

@@ -4,6 +4,7 @@ import 'package:trops_app/ui/createAdvert.dart';
 import 'package:trops_app/ui/profile.dart';
 import 'package:trops_app/ui/searchresult.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:trops_app/ui/splash.dart';
 import 'ui/home.dart';
 
 void main() => runApp(TropsApp());
@@ -14,9 +15,10 @@ class TropsApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "TROPS",
-      initialRoute: "/",
+      initialRoute: "/splash",
       routes: {
         '/' : (context) => HomePage(),
+        '/splash' : (context) => SplashPage(),
         '/search' : (context) => SearchResultPage(),
         '/auth' : (context) => AuthPage(),
         '/profile' : (context) => ProfilePage(),
@@ -31,5 +33,4 @@ class TropsApp extends StatelessWidget {
       ],
     );
   }
-
 }

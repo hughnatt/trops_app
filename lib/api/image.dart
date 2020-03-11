@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/constants.dart';
 
 
 Future<Http.StreamedResponse> uploadImage(File imageToUpload) async {

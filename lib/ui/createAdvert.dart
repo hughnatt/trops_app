@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/autocompleteSearch.dart';
@@ -13,52 +14,267 @@ import 'package:trops_app/widgets/advertField.dart';
 import 'package:trops_app/widgets/categorySelector.dart';
 
 
-class CreateAdvertPage extends StatefulWidget {
+class CreateAdvertPage extends StatefulWidget  {
 
   @override
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
+enum _AlertType {success, failure, denied, eulaNotAccepted} //enum for the different case of the creation of an advert
 
-class _CreateAdvertPage extends State<CreateAdvertPage> {
+class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProviderStateMixin {
 
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
-  List<TropsCategory> _categories = new List<TropsCategory>();
   Autocomplete locationSearchBar = Autocomplete();
   CategorySelector _categorySelector;
+  bool _loadingCategory;
   AvailabilityList _availabilityList = AvailabilityList(availability: []);
+  Icon _fabIcon;
 
   bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
+  bool _hasAcceptedEULA;
+  bool _isPriceValid;
 
-  GlobalKey<ImageSelectorState> _myWidgetState = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
+
+  GlobalKey<ImageSelectorState> _imageSelector = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
+
+  TabController _tabController;
+  List<Widget> _kPanes;
 
   @override
   void initState(){
     super.initState();
-    loadCategories();
-    setState(() {
-      _isUploadProcessing = false;
-    });
-    _categorySelector = CategorySelector(categories: [],);
 
-  }
+    _fabIcon = Icon(Icons.navigate_next);
 
-  loadCategories() async {
-
-    getCategories().then( (List<TropsCategory> res) {
+    _tabController = TabController(vsync: this, length: 6);
+    _tabController.addListener((){
       setState(() {
-        _categories = res;
-        _categorySelector = CategorySelector(categories: _categories,);
+          _fabIcon = (_tabController.index == _kPanes.length-1) ? Icon(Icons.check_circle) : Icon(Icons.navigate_next);
       });
     });
+
+
+    _loadingCategory = true;
+    getCategories().then( (List<TropsCategory> res) {
+      setState(() {
+        _loadingCategory = false;
+        _categorySelector = CategorySelector(categories: res);
+      });
+    });
+
+    _isUploadProcessing = false;
+    _hasAcceptedEULA = false;
+    _isPriceValid = true;
   }
 
-  bool _isPriceValid = true;
-  
+  @override
+  void dispose(){
+    super.dispose();
+    _tabController.dispose();
+  }
+
+  Widget _buildTitleDescPane() {
+    return SingleChildScrollView(
+      child: Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(25.0),
+              child: Material(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)
+                ),
+                child: Column(
+                  children: <Widget>[
+                    AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
+                    Container(
+                      width: 250.0,
+                      height: 1.0,
+                      color: Colors.grey[400],
+                    ),
+                    _buildValuePicker(),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+              child: Material(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)
+                ),
+                //child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
+                child: Container(
+                  padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    maxLength: 1000,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.description),
+                      hintText: "Description",
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]
+      ),
+    );
+  }
+
+  Widget _buildCategoryPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                    "Catégorie",
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                ),
+                Padding(padding: EdgeInsets.only(top: 10)),
+                _loadingCategory ? SpinKitDoubleBounce(size: 25, color: Colors.lightBlueAccent) : _categorySelector,
+              ],
+            )
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+              ),
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: locationSearchBar,
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvailabilityPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  "Disponibilités",
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                ),
+                _availabilityList,
+              ],
+            )
+          )
+        )
+      ),
+    );
+  }
+
+  Widget _buildPhotoPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+              ),
+              ImageSelector(key:_imageSelector)
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildValidationPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.only(top: 25.0, left:25.0, right: 25.0, bottom: 10.0),
+        child: Column(
+          children: <Widget>[
+            Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _hasAcceptedEULA,
+                    onChanged: (newValue){
+                      setState(() {
+                        _hasAcceptedEULA = newValue;
+                      });
+                    },
+                  ),
+                  Flexible(
+                      child : Text("J'accepte les conditions générales de l'application TROPS")
+                  )
+                ]
+            ),
+            MaterialButton(
+              color: Colors.green,
+              onPressed: _isUploadProcessing ? null : _submitAdvert,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              ),
+              child: (_isUploadProcessing) ? CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black))
+                                           : Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _selectedCategory(){
+    if (_loadingCategory){
+      return null;
+    } else {
+      return _categorySelector.selectedCategory();
+    }
+  }
+
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
@@ -92,75 +308,64 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
-  Widget _buildValidationButton(){
-    return Container(
-      padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
-      child: MaterialButton(
-        color: Colors.green,
-        onPressed: _isUploadProcessing ? null : _uploadAdvert,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        child: _buildButtonState(),
-      ),
-    );
-  }
-
-  Widget _buildButtonState(){
-    if(!_isUploadProcessing){
-      return Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white));
-    }
-    else{
-      return CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black));
-    }
-  }
-
-
-
-  void unfocus(){
-    FocusScope.of(context).unfocus(); //make all the textfield loose focus
-  }
-
-
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _categorySelector.selectedCategory() != null && locationSearchBar.getSelectedLocation() != null); //check if all REQUIRED field have a value
+    return (
+        _titleController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty &&
+        _isPriceValid &&
+        _selectedCategory() != null &&
+        locationSearchBar.getSelectedLocation() != null
+    ); //check if all REQUIRED field have a value
   }
 
+  void _submitAdvert() async {
 
-  void _uploadAdvert() async {
+    FocusScope.of(context).unfocus();
 
-    this.unfocus();
+    if(!_checkFields()) { //if the user have correctly completed the form
+      _showUploadResult(context, _AlertType.denied); // we warn him that he can't create the advert
+      return;
+    }
 
-    //List<String> splitedPaths = this._imagesManager.getAllFilePath();
+    if (!_hasAcceptedEULA){
+      _showUploadResult(context, _AlertType.eulaNotAccepted);
+      return;
+    }
 
+    setState(() {
+      _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
+    });
 
-    if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
+    try {
+      var response = await uploadAdvert(
+          User.current.getToken(),
+          _titleController.text,
+          double.parse(_priceController.text),
+          _descriptionController.text,
+          _selectedCategory(),
+          User.current.getEmail(),
+          _imageSelector.currentState.getAllPaths(),
+          _availabilityList.availability,
+          locationSearchBar.getSelectedLocation()); // we try to contact the API to add the advert
 
-      setState(() {
-        _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
-      });
-
-      //var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-      var response = await uploadAdvertApi(User.current.getToken(),_titleController.text, double.parse(_priceController.text), _descriptionController.text, _categorySelector.selectedCategory(), User.current.getId(),_myWidgetState.currentState.getAllPaths(), _availabilityList.availability, locationSearchBar.getSelectedLocation()); // we try to contact the APi to add the advert
-
+      switch(response){
+        case AdvertUploadStatus.FAILURE:
+          _showUploadResult(context,_AlertType.failure); //we warn the user that the process failed
+          return;
+        case AdvertUploadStatus.SUCCESS:
+          _showUploadResult(context,_AlertType.success); // we warn him that it's a success
+          return;
+      }
+    } catch (error){
+      _showUploadResult(context,_AlertType.failure);
+    } finally {
       setState(() {
         _isUploadProcessing = false; //the button is show again (before pop context)
       });
-
-      if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
-        _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
-      }
-      else{ // the response is 201, the creation was a sucess
-        _showUploadResult(context,ResultType.success); // we warn him that it's a success
-      }
     }
-    else{ // the user doesn't correctly complete the form
-      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
-    }
-
   }
 
-  Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
+  Future<void> _showUploadResult(BuildContext context, _AlertType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
     String title;
     String content;
     int popCount;
@@ -169,7 +374,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     Color color;
 
     switch(result){
-      case ResultType.success:
+      case _AlertType.eulaNotAccepted:
+        title = "Pas si vite !";
+        content = "Veuillez accepter les conditions générales d'utilisation";
+        popCount = 1;
+        color = Colors.redAccent;
+        break;
+      case _AlertType.success:
         {
           title = "Opération terminée";
           content = "Votre annonce a été créée avec succès";
@@ -177,7 +388,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           color = Colors.greenAccent;
           break;
         }
-      case ResultType.failure:
+      case _AlertType.failure:
         {
           title = "Opération échouée";
           content = "Malheureusement, votre annonce n'a pas pu être créée";
@@ -185,7 +396,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           color = Colors.redAccent;
           break;
         }
-      case ResultType.denied:
+      case _AlertType.denied:
         {
           title = "Pas si vite !";
           content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Catégorie, Dates)";
@@ -233,170 +444,77 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+
+    _kPanes = <Widget>[
+      _buildTitleDescPane(),
+      _buildCategoryPane(),
+      _buildLocationPane(),
+      _buildAvailabilityPane(),
+      _buildPhotoPane(),
+      _buildValidationPane(),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Création d'une annonce", style: TextStyle(
-          fontSize: 25.0,
-        ),
-        ),
-      ),
-      body: GestureDetector(
-        onTap: (){
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
-                        Container(
-                          width: 250.0,
-                          height: 1.0,
-                          color: Colors.grey[400],
-                        ),
-                        _buildValuePicker(),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    //child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
-                    child: Container(
-                      padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
-                      child: TextField(
-                        controller: _descriptionController,
-                        maxLines: null,
-                        maxLength: 1000,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.description),
-                          hintText: "Description",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                                "Catégorie",
-                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                            ),
-                            _categorySelector,
-                          ],
-                        )
-                    ),
-                  ),
-                ),
-
-                Container(
-                    padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                    child: Material(
-                        elevation: 2.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)
-                        ),
-                        child: Container(
-                            padding: EdgeInsets.all(10.0),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                    "Disponibilités",
-                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                                ),
-                                _availabilityList,
-
-                              ],
-                            )
-                        )
-                    )
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(10.0),
-                          child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: locationSearchBar,
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(10.0),
-                          child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-                        ),
-                        ImageSelector(key:_myWidgetState)
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                    padding: EdgeInsets.only(top:25,bottom:25),
-                    child: _buildValidationButton()
-                ),
-              ],
-            ),
-          ),
-        )
+        title: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0)),
       ),
       bottomNavigationBar: TropsBottomAppBar(),
+      floatingActionButton: Visibility(
+        visible: _dockedFabVisibility(context),
+        child:FloatingActionButton(
+          backgroundColor: Colors.green,
+          child: _fabIcon,
+          onPressed: (){
+            setState(() {
+              if (!_tabController.indexIsChanging){
+                if (_tabController.index < _kPanes.length-1){
+                  _tabController.animateTo(_tabController.index+1);
+                } else {
+                  _submitAdvert();
+                }
+              }
+            });
+          },
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      body: /*GestureDetector(
+        onTap: (){
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },*/
+     Padding(
+        padding: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              TabPageSelector(
+                controller: _tabController,
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: _kPanes,
+                )
+              )
+            ]
+          ),
+        )
     );
   }
 
-
+  static _dockedFabVisibility(context) {
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 

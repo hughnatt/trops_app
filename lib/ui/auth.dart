@@ -34,6 +34,7 @@ import 'package:trops_app/style/theme.dart' as Theme;
 import 'package:trops_app/api/auth.dart' as Auth;
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/sharedPreferences.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 
