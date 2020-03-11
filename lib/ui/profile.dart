@@ -9,6 +9,7 @@ import 'package:trops_app/widgets/trops_scaffold.dart';
 import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/Location.dart';
+import 'package:trops_app/ui/menu_profile.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key : key);
@@ -67,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage>{
                 FontAwesomeIcons.cog,
                 color: Colors.white,
               ),
-              onPressed: () {},
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => MenuProfile())),
             ),
             IconButton(
               icon: Icon(
