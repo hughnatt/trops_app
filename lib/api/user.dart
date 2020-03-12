@@ -49,13 +49,13 @@ Future<Http.Response> modifyPassword(String password) async {
 
 }
 
-Future<Http.Response> modifyEmail(String email) async {
+Future<Http.Response> modifyUser(String field, String value) async {
 
   Uri uri = Uri.https(apiBaseURI, "/users/me");
   String token = Session.token;
   var jsonBody = '''
   {
-    "email" : "$email"
+    "$field" : "$value"
   }
   ''';
 
