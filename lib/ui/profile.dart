@@ -8,7 +8,6 @@ import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/ui/menu_profile.dart';
 
 class ProfilePage extends StatefulWidget {
