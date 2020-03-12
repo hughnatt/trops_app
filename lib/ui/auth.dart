@@ -749,8 +749,8 @@ class _AuthPageState extends State<AuthPage>
   void _handleGoogle() async {
     GoogleSignInAuthentication googleSignInAuthentication;
     try {
-      await _googleSignIn.signIn();
-      googleSignInAuthentication = await _googleSignIn.currentUser.authentication;
+      await googleSignIn.signIn();
+      googleSignInAuthentication = await googleSignIn.currentUser.authentication;
     } catch(error) {
       print(error);
       _displayAlert("Echec de l'authentification");
@@ -764,9 +764,3 @@ class _AuthPageState extends State<AuthPage>
     }
   }
 }
-
-GoogleSignIn _googleSignIn = GoogleSignIn(
-  scopes: [
-    'email',
-  ],
-);

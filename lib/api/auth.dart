@@ -1,5 +1,6 @@
 
 import 'dart:convert' show jsonEncode, jsonDecode;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
@@ -130,6 +131,8 @@ Future<AuthResult> login(String email, String password) async {
 Future<AuthResult> signOff() async {
   String token = Session.token;
   Cache.forgetToken();
+  await googleSignIn.signOut();
+
 
   await Http.post(
       Uri.https(apiBaseURI, "/users/me/logout"),
@@ -218,3 +221,9 @@ Future<AuthResult> socialLoginWithGoogle(String googleToken) async {
   }
   return authResult;
 }
+
+GoogleSignIn googleSignIn = GoogleSignIn(
+  scopes: [
+    'email',
+  ],
+);
