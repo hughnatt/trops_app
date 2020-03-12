@@ -30,6 +30,10 @@ class User {
     return _favorites;
   }
 
+  setFavorites(List<String> newFavorites){
+    _favorites = newFavorites;
+  }
+
   bool isInFavorites(String advertId){
     return this._favorites.contains(advertId);
   }

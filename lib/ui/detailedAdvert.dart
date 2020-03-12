@@ -61,6 +61,18 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   }
 
+
+  void _addFavoriteProcess(String advertId) async {
+    addFavorite(advertId).then((listFavorite) {
+      setState(() {
+        Session.currentUser.setFavorites(listFavorite);
+      });
+    }).catchError((onError){
+      _showErrorAlert(context,"Impossible de modifier les favoris");
+    });
+  }
+
+
   Widget trailingIcon(BuildContext context){
 
     if(Session.currentUser != null && Session.currentUser.getId() == widget.advert.getOwner()){
@@ -70,7 +82,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
       return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a star if the current advert is in the user's favorites
     }
     else if(Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && !Session.currentUser.isInFavorites(widget.advert.getId())) {
-      return IconButton(icon: Icon(Icons.star_border),onPressed: () => null); //display a empty star if the current advert is not in the user's favorites
+      return IconButton(icon: Icon(Icons.star_border),onPressed: () => _addFavoriteProcess(widget.advert.getId())); //display a empty star if the current advert is not in the user's favorites
     }
     else{ //the user is not logged
       return IconButton(icon: Icon(null),onPressed: () => null);
