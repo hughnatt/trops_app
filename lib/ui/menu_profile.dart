@@ -17,6 +17,8 @@ class MenuProfile extends StatefulWidget{
 class _MenuProfileState extends State<MenuProfile>{
 
   TextEditingController _emailController = TextEditingController(text: Session.currentUser.getEmail());
+  TextEditingController _phoneNumberController = TextEditingController(text: Session.currentUser.getPhoneNumber());
+  TextEditingController _nameController = TextEditingController(text: Session.currentUser.getName());
 
   TextEditingController _currentPassword = TextEditingController();
   TextEditingController _newPassword = TextEditingController();
@@ -27,16 +29,41 @@ class _MenuProfileState extends State<MenuProfile>{
 
   bool _isUpdatingPassword = false;
   bool _isUpdatingEmail = false;
+  bool _isUpdatingPhoneNumber = false;
+  bool _isUpdatingName = false;
+
+  Future<void> showError(String message){
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => SimpleDialog(
+        title: Text("Erreur"),
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(10),
+            child: Text(message),
+          ),
+        ],
+      ),
+
+    );
+  }
 
   void changeEmail() async{
     setState(() {
       _isUpdatingEmail = true;
     });
-    Http.Response res = await modifyEmail(_emailController.text);
+    Http.Response res;
+    try{
+      res = await modifyUser("email",_emailController.text);
+    } catch(Err){
+      showError("Impossible de modifier le mail, réessayer plus tard");
+    }
     setState(() {
       _isUpdatingEmail = false;
     });
-    print(res.statusCode);
+    if(res.statusCode != 200){
+      showError("Impossible de modifier le mail, réessayer plus tard");
+    }
   }
 
   void changePassword() async {
@@ -44,7 +71,17 @@ class _MenuProfileState extends State<MenuProfile>{
     setState(() {
       _isUpdatingPassword = true;
     });
-    AuthResult resLogin = await login(Session.currentUser.getEmail(),_currentPassword.text);
+    AuthResult resLogin;
+    try{
+      resLogin = await login(Session.currentUser.getEmail(),_currentPassword.text);
+    } catch(Err){
+      showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
+      setState(() {
+        _isUpdatingPassword = false;
+      });
+      return;
+    }
+
 
     if(resLogin.token != null){
       setState(() {
@@ -55,7 +92,17 @@ class _MenuProfileState extends State<MenuProfile>{
           _backgroundNewPassword = Colors.white;
           _backgroundCurrentPassword = Colors.white;
         });
-        Http.Response resModif = await modifyPassword(_newPassword.text);
+        Http.Response resModif;
+        try{
+          resModif = await modifyPassword(_newPassword.text);
+        } catch(Err){
+          showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
+          setState(() {
+            _isUpdatingPassword = false;
+          });
+          return;
+        }
+
         print(resModif.statusCode);
         if(resModif.statusCode == 200){
           setState(() {
@@ -63,6 +110,8 @@ class _MenuProfileState extends State<MenuProfile>{
             _newPassword.text = "";
             _currentPassword.text = "";
           });
+        } else {
+          showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
         }
       } else {
         setState(() {
@@ -80,11 +129,57 @@ class _MenuProfileState extends State<MenuProfile>{
     });
   }
 
+  void changePhoneNumber() async {
+    setState(() {
+      _isUpdatingPhoneNumber = true;
+    });
+    Http.Response res;
+    try{
+      res= await modifyUser("phoneNumber",_phoneNumberController.text);
+    } catch(Err){
+      showError("Impossible de modifiez le numéro de téléphone, veuillez réessayer plus tard");
+      setState(() {
+        _isUpdatingPhoneNumber = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isUpdatingPhoneNumber = false;
+    });
+    if(res.statusCode != 200){
+      showError("Impossible de modifiez le numéro de téléphone, veuillez réessayer plus tard");
+    }
+    print(res.statusCode);
+  }
+
+  void changeName() async {
+    setState(() {
+      _isUpdatingName= true;
+    });
+    Http.Response res;
+    try{
+      res = await modifyUser("name",_nameController.text);
+    } catch(Err){
+      showError("Impossible de modifiez le pseudo, veuillez réessayer plus tard");
+      setState(() {
+        _isUpdatingName= false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isUpdatingName= false;
+    });
+    if(res.statusCode != 200){
+      showError("Impossible de modifiez le pseudo, veuillez réessayer plus tard");
+    }
+    print(res.statusCode);
+  }
+
   Widget _confirmEmail(){
     if(_isUpdatingEmail){
-      return CircularProgressIndicator(
-
-      );
+      return CircularProgressIndicator();
     } else {
       return FlatButton(
         child: Text("Confirmer"),
@@ -104,6 +199,28 @@ class _MenuProfileState extends State<MenuProfile>{
     }
   }
 
+  Widget _confirmPhoneNumber(){
+    if(_isUpdatingPhoneNumber){
+      return CircularProgressIndicator();
+    } else {
+      return FlatButton(
+        child: Text("Confirmer"),
+        onPressed: () => changePhoneNumber(),
+      );
+    }
+  }
+
+  Widget _confirmName(){
+    if(_isUpdatingPhoneNumber){
+      return CircularProgressIndicator();
+    } else {
+      return FlatButton(
+        child: Text("Confirmer"),
+        onPressed: () => changeName(),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,12 +234,17 @@ class _MenuProfileState extends State<MenuProfile>{
 
           children: <Widget>[
 
-            Container(
-              child: Padding(
-                padding: EdgeInsets.all(25),
+            Padding(
+              padding: EdgeInsets.all(25),
+              child: Material(
+                borderRadius: BorderRadius.circular(20),
+                elevation: 5,
                 child: Column(
                   children: <Widget>[
-                    Text("Modifiez le mail"),
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      child : Text("Modifiez le mail"),
+                    ),
                     TextField(
                       controller: _emailController,
                     ),
@@ -132,12 +254,17 @@ class _MenuProfileState extends State<MenuProfile>{
               ),
             ),
 
-            Container(
-              child: Padding(
-                padding: EdgeInsets.all(25),
-                child: Column(
-                  children: <Widget>[
-                    Text("Modifiez le mot de passe"),
+           Padding(
+             padding: EdgeInsets.all(25),
+             child: Material(
+               borderRadius: BorderRadius.circular(20),
+               elevation: 5,
+               child:  Column(
+                 children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      child : Text("Modifiez le mot de passe"),
+                    ),
                     TextField(
                       obscureText: true,
                       controller: _currentPassword,
@@ -166,6 +293,47 @@ class _MenuProfileState extends State<MenuProfile>{
                       ),
                     ),
                     _confirmPassword(),
+                  ],
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(25),
+              child: Material(
+                borderRadius: BorderRadius.circular(20),
+                elevation: 5,
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      child : Text("Modifiez le numero de téléphone"),
+                    ),
+                    TextField(
+                      controller: _phoneNumberController,
+                      keyboardType: TextInputType.number,
+                    ),
+                    _confirmPhoneNumber(),
+                  ],
+                ),
+              ),
+            ),
+
+            Padding(
+              padding: EdgeInsets.all(25),
+              child: Material(
+                borderRadius: BorderRadius.circular(20),
+                elevation: 5,
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.all(15),
+                      child : Text("Modifiez le pseudo"),
+                    ),
+                    TextField(
+                      controller: _nameController,
+                    ),
+                    _confirmName(),
                   ],
                 ),
               ),
