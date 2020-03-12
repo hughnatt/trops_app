@@ -43,11 +43,17 @@ class LoginBody{
 }
 
 User parseAuthUser(Map json) {
+
+  List<String> favorites = new List<String>.from(json['user']['favorites']);
+
+  print(favorites);
+
   return User(
       json['user']['_id'],
       json['user']['name'],
       json['user']['email'],
-      json['user']['phoneNumber']
+      json['user']['phoneNumber'],
+      favorites
   );
 }
 
@@ -164,7 +170,8 @@ Future<AuthResult> getSession(String token) async {
             json['_id'],
             json['name'],
             json['email'],
-            json['phoneNumber']
+            json['phoneNumber'],
+            json['favorites']
         );
         authResult.isAuthenticated = true;
         authResult.user = user;
