@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
   Widget _getListViewWidget(){
 
     var list = ListView.builder(
-      itemCount: _adverts.length,
+      itemCount: _adverts.length + 1,
       padding: EdgeInsets.only(top: 5.0),
       itemBuilder: (context, index) {
         if (index == 0){

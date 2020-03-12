@@ -51,6 +51,38 @@ Future<User> getUser(String uid) async {
   }
 }
 
+Future<Http.Response> modifyPassword(String password) async {
+
+  Uri uri = Uri.https(apiBaseURI, "/users/me/password");
+  String token = Session.token;
+  var jsonBody = '''
+  {
+    "password" : "$password"
+  }
+  ''';
+
+  Http.Response response = await Http.put(uri, headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"}, body: jsonBody);
+
+  return response;
+
+}
+
+Future<Http.Response> modifyUser(String field, String value) async {
+
+  Uri uri = Uri.https(apiBaseURI, "/users/me");
+  String token = Session.token;
+  var jsonBody = '''
+  {
+    "$field" : "$value"
+  }
+  ''';
+
+  Http.Response response = await Http.put(uri, headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"}, body: jsonBody);
+
+  return response;
+
+}
+
 
 /*Future<List<String>> updateFavorites(String advertId,favoritesEnum operation) async{
 
