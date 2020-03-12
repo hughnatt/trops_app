@@ -26,6 +26,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
 import 'package:trops_app/style/theme.dart' as Theme;
@@ -420,7 +421,7 @@ class _AuthPageState extends State<AuthPage>
               Padding(
                 padding: EdgeInsets.only(top: 20.0),
                 child: GestureDetector(
-                  onTap: () => _displayAlert("Indisponible"),
+                  onTap: () => _handleGoogle(),
                   child: Container(
                     padding: const EdgeInsets.all(15.0),
                     decoration: new BoxDecoration(
@@ -738,10 +739,31 @@ class _AuthPageState extends State<AuthPage>
   void _handleLogin() async {
     AuthResult authResult = await login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
     if (authResult.isAuthenticated && authResult.user != null){
+
+      String _futureRoute = ModalRoute.of(context).settings.arguments;
+      if(_futureRoute == null) _futureRoute = "/home";
       Navigator.pop(context);
-      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
+      Navigator.pushNamed(context, _futureRoute);
     } else {
       _displayAlert("Les identifiants fournis sont incorrects.");
+    }
+  }
+
+  void _handleGoogle() async {
+    GoogleSignInAuthentication googleSignInAuthentication;
+    try {
+      await googleSignIn.signIn();
+      googleSignInAuthentication = await googleSignIn.currentUser.authentication;
+    } catch(error) {
+      print(error);
+      _displayAlert("Echec de l'authentification");
+    }
+
+    AuthResult authResult = await socialLoginWithGoogle(googleSignInAuthentication.idToken);
+    if (authResult.isAuthenticated && authResult.user != null) {
+      Navigator.popAndPushNamed(context, ModalRoute.of(context).settings.arguments);
+    } else {
+      _displayAlert("Echec de l'authentification");
     }
   }
 }

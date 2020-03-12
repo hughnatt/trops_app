@@ -1,5 +1,6 @@
 
 import 'dart:convert' show jsonEncode, jsonDecode;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
@@ -75,6 +76,7 @@ Future<AuthResult> register(String name, String email, String password, String p
         Session.currentUser = authResult.user;
         Session.token = authResult.token;
         Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
       } catch (error){
         authResult.isAuthenticated = false;
         authResult.error = "Erreur de décodage de l'utilisateur";
@@ -110,6 +112,7 @@ Future<AuthResult> login(String email, String password) async {
         Session.currentUser = authResult.user;
         Session.token = authResult.token;
         Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
       } catch (error){
         authResult.isAuthenticated = false;
         authResult.error = "Erreur de décodage de l'utilisateur";
@@ -128,6 +131,8 @@ Future<AuthResult> login(String email, String password) async {
 Future<AuthResult> signOff() async {
   String token = Session.token;
   Cache.forgetToken();
+  await googleSignIn.signOut();
+
 
   await Http.post(
       Uri.https(apiBaseURI, "/users/me/logout"),
@@ -182,3 +187,43 @@ Future<AuthResult> getSession(String token) async {
 
   return authResult;
 }
+
+
+Future<AuthResult> socialLoginWithGoogle(String googleToken) async {
+  Http.Response res = await Http.get(
+    Uri.https(apiBaseURI, '/auth/google/' + googleToken)
+  );
+
+  AuthResult authResult = AuthResult();
+
+  switch(res.statusCode){
+    case 200:
+      try {
+        Map json = await jsonDecode(res.body);
+        User user = parseAuthUser(json);
+        authResult.user = user;
+        authResult.token = parseToken(json);
+        authResult.isAuthenticated = true;
+        Session.currentUser = authResult.user;
+        Session.token = authResult.token;
+        Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
+      } catch (error){
+        authResult.isAuthenticated = false;
+        authResult.error = "Erreur de décodage de l'utilisateur";
+      }
+      break;
+    default:
+      authResult.isAuthenticated = false;
+      authResult.user = null;
+      authResult.error = "Echec de l'authentification";
+      break;
+  }
+  return authResult;
+}
+
+GoogleSignIn googleSignIn = GoogleSignIn(
+  scopes: [
+    'email',
+  ],
+);
