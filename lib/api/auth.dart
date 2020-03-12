@@ -182,3 +182,37 @@ Future<AuthResult> getSession(String token) async {
 
   return authResult;
 }
+
+
+Future<AuthResult> socialLoginWithGoogle(String googleToken) async {
+  Http.Response res = await Http.get(
+    Uri.https(apiBaseURI, '/auth/google/' + googleToken)
+  );
+
+  AuthResult authResult = AuthResult();
+
+  switch(res.statusCode){
+    case 200:
+      try {
+        Map json = await jsonDecode(res.body);
+        User user = parseAuthUser(json);
+        authResult.user = user;
+        authResult.token = parseToken(json);
+        authResult.isAuthenticated = true;
+        Session.currentUser = authResult.user;
+        Session.token = authResult.token;
+        Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
+      } catch (error){
+        authResult.isAuthenticated = false;
+        authResult.error = "Erreur de décodage de l'utilisateur";
+      }
+      break;
+    default:
+      authResult.isAuthenticated = false;
+      authResult.user = null;
+      authResult.error = "Echec de l'authentification";
+      break;
+  }
+  return authResult;
+}

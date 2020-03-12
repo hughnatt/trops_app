@@ -747,14 +747,20 @@ class _AuthPageState extends State<AuthPage>
   }
 
   void _handleGoogle() async {
+    GoogleSignInAuthentication googleSignInAuthentication;
     try {
-      await _googleSignIn.signOut();
       await _googleSignIn.signIn();
-      GoogleSignInAuthentication auth = await _googleSignIn.currentUser.authentication;
-      print(auth.idToken);
-      print(auth.accessToken);
-    } catch(error){
+      googleSignInAuthentication = await _googleSignIn.currentUser.authentication;
+    } catch(error) {
       print(error);
+      _displayAlert("Echec de l'authentification");
+    }
+
+    AuthResult authResult = await socialLoginWithGoogle(googleSignInAuthentication.idToken);
+    if (authResult.isAuthenticated && authResult.user != null) {
+      Navigator.popAndPushNamed(context, ModalRoute.of(context).settings.arguments);
+    } else {
+      _displayAlert("Echec de l'authentification");
     }
   }
 }
