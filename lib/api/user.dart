@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as Http;
 import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/session.dart';
 
 User parseUser(Map json) {
   return User(
@@ -30,6 +31,38 @@ Future<User> getUser(String uid) async {
   else{
     return null;
   }
+}
+
+Future<Http.Response> modifyPassword(String password) async {
+
+  Uri uri = Uri.https(apiBaseURI, "/users/me/password");
+  String token = Session.token;
+  var jsonBody = '''
+  {
+    "password" : "$password"
+  }
+  ''';
+
+  Http.Response response = await Http.put(uri, headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"}, body: jsonBody);
+
+  return response;
+
+}
+
+Future<Http.Response> modifyEmail(String email) async {
+
+  Uri uri = Uri.https(apiBaseURI, "/users/me");
+  String token = Session.token;
+  var jsonBody = '''
+  {
+    "email" : "$email"
+  }
+  ''';
+
+  Http.Response response = await Http.put(uri, headers: {"Authorization" : "Bearer $token", "Content-Type": "application/json"}, body: jsonBody);
+
+  return response;
+
 }
 
 
