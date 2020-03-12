@@ -62,15 +62,36 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
   }
 
 
+  /*void _updateFavoritesProcess(String advertId, favoritesEnum operation) async {
+    updateFavorites(advertId,operation).then((listFavorites) {
+      setState(() {
+        Session.currentUser.setFavorites(listFavorites);
+      });
+    }).catchError((onError){
+      _showErrorAlert(context,"Impossible de terminer l'opération" + onError.toString());
+    });
+  }*/
+
   void _addFavoriteProcess(String advertId) async {
     addFavorite(advertId).then((listFavorite) {
       setState(() {
         Session.currentUser.setFavorites(listFavorite);
       });
     }).catchError((onError){
-      _showErrorAlert(context,"Impossible de modifier les favoris");
+      _showErrorAlert(context,"Impossible d'ajouter l'annonce aux favoris ");
     });
   }
+
+  void _deleteFavoriteProcess(String advertId) async {
+    deleteFavorite(advertId).then((listFavorite) {
+      setState(() {
+        Session.currentUser.setFavorites(listFavorite);
+      });
+    }).catchError((onError){
+      _showErrorAlert(context,"Impossible de supprimer l'annonce des favoris ");
+    });
+  }
+
 
 
   Widget trailingIcon(BuildContext context){
@@ -79,7 +100,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
       return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
     }
     else if (Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && Session.currentUser.isInFavorites(widget.advert.getId())) { //&& isInUserFavorite(widget.advert.getId())
-      return IconButton(icon: Icon(Icons.star),onPressed: () => null); //display a star if the current advert is in the user's favorites
+      return IconButton(icon: Icon(Icons.star),onPressed: () => _deleteFavoriteProcess(widget.advert.getId())); //display a star if the current advert is in the user's favorites
     }
     else if(Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && !Session.currentUser.isInFavorites(widget.advert.getId())) {
       return IconButton(icon: Icon(Icons.star_border),onPressed: () => _addFavoriteProcess(widget.advert.getId())); //display a empty star if the current advert is not in the user's favorites
