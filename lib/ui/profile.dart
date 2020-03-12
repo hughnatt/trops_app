@@ -160,6 +160,6 @@ class _ProfilePageState extends State<ProfilePage>{
   void _logout() {
     signOff();
     Navigator.pop(context);
-    Navigator.pushNamed(context, "/auth", arguments: "home");
+    Navigator.pushNamed(context, "/auth", arguments: "/home");
   }
 }

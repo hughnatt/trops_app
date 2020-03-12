@@ -738,8 +738,11 @@ class _AuthPageState extends State<AuthPage>
   void _handleLogin() async {
     AuthResult authResult = await login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
     if (authResult.isAuthenticated && authResult.user != null){
+
+      String _futureRoute = ModalRoute.of(context).settings.arguments;
+      if(_futureRoute == null) _futureRoute = "/home";
       Navigator.pop(context);
-      Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
+      Navigator.pushNamed(context, _futureRoute);
     } else {
       _displayAlert("Les identifiants fournis sont incorrects.");
     }
