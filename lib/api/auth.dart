@@ -75,6 +75,7 @@ Future<AuthResult> register(String name, String email, String password, String p
         Session.currentUser = authResult.user;
         Session.token = authResult.token;
         Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
       } catch (error){
         authResult.isAuthenticated = false;
         authResult.error = "Erreur de décodage de l'utilisateur";
@@ -110,6 +111,7 @@ Future<AuthResult> login(String email, String password) async {
         Session.currentUser = authResult.user;
         Session.token = authResult.token;
         Session.isAuthenticated = true;
+        Cache.saveToken(Session.token);
       } catch (error){
         authResult.isAuthenticated = false;
         authResult.error = "Erreur de décodage de l'utilisateur";
