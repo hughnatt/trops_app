@@ -26,18 +26,32 @@ class SearchBody{
   };
 }
 
-Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories, List<double> location, int distance) async {
+Future<List<Advert>> getResults(
+    String text,
+    int priceMin,
+    int priceMax,
+    List<String> categories,
+    List<double> location,
+    int distance,
+    String sortField,
+    int sortOrder) async {
 
   SearchBody body = new SearchBody(text, priceMin, priceMax, categories, location, distance);
 
-  var uri = new Uri.https(apiBaseURI, "/search");
-  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
+  Uri uri = new Uri.https(apiBaseURI, '/search', {'sort' : '$sortField,$sortOrder'});
+
+  Http.Response response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
+
+  print(uri);
+  print(jsonEncode(body));
 
   if(response.statusCode == 200) {
+    print(response.body);
     var result = await jsonDecode(response.body);
 
     List<Advert> _adverts = new List<Advert>();
 
+    print(result);
     for (var item in result){
       List<String> photos = new List<String>.from(item['photos']);
 

@@ -35,6 +35,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
   TextEditingController _priceMaxController = TextEditingController();
   RangeValues _priceRange = RangeValues(0.0,1.0);
 
+
+
   static const int PRICE_MAX = 500;
   static const int PRICE_MIN = 0;
 
@@ -45,6 +47,10 @@ class _SearchResultPageState extends State<SearchResultPage>{
   int _distance = DEFAULT_DISTANCE;
   Location _selectedLocation;
 
+  String _sortField = "creationDate";
+  int _sortOrder = -1;
+
+
   List<TropsCategory> _categories = List<TropsCategory>();
 
   @override
@@ -52,6 +58,43 @@ class _SearchResultPageState extends State<SearchResultPage>{
     super.initState();
     loadCategories();
     loadAdverts();
+  }
+
+  static const _sortFields = <String>[
+    'TITRE',
+    'DATE DE CREATION',
+    'PRIX'
+  ];
+  final List<DropdownMenuItem<String>> _dropDownFieldsMenu = _sortFields.map(
+      (String value) => DropdownMenuItem<String>(
+        value : value,
+        child: Text(value)
+      )
+  );
+
+  _setSortField(field){
+    switch(field)  {
+      case "TITRE":
+        _sortField = "title";
+        break;
+      case "DATE DE CREATION":
+        _sortField = "creationDate";
+        break;
+      case "PRIX":
+        _sortField = "price";
+        break;
+    }
+  }
+
+  _toggleSortOrder(){
+    setState(() {
+      if (_sortOrder == 1){
+        _sortOrder = -1;
+      } else {
+        _sortOrder = 1;
+      }
+    });
+    _doSearch();
   }
 
   void _resetCategories(List<TropsCategory> catList){
@@ -100,7 +143,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       }
     });
 
-    getResults(_keywordController.text, priceMin, priceMax, categories, _selectedLocation?.getCoordinates(), _distance).then((res) {
+    getResults(_keywordController.text, priceMin, priceMax, categories, _selectedLocation?.getCoordinates(), _distance, _sortField, _sortOrder).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -220,11 +263,47 @@ class _SearchResultPageState extends State<SearchResultPage>{
       slivers: <Widget>[
         SliverAppBar(
           automaticallyImplyLeading: false,
-          title: Center(
-            child: FlatButton.icon(
-              icon: Icon(Icons.filter_list),
-              label: Text("Filtres"),
-              onPressed: () {_scaffoldKey.currentState.openDrawer();},
+          title: SizedBox(
+            height: 30,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: <Widget>[
+                DropdownButton(
+                  value: "DATE DE CREATION",
+                  onChanged: (String newValue){
+                    _setSortField(newValue);
+                  },
+                  items: _dropDownFieldsMenu,
+                ),
+                RaisedButton.icon(
+                  icon: Icon(Icons.filter_list),
+                  label: Text("FILTRES"),
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  onPressed: () {_scaffoldKey.currentState.openDrawer();},
+                ),
+                Padding(padding: EdgeInsets.only(left: 10)),
+                RaisedButton.icon(
+                  icon: Icon(Icons.arrow_drop_down),
+                  label: Text('DATE DE CREATION'),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  elevation: 2.0,
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  onPressed: () {},
+                ),
+                Padding(padding: EdgeInsets.only(left: 10)),
+                RaisedButton.icon(
+                  icon: (_sortOrder == 1) ? Icon(Icons.arrow_upward) : Icon(Icons.arrow_downward),
+                  label: (_sortOrder == 1) ? Text('CROISSANT') : Text('DECROISSANT'),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  elevation: 2.0,
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  onPressed: () => _toggleSortOrder(),
+                ),
+              ],
             ),
           ),
           snap: true,
