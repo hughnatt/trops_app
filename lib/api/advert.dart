@@ -6,6 +6,7 @@ import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/DateRange.dart';
 import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/User.dart';
+import 'package:trops_app/utils/session.dart';
 
 
 enum AdvertUploadStatus {SUCCESS,FAILURE}
@@ -16,13 +17,17 @@ Future<List<Advert>> getAllAdverts()  async {
 
 Future<List<Advert>> getAdvertsByUser(User user) async {
   Uri uri;
+  Http.Response response;
   if (user == null){
     uri = Uri.https(apiBaseURI, '/advert');
+    response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+    
   } else {
     uri = Uri.https(apiBaseURI, '/advert/owner/' + user.getId());
-  }
+    String token = Session.token;
+    response = await Http.post(uri, headers: {"Authorization" : "Bearer $token","Content-Type": "application/json"});
 
-  Http.Response response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+  }
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -36,10 +41,35 @@ Future<List<Advert>> getAdvertsByUser(User user) async {
       });
       break;
     default:
+      print(response.statusCode);
       break;
   }
 
   return _adverts;
+}
+
+
+Future<Advert> getAdvertsById(String id) async {
+  Uri uri = Uri.https(apiBaseURI, '/advert/' + id);
+  Http.Response response;
+
+
+  response = await Http.get(uri, headers: {"Content-Type": "application/json"});
+
+
+  Advert _advert;
+
+  switch (response.statusCode){
+    case 200:
+      Map json = await jsonDecode(response.body);
+      _advert = decodeAdvert(json);
+      break;
+    default:
+      print(response.statusCode);
+      break;
+  }
+
+  return _advert;
 }
 
 
