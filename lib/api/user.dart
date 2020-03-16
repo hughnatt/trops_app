@@ -38,11 +38,11 @@ Future<User> getUser(String uid) async {
     var result = await jsonDecode(response.body);
 
     User user = User(
+        result['_id'],
         result['name'],
         result['email'],
         result['phoneNumber'],
-        result['_id'],
-        null //we don't want to get the user's favorites
+        null  /*we don't want to get the user's favorites*/
     );
     return user;
   }

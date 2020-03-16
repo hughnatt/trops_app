@@ -6,7 +6,7 @@ import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
 import 'package:trops_app/models/TropsCategory.dart';
-import 'package:trops_app/ui/searchresult.dart';
+import 'package:trops_app/ui/search.dart';
 import 'package:trops_app/widgets/advertTile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:trops_app/widgets/monetization.dart';
