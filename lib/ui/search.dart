@@ -50,6 +50,8 @@ class _SearchResultPageState extends State<SearchResultPage>{
   String _sortField = "creationDate";
   int _sortOrder = -1;
 
+  String _selectedField = "DATE DE CREATION";
+
 
   List<TropsCategory> _categories = List<TropsCategory>();
 
@@ -65,12 +67,12 @@ class _SearchResultPageState extends State<SearchResultPage>{
     'DATE DE CREATION',
     'PRIX'
   ];
-  final List<DropdownMenuItem<String>> _dropDownFieldsMenu = _sortFields.map(
-      (String value) => DropdownMenuItem<String>(
+  final List<PopupMenuItem<String>> _dropDownFieldsMenu = _sortFields.map(
+      (String value) => PopupMenuItem<String>(
         value : value,
         child: Text(value)
       )
-  );
+  ).toList();
 
   _setSortField(field){
     switch(field)  {
@@ -84,6 +86,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
         _sortField = "price";
         break;
     }
+    _doSearch();
   }
 
   _toggleSortOrder(){
@@ -268,13 +271,6 @@ class _SearchResultPageState extends State<SearchResultPage>{
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: <Widget>[
-                DropdownButton(
-                  value: "DATE DE CREATION",
-                  onChanged: (String newValue){
-                    _setSortField(newValue);
-                  },
-                  items: _dropDownFieldsMenu,
-                ),
                 RaisedButton.icon(
                   icon: Icon(Icons.filter_list),
                   label: Text("FILTRES"),
@@ -285,8 +281,18 @@ class _SearchResultPageState extends State<SearchResultPage>{
                 ),
                 Padding(padding: EdgeInsets.only(left: 10)),
                 RaisedButton.icon(
-                  icon: Icon(Icons.arrow_drop_down),
-                  label: Text('DATE DE CREATION'),
+                  icon: PopupMenuButton(
+                    padding: EdgeInsets.all(0),
+                    icon: Icon(Icons.arrow_drop_down),
+                    onSelected: (newValue){
+                      setState(() {
+                        _selectedField = newValue;
+                      });
+                      _setSortField(newValue);
+                    },
+                    itemBuilder: (BuildContext context) => _dropDownFieldsMenu,
+                  ),
+                  label: Text(_selectedField),
                   shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
                   elevation: 2.0,
                   color: Colors.blueAccent,
