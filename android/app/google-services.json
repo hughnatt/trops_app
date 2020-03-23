@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "340300108667",
+    "firebase_url": "https://trops-cc48c.firebaseio.com",
+    "project_id": "trops-cc48c",
+    "storage_bucket": "trops-cc48c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340300108667:android:6d21ea7a1d7bf926a923de",
+        "android_client_info": {
+          "package_name": "space.trops.trops_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "340300108667-e1179nmddtuhii6u3aet6mabam7tqujb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "space.trops.trops_app",
+            "certificate_hash": "136fb19eeaeb2ea2df29a7dcbe430437a20c571a"
+          }
+        },
+        {
+          "client_id": "340300108667-3evrvulusncjeku066cbofuir5v68gdv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYq59KsbwNVMdTe4M9SEHtXBKy1bvxBUo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340300108667-3evrvulusncjeku066cbofuir5v68gdv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

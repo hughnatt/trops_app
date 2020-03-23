@@ -3,10 +3,13 @@ import 'package:trops_app/api/auth.dart';
 import 'package:trops_app/models/User.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:trops_app/utils/session.dart';
 import 'package:trops_app/widgets/slidingCard.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
-import 'package:trops_app/api/data.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/Advert.dart';
+import 'package:trops_app/ui/menu_profile.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key key}) : super(key : key);
 
@@ -21,35 +24,50 @@ class _ProfilePageState extends State<ProfilePage>{
   PageController pageController;
 
   List<Advert> _adverts = new List<Advert>();
+  List<Advert> _advertsFavorites = new List<Advert>();
+
+  User _user;
 
   @override
   void initState() {
     super.initState();
 
-    pageController = PageController(viewportFraction: 0.8);
     // Make sure we have an user logged in
     // If not, redirect to authentication screen
-    if (User.current == null){
+    if (!Session.isAuthenticated){
       SchedulerBinding.instance.addPostFrameCallback((_) {
         Navigator.pop(context);
         Navigator.of(context).pushNamed("/auth");
       });
     }
 
-    getAdvertOfUser(User.current.getEmail(),User.current.getToken()).then((res) {
+    pageController = PageController(viewportFraction: 0.8);
+
+
+    getAdvertsByUser(Session.currentUser).then((res) {
       setState(() {
         _adverts = res;
       });
-      print("finish getting avert");
+    });
+
+    Session.currentUser.getFavorites().forEach((advertId) {
+      getAdvertsById(advertId).then((advertResult) {
+        setState(() {
+          _advertsFavorites.add(advertResult);
+        });
+      });
     });
 
 
+    _user = Session.currentUser;
+  }
 
+  Widget _buildFavoriteContent(int index){
+    return _advertsFavorites[index] != null ? SlidingCard(advert:_advertsFavorites[index] , proprietary: false) : CircularProgressIndicator();
   }
 
   @override
   Widget build(BuildContext context) {
-    final User user = ModalRoute.of(context).settings.arguments;
     return TropsScaffold(
         appBar: AppBar(
           centerTitle: true,
@@ -63,7 +81,7 @@ class _ProfilePageState extends State<ProfilePage>{
                 FontAwesomeIcons.cog,
                 color: Colors.white,
               ),
-              onPressed: () {},
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => MenuProfile())),
             ),
             IconButton(
               icon: Icon(
@@ -90,7 +108,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(top: 10.0),
                       child: Text(
-                          user.getName(),
+                          _user.getName(),
                           textAlign: TextAlign.center,
                           textScaleFactor: 2.0,
                           style: TextStyle(fontWeight: FontWeight.bold)
@@ -99,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage>{
                     Padding(
                       padding: EdgeInsets.only(bottom: 10.0),
                       child: Text(
-                        user.getEmail(),
+                        _user.getEmail(),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -110,17 +128,16 @@ class _ProfilePageState extends State<ProfilePage>{
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 15.0),
-                      child: Text("Réservations en cours", style: TextStyle(fontSize: 18),),
+                      child: Text("Mes favoris", style: TextStyle(fontSize: 18),),
                     ),
                     SizedBox(
                       height: 275,
-                      child: PageView(
+                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {
+                        return _buildFavoriteContent(index);
+                        },
+                        itemCount: _advertsFavorites.length,
                         controller: pageController,
-                        children: <Widget>[
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),),
-                          SlidingCard(advert: Advert(null,"Titre 1",10,"Je suis une Description",null,"ariane@ancrenaz.fr","Sports Nautiques"),)
-                        ],
-                      ),
+                      )
                     ),
                     Padding(
                       padding: EdgeInsets.only(top: 15.0),
@@ -128,8 +145,10 @@ class _ProfilePageState extends State<ProfilePage>{
                     ),
                     SizedBox(
                       height: 275,
-                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {return SlidingCard(
+                      child: PageView.builder(itemBuilder: (BuildContext context, int index) {
+                        return SlidingCard(
                         advert: _adverts[index],
+                        proprietary: true,
                       );},
                         itemCount: _adverts.length,
                         controller: pageController,
@@ -152,10 +171,8 @@ class _ProfilePageState extends State<ProfilePage>{
   }
 
   void _logout() {
-    print("Logging out");
-    signOff(User.current);
-    User.current = null;
+    signOff();
     Navigator.pop(context);
-    Navigator.pushNamed(context, "/auth");
+    Navigator.pushNamed(context, "/auth", arguments: "/home");
   }
 }

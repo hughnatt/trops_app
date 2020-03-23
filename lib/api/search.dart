@@ -1,43 +1,73 @@
 import 'dart:convert';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/api/api.dart';
+import 'package:trops_app/api/constants.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/models/Advert.dart';
-
-const String _dataBaseURI = "trops.sauton.xyz";
+import 'package:trops_app/models/Location.dart';
+import 'package:trops_app/models/DateRange.dart';
 
 class SearchBody{
   String text;
   int priceMin;
   int priceMax;
   List<String> categories;
-  SearchBody(this.text,this.priceMin,this.priceMax,this.categories);
+  List<double> location;
+  int distance;
+
+  SearchBody(this.text,this.priceMin,this.priceMax,this.categories, this.location, this.distance);
 
   Map<String,dynamic> toJson() => {
     'text': text,
     'priceMin': priceMin,
     'priceMax': priceMax,
-    'categories': categories
+    'categories': categories,
+    'location': location,
+    'distance': distance*1000
   };
 }
 
-Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<String> categories) async {
+Future<List<Advert>> getResults(
+    String text,
+    int priceMin,
+    int priceMax,
+    List<String> categories,
+    List<double> location,
+    int distance,
+    String sortField,
+    int sortOrder) async {
 
-  SearchBody body = new SearchBody(text, priceMin, priceMax, categories);
+  SearchBody body = new SearchBody(text, priceMin, priceMax, categories, location, distance);
 
-  var uri = new Uri.https(apiBaseURI, "/search");
-  var response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
+  Uri uri = new Uri.https(apiBaseURI, '/search', {'sort' : '$sortField,$sortOrder'});
+
+  Http.Response response = await Http.post(uri, headers: {"Content-Type": "application/json"}, body: jsonEncode(body));
+
+  print(uri);
+  print(jsonEncode(body));
 
   if(response.statusCode == 200) {
+    print(response.body);
     var result = await jsonDecode(response.body);
 
     List<Advert> _adverts = new List<Advert>();
 
+    print(result);
     for (var item in result){
       List<String> photos = new List<String>.from(item['photos']);
 
       //Resolve category name
       String categoryName = getCategoryNameByID(item['category']);
+
+      List<double> coordinates = List<double>.from(item['location']['coordinates']);
+
+      Location location = Location(item['location']['label'],item['location']['city'],item['location']['postcode'],coordinates);
+
+      List<DateRange> availability = List<DateRange>();
+
+      List temp = List.from(item["availability"]);
+      temp.forEach((item){
+        availability.add(makeDateRange(item));
+      });
 
       var advert = new Advert(
           item['_id'],
@@ -46,7 +76,9 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
           item['description'],
           photos,
           item['owner'],
-          categoryName
+          categoryName,
+          availability,
+          location
       );
 
       _adverts.add(advert);
@@ -56,4 +88,8 @@ Future<List<Advert>> getResults(String text, int priceMin, int priceMax, List<St
   } else {
     throw Exception("Failed to get adverts");
   }
+}
+
+DateRange makeDateRange(Map<String,dynamic> fromJSON){
+  return DateRange(DateTime.parse(fromJSON["start"]),DateTime.parse(fromJSON["end"]));
 }

@@ -1,152 +1,284 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/data.dart';
-import 'package:trops_app/models/DateRange.dart';
-import 'package:trops_app/api/image.dart';
-import 'package:trops_app/models/User.dart';
+import 'package:trops_app/api/advert.dart';
 import 'package:trops_app/models/TropsCategory.dart';
+import 'package:trops_app/utils/session.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
+import 'package:trops_app/widgets/availabilityList.dart';
+import 'package:trops_app/widgets/imageSelector.dart';
 import 'package:trops_app/widgets/trops_bottom_bar.dart';
-import 'package:trops_app/utils/imagesManager.dart';
 import 'package:trops_app/widgets/advertField.dart';
-import 'package:intl/intl.dart';
+import 'package:trops_app/widgets/categorySelector.dart';
 
-String _selectedCategoryID;
 
-class CreateAdvertPage extends StatefulWidget {
+class CreateAdvertPage extends StatefulWidget  {
 
   @override
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
-enum ResultType {success, failure, denied} //enum for the different case of the creation of an advert
+enum _AlertType {success, failure, denied, eulaNotAccepted} //enum for the different case of the creation of an advert
 
+class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProviderStateMixin {
 
-
-class _CreateAdvertPage extends State<CreateAdvertPage> {
-
-  List<DateRange> _availability = new List<DateRange>();
-  ImagesManager _imagesManager = ImagesManager(); //Object that allow us to load 4 images for the current advert that will be created
   TextEditingController _titleController = TextEditingController(); //controller to get the text form the title field
   TextEditingController _descriptionController = TextEditingController(); //controller to get the text form the description field
   TextEditingController _priceController = TextEditingController(); //controller to get the text form the price field
 
-  List<TropsCategory> _categories = new List<TropsCategory>();
+  GlobalKey<AutocompleteState> _autocomplete = GlobalKey<AutocompleteState>();
+  GlobalKey<CategorySelectorState> _categorySelectorState = GlobalKey<CategorySelectorState>();
+
+  CategorySelector _categorySelector;
+  bool _loadingCategory;
+  AvailabilityList _availabilityList = AvailabilityList(availability: []);
+  Icon _fabIcon;
+
+  bool _isUploadProcessing; //bool that indicate if the a upload task is running to disable the upload button
+  bool _hasAcceptedEULA;
+  bool _isPriceValid;
+
+
+  GlobalKey<ImageSelectorState> _imageSelector = GlobalKey<ImageSelectorState>(); //GlobalKey to access the imageSelector state
+
+  TabController _tabController;
+  List<Widget> _kPanes;
 
   @override
   void initState(){
     super.initState();
-    loadCategories();
-    setState(() {
-      _availability.add(DateRange(DateTime.now(), DateTime.now()));
-    });
-  }
 
-  loadCategories() async {
 
-    getCategories().then( (List<TropsCategory> res) {
+
+    _fabIcon = Icon(Icons.navigate_next);
+
+    _tabController = TabController(vsync: this, length: 6);
+    _tabController.addListener((){
       setState(() {
-        _categories = res;
+          _fabIcon = (_tabController.index == _kPanes.length-1) ? Icon(Icons.check_circle) : Icon(Icons.navigate_next);
       });
     });
-  }
-
-  Future<File> _openSource(BuildContext context, int index, SourceType source) async {
-
-    ImageSource sourceChoice; //object that represent the source form where to pick the imaes
-
-    switch (source) { //we check where to look, depending by the user's choice
-      case SourceType.camera:
-        {
-          sourceChoice = ImageSource.camera;
-        }
-        break;
-
-      case SourceType.gallery:
-        {
-          sourceChoice = ImageSource.gallery;
-        }
-        break;
-    }
-
-    var picture = await ImagePicker.pickImage(source: sourceChoice); //we let the user pick the image where he want
-
-    return picture;
-  }
 
 
-  void _imageUploadProcess(SourceType source, int index) async {
-    var picture = await _openSource(context, index, source); //return the file choosen by the user
-
-    var compressedPicture = await this._imagesManager.compressAndGetFile(picture);
-
-    this.setState((){
-      _imagesManager.loadFile(index, compressedPicture); //add the file to the imageMangaer
+    _loadingCategory = true;
+    getCategories().then( (List<TropsCategory> res) {
+      setState(() {
+        _loadingCategory = false;
+        _categorySelector = CategorySelector(key: _categorySelectorState,categories: res);
+      });
     });
 
-    uploadImage(compressedPicture); //compress & upload the image on server
+    _isUploadProcessing = false;
+    _hasAcceptedEULA = false;
+    _isPriceValid = true;
   }
 
-  Future<void> _showChoiceDialog(BuildContext context, int index) {
+  @override
+  void dispose(){
+    super.dispose();
+    _tabController.dispose();
+  }
 
-    return showDialog(context: context, builder: (BuildContext context) {
-      return SimpleDialog(
-        title: Text("Que voulez-vous faire ?"),
-        children: <Widget>[
-          ListTile(
-            leading: Icon(Icons.image),
-            title: Text("Importer depuis la gallerie"),
-            onTap: () {
-              _imageUploadProcess(SourceType.gallery, index);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
+  Widget _buildTitleDescPane() {
+    return SingleChildScrollView(
+      child: Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.all(25.0),
+              child: Material(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)
+                ),
+                child: Column(
+                  children: <Widget>[
+                    AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
+                    Container(
+                      width: 250.0,
+                      height: 1.0,
+                      color: Colors.grey[400],
+                    ),
+                    _buildValuePicker(),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
+              child: Material(
+                elevation: 2.0,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)
+                ),
+                //child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
+                child: Container(
+                  padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
+                  child: TextField(
+                    controller: _descriptionController,
+                    maxLines: null,
+                    maxLength: 1000,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.description),
+                      hintText: "Description",
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ]
+      ),
+    );
+  }
+
+  Widget _buildCategoryPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
           ),
-          ListTile(
-            leading: Icon(Icons.photo_camera),
-            title: Text("Prendre une photo"),
-            onTap: () {
-              _imageUploadProcess(SourceType.camera, index);
-              Navigator.of(context).pop(); //we make the alert dialog disapear
-            },
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                    "Catégorie",
+                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                ),
+                Padding(padding: EdgeInsets.only(top: 10)),
+                _loadingCategory ? SpinKitDoubleBounce(size: 25, color: Colors.lightBlueAccent) : _categorySelector,
+              ],
+            )
           ),
-          ListTile(
-            enabled: (_imagesManager.get(index) != null), //the user can't delete the picture if the image at index is null
-            leading: Icon(Icons.delete),
-            title: Text("Supprimer la photo"),
-            onTap: () {
-              _deleteImageProcess(context, index);
-              Navigator.of(context).pop(); // we close the alertDialog
-            },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Text("Adresse du bien", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+              ),
+              Padding(
+                padding: EdgeInsets.all(10.0),
+                child: Autocomplete(key: _autocomplete),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvailabilityPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Container(
+            padding: EdgeInsets.all(10.0),
+            child: Column(
+              children: <Widget>[
+                Text(
+                  "Disponibilités",
+                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
+                ),
+                _availabilityList,
+              ],
+            )
           )
-        ],
-      );
-    });
+        )
+      ),
+    );
   }
 
-  _deletePicture(BuildContext context, int index){
-    this.setState(() { //we reload the UI
-      _imagesManager.removeAt(index);
-    });
+  Widget _buildPhotoPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(25.0),
+        child: Material(
+          elevation: 2.0,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0)
+          ),
+          child: Column(
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+              ),
+              ImageSelector(key:_imageSelector)
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  void _deleteImageProcess(BuildContext context, int index) async{
-    var response = await deleteImage(_imagesManager.get(index));//First, delete the image from the server
+  Widget _buildValidationPane(){
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.only(top: 25.0, left:25.0, right: 25.0, bottom: 10.0),
+        child: Column(
+          children: <Widget>[
+            Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _hasAcceptedEULA,
+                    onChanged: (newValue){
+                      setState(() {
+                        _hasAcceptedEULA = newValue;
+                      });
+                    },
+                  ),
+                  Flexible(
+                      child : Text("J'accepte les conditions générales de l'application TROPS")
+                  )
+                ]
+            ),
+            MaterialButton(
+              color: Colors.green,
+              onPressed: _isUploadProcessing ? null : _submitAdvert,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+              ),
+              child: (_isUploadProcessing) ? CircularProgressIndicator( valueColor: AlwaysStoppedAnimation<Color>(Colors.black))
+                                           : Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold,color: Colors.white))
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
-    if(response.statusCode == 200){//if the deletion is a success
-      _deletePicture(context, index); //we delete the image in client + refresh UI
+  String _selectedCategory(){
+    if (_loadingCategory){
+      return null;
+    } else {
+      return _categorySelectorState.currentState.selectedCategory();
     }
-    else{
-      print("Delete error " + response.statusCode.toString());
-    }
   }
-  
-  bool _isPriceValid = true;
-  
+
   Widget _buildValuePicker() {
     return Container(
       padding: EdgeInsets.only(top: 20,right: 25,left:10,bottom:20),
@@ -180,192 +312,64 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
-  Widget _buildValidationButton(){
-    return Container(
-      padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 10.0),
-      child: MaterialButton(
-        color: Colors.green,
-        textColor: Colors.white,
-        onPressed: () =>_uploadAdvert(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(10.0)),
-        ),
-        child: Text("Créer l'annonce",style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-      ),
-    );
-  }
-
-
-  ///
-  ///
-  ///
-  Future<Null> _selectDate(BuildContext context, int index, bool start) async {
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: start ? DateTime.now() : _availability[index].start,
-        firstDate: DateTime(2015, 8),
-        lastDate: DateTime(2101));
-    if (picked != null && picked.isAfter(DateTime.now())){
-      if (start){
-        setState(() {
-          _availability[index].start = picked;
-          if (picked.isAfter(_availability[index].end)){
-            _availability[index].end = picked;
-          }
-        });
-      } else {
-        setState(() {
-          _availability[index].end = picked;
-          if (picked.isBefore(_availability[index].start)){
-            _availability[index].start = picked;
-          }
-        });
-      }
-    }
-  }
-
-  Widget _buildAvailabilityList() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _availability.length,
-      physics: const NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) {
-        return Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: <Widget>[
-            Text(
-                "DU  ",
-              style: TextStyle(
-                  fontWeight: FontWeight.bold
-              ),
-            ),
-            OutlineButton(
-              child: Text(
-                  DateFormat('dd/MM/yy').format(_availability[index].start)
-              ),
-              onPressed: () {
-                _selectDate(context,index,true);
-              },
-              textColor: Colors.blueAccent,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              ),
-            ),
-            Text(
-              "  AU  ",
-              style: TextStyle(
-                fontWeight: FontWeight.bold
-              ),
-            ),
-            OutlineButton(
-              child: Text(
-                  DateFormat('dd/MM/yy').format(_availability[index].end)
-              ),
-              onPressed: () {
-                _selectDate(context,index,false);
-              },
-              textColor: Colors.blueAccent,
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(20.0)),
-              ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete),
-              color: Colors.red,
-              highlightColor: Colors.deepOrangeAccent,
-              onPressed: (_availability.length <= 1) ? null : () {
-                {
-                  setState(() {
-                    _availability.removeAt(index);
-                  });
-                }
-              },
-            ),
-          ],
-        );
-      }
-    );
-  }
-
-  void unfocus(){
-    FocusScope.of(context).unfocus(); //make all the textfield loose focus
-  }
-
-  Widget _buildPictureGrild() {
-    return GridView.count(
-      physics: const NeverScrollableScrollPhysics(), //prevent the user to scroll on the gridview instead of the list
-      crossAxisCount: 2,
-      scrollDirection: Axis.vertical,
-      shrinkWrap: true,
-      children: List.generate(4, (index) {
-        return GestureDetector(
-          onTap: () {
-            _showChoiceDialog(context, index);
-          },
-          child: Container(
-              padding: EdgeInsets.all(10.0),
-              child: Material(
-                elevation: 2.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-                color: Colors.white,
-                child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    child: _boxContent(index),
-                  ),
-              )
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _boxContent(int index) {
-    if (_imagesManager.get(index) == null) {
-      return Icon(
-        Icons.photo_camera,
-        size: 50,
-      );
-    }
-    else {
-      return Image.file(_imagesManager.get(index), fit: BoxFit.cover);
-    }
-  }
-
-
   bool _checkFields(){
-    return (_titleController.text.isNotEmpty && _priceController.text.isNotEmpty && _selectedCategoryID != ""); //check if all REQUIRED field have a value
+    return (
+        _titleController.text.isNotEmpty &&
+        _priceController.text.isNotEmpty &&
+        _isPriceValid &&
+        _selectedCategory() != null &&
+        _autocomplete.currentState.getSelectedLocation() != null
+    ); //check if all REQUIRED field have a value
   }
 
+  void _submitAdvert() async {
 
-  void _uploadAdvert() async {
+    FocusScope.of(context).unfocus();
 
-    this.unfocus();
-
-    List<String> splitedPaths = this._imagesManager.getAllFilePath();
-
-
-    if(_checkFields() && _isPriceValid){ //if the user have correctly completed the form
-      var response = await uploadAdvertApi(_titleController.text, double.parse(_priceController.text), _descriptionController.text, _selectedCategoryID, User.current.getEmail(),splitedPaths, _availability); // we try to contact the APi to add the advert
-
-      if (response.statusCode != 201){ //if the response is not 201, the advert wasn't created for some reasons
-        _showUploadResult(context,ResultType.failure); //we warn the user that the process failed
-      }
-      else{ // the response is 201, the creation was a sucess
-        _showUploadResult(context,ResultType.success); // we warn him that it's a success
-      }
-    }
-    else{ // the user doesn't correctly complete the form
-      _showUploadResult(context, ResultType.denied); // we warn him that he can't create the advert
+    if(!_checkFields()) { //if the user have correctly completed the form
+      _showUploadResult(context, _AlertType.denied); // we warn him that he can't create the advert
+      return;
     }
 
+    if (!_hasAcceptedEULA){
+      _showUploadResult(context, _AlertType.eulaNotAccepted);
+      return;
+    }
+
+    setState(() {
+      _isUploadProcessing = true; //We transform the button into loading circle (the button is disabled)
+    });
+
+    try {
+      var response = await uploadAdvert(
+          Session.token,
+          _titleController.text,
+          double.parse(_priceController.text),
+          _descriptionController.text,
+          _selectedCategory(),
+          Session.currentUser.getId(),
+          _imageSelector.currentState.getAllPaths(),
+          _availabilityList.availability,
+          _autocomplete.currentState.getSelectedLocation()); // we try to contact the API to add the advert
+
+      switch(response){
+        case AdvertUploadStatus.FAILURE:
+          _showUploadResult(context,_AlertType.failure); //we warn the user that the process failed
+          return;
+        case AdvertUploadStatus.SUCCESS:
+          _showUploadResult(context,_AlertType.success); // we warn him that it's a success
+          return;
+      }
+    } catch (error){
+      _showUploadResult(context,_AlertType.failure);
+    } finally {
+      setState(() {
+        _isUploadProcessing = false; //the button is show again (before pop context)
+      });
+    }
   }
 
-  Future<void> _showUploadResult(BuildContext context, ResultType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
+  Future<void> _showUploadResult(BuildContext context, _AlertType result) { //one function to show an alertdialog depending of the advert state when user clicked on create
     String title;
     String content;
     int popCount;
@@ -374,7 +378,13 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     Color color;
 
     switch(result){
-      case ResultType.success:
+      case _AlertType.eulaNotAccepted:
+        title = "Pas si vite !";
+        content = "Veuillez accepter les conditions générales d'utilisation";
+        popCount = 1;
+        color = Colors.redAccent;
+        break;
+      case _AlertType.success:
         {
           title = "Opération terminée";
           content = "Votre annonce a été créée avec succès";
@@ -382,7 +392,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           color = Colors.greenAccent;
           break;
         }
-      case ResultType.failure:
+      case _AlertType.failure:
         {
           title = "Opération échouée";
           content = "Malheureusement, votre annonce n'a pas pu être créée";
@@ -390,7 +400,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
           color = Colors.redAccent;
           break;
         }
-      case ResultType.denied:
+      case _AlertType.denied:
         {
           title = "Pas si vite !";
           content = "Vérifiez que les champs obligatoires soient remplis (Titre, Prix, Catégorie, Dates)";
@@ -406,7 +416,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
       builder: (BuildContext context) {
         // return object of type Dialog
         return WillPopScope(
-            onWillPop: () {},
+            onWillPop: () {return null;},
             child : AlertDialog(
               title: new Text(title),
               content: Row(
@@ -438,224 +448,78 @@ class _CreateAdvertPage extends State<CreateAdvertPage> {
     );
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+
+    _kPanes = <Widget>[
+      _buildTitleDescPane(),
+      _buildCategoryPane(),
+      _buildLocationPane(),
+      _buildAvailabilityPane(),
+      _buildPhotoPane(),
+      _buildValidationPane(),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Création d'une annonce", style: TextStyle(
-          fontSize: 25.0,
-        ),
-        ),
-      ),
-      body: GestureDetector(
-        onTap: (){
-          FocusScope.of(context).requestFocus(new FocusNode());
-        },
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        AdvertField(nbLines: 1,label:"Nom du produit",icon: Icons.title,controller: _titleController),
-                        Container(
-                          width: 250.0,
-                          height: 1.0,
-                          color: Colors.grey[400],
-                        ),
-                        _buildValuePicker(),
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    //child: AdvertField(nbLines: 3,label: "Description",icon: Icons.description,controller: _descriptionController),
-                    child: Container(
-                      padding: EdgeInsets.only(top: 25,right: 25, left:10, bottom: 20.0),
-                      child: TextField(
-                        controller: _descriptionController,
-                        maxLines: null,
-                        maxLength: 1000,
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.description),
-                          hintText: "Description",
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Container(
-                        padding: EdgeInsets.all(10.0),
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                                "Catégorie",
-                                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                            ),
-                            CategorySelector(categories: _categories),
-                          ],
-                        )
-                    ),
-                  ),
-                ),
-
-                Container(
-                    padding: EdgeInsets.only(left:25.0, right: 25.0, bottom: 25.0),
-                    child: Material(
-                        elevation: 2.0,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)
-                        ),
-                        child: Container(
-                            padding: EdgeInsets.all(10.0),
-                            child: Column(
-                              children: <Widget>[
-                                Text(
-                                    "Disponibilités",
-                                    style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)
-                                ),
-                                _buildAvailabilityList(),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 10),
-                                ),
-                                RaisedButton.icon(
-                                  label: Text("Ajouter une période"),
-                                  icon: Icon(Icons.add),
-                                  textColor: Colors.blueAccent,
-                                  color: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
-                                  ),
-                                  onPressed: () {
-                                    setState(() {
-                                      _availability.add(DateRange(DateTime.now(), DateTime.now()));
-                                    });
-                                  },
-                                ),
-                              ],
-                            )
-                        )
-                    )
-                ),
-
-                Container(
-                  padding: EdgeInsets.only(top: 20.0, left:25.0, right: 25.0, bottom: 10.0),
-                  child: Material(
-                    elevation: 2.0,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0)
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.all(10.0),
-                          child: Text("Photos", style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
-                        ),
-                        _buildPictureGrild()
-                      ],
-                    ),
-                  ),
-                ),
-
-                Container(
-                    padding: EdgeInsets.only(top:25,bottom:25),
-                    child: _buildValidationButton()
-                ),
-              ],
-            ),
-          ),
-        )
+        title: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0)),
       ),
       bottomNavigationBar: TropsBottomAppBar(),
+      floatingActionButton: Visibility(
+        visible: _dockedFabVisibility(context),
+        child:FloatingActionButton(
+          backgroundColor: Colors.green,
+          child: _fabIcon,
+          onPressed: (){
+            setState(() {
+              if (!_tabController.indexIsChanging){
+                if (_tabController.index < _kPanes.length-1){
+                  _tabController.animateTo(_tabController.index+1);
+                } else {
+                  _submitAdvert();
+                }
+              }
+            });
+          },
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      body: /*GestureDetector(
+        onTap: (){
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },*/
+     Padding(
+        padding: EdgeInsets.all(10),
+          child: Column(
+            children: <Widget>[
+              TabPageSelector(
+                controller: _tabController,
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: _kPanes,
+                )
+              )
+            ]
+          ),
+        )
     );
   }
 
-
-}
-
-class CategorySelector extends StatefulWidget {
-
-  final List<TropsCategory> categories;
-  CategorySelector({Key key, this.categories}) : super(key: key);
-
-  @override
-  _CategorySelectorState createState() => _CategorySelectorState();
-}
-
-class _CategorySelectorState extends State<CategorySelector>{
-
-
-  Widget _buildTiles(TropsCategory root){
-    if (root.subcategories.isEmpty) {
-      return Padding(
-        padding: EdgeInsets.only(left:20, right: 5),
-        child: Row(
-          children: <Widget>[
-            Text(root.title),
-              Spacer(),
-              Radio<String>(
-                value: root.id,
-                groupValue: _selectedCategoryID,
-                onChanged: (String value){
-                  setState(() {
-                    _selectedCategoryID = value;
-                  });
-                },
-            )
-          ],
-        ),
-      );
+  static _dockedFabVisibility(context) {
+    if (MediaQuery.of(context).viewInsets.bottom != 0) {
+      return false;
     } else {
-      return ExpansionTile(
-        key: PageStorageKey<TropsCategory>(root),
-        title: Row(
-          children: <Widget>[
-            Text(
-              root.title,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16
-              ),
-            ),
-          ],
-        ),
-        children: root.subcategories.map(_buildTiles).toList(),
-      );
+      return true;
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemBuilder: (BuildContext context, int index) =>_buildTiles(widget.categories[index]),
-      itemCount: widget.categories.length,
-    );
-  }
 }
+
+
+

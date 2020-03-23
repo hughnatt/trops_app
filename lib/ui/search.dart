@@ -3,9 +3,10 @@ import 'package:flutter/rendering.dart';
 import 'package:trops_app/api/category.dart';
 import 'package:trops_app/api/search.dart';
 import 'package:trops_app/models/Advert.dart';
-import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
+import 'package:trops_app/models/Location.dart';
 import 'package:trops_app/models/TropsCategory.dart';
 import 'package:trops_app/widgets/advertTile.dart';
+import 'package:trops_app/widgets/autocompleteSearch.dart';
 import 'package:trops_app/widgets/trops_scaffold.dart';
 
 class SearchResultPage extends StatefulWidget {
@@ -23,6 +24,7 @@ Map<String,bool> _categorySelected = Map<String,bool>();
 
 class _SearchResultPageState extends State<SearchResultPage>{
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  GlobalKey<AutocompleteState> _autocomplete = GlobalKey<AutocompleteState>();
 
   List<Advert> _adverts = new List<Advert>();
 
@@ -33,8 +35,22 @@ class _SearchResultPageState extends State<SearchResultPage>{
   TextEditingController _priceMaxController = TextEditingController();
   RangeValues _priceRange = RangeValues(0.0,1.0);
 
+
+
   static const int PRICE_MAX = 500;
   static const int PRICE_MIN = 0;
+
+  static const String DEFAULT_CITY = "Toute la France";
+  static const int DEFAULT_DISTANCE = 5;
+
+  String _city = DEFAULT_CITY;
+  int _distance = DEFAULT_DISTANCE;
+  Location _selectedLocation;
+
+  String _sortField = "creationDate";
+  int _sortOrder = -1;
+
+  String _selectedField = "DATE DE CREATION";
 
 
   List<TropsCategory> _categories = List<TropsCategory>();
@@ -44,6 +60,44 @@ class _SearchResultPageState extends State<SearchResultPage>{
     super.initState();
     loadCategories();
     loadAdverts();
+  }
+
+  static const _sortFields = <String>[
+    'TITRE',
+    'DATE DE CREATION',
+    'PRIX'
+  ];
+  final List<PopupMenuItem<String>> _dropDownFieldsMenu = _sortFields.map(
+      (String value) => PopupMenuItem<String>(
+        value : value,
+        child: Text(value)
+      )
+  ).toList();
+
+  _setSortField(field){
+    switch(field)  {
+      case "TITRE":
+        _sortField = "title";
+        break;
+      case "DATE DE CREATION":
+        _sortField = "creationDate";
+        break;
+      case "PRIX":
+        _sortField = "price";
+        break;
+    }
+    _doSearch();
+  }
+
+  _toggleSortOrder(){
+    setState(() {
+      if (_sortOrder == 1){
+        _sortOrder = -1;
+      } else {
+        _sortOrder = 1;
+      }
+    });
+    _doSearch();
   }
 
   void _resetCategories(List<TropsCategory> catList){
@@ -92,9 +146,96 @@ class _SearchResultPageState extends State<SearchResultPage>{
       }
     });
 
-    getResults(_keywordController.text, priceMin, priceMax, categories).then((res) {
+    getResults(_keywordController.text, priceMin, priceMax, categories, _selectedLocation?.getCoordinates(), _distance, _sortField, _sortOrder).then((res) {
       setState(() {
         _adverts = res;
+      });
+    });
+  }
+
+  String getLocationText(){
+    if(_city != DEFAULT_CITY){
+      return _city + " (" + _distance.toString()+"km)";
+    }
+    else{
+      return _city;
+    }
+  }
+
+  Future<void> _showAlert(BuildContext context){
+
+    int _selectedDistance = 5;
+
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Choisir un lieu"),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Material(
+                    elevation: 2.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                      child: Autocomplete(key: _autocomplete),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 10.0),
+                            child: Text("Dans un rayon de : $_selectedDistance km"),
+                          ),
+                          Slider(
+                            value: _selectedDistance.toDouble(),
+                            min: 5.0,
+                            max: 55.0,
+                            divisions: 10,
+                            onChanged: (double newValue) {
+                              setState(() {
+                                _selectedDistance = newValue.round();
+                              });
+                            },
+                          ),
+                        ],
+                    )
+                  )
+                ],
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text("Valider"),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                )
+              ],
+            );
+          },
+        );
+
+      }
+    ).then((returndata) {
+      setState(() {
+        try{
+          _city = _autocomplete.currentState.getSelectedLocation().getCity();
+          _distance = _selectedDistance;
+        }
+        catch(err){
+          _city = DEFAULT_CITY;
+          _distance = DEFAULT_DISTANCE;
+        }
+        _selectedLocation = _autocomplete.currentState.getSelectedLocation();
+
       });
     });
   }
@@ -125,11 +266,50 @@ class _SearchResultPageState extends State<SearchResultPage>{
       slivers: <Widget>[
         SliverAppBar(
           automaticallyImplyLeading: false,
-          title: Center(
-            child: FlatButton.icon(
-              icon: Icon(Icons.filter_list),
-              label: Text("Filtres"),
-              onPressed: () {_scaffoldKey.currentState.openDrawer();},
+          title: SizedBox(
+            height: 30,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: <Widget>[
+                RaisedButton.icon(
+                  icon: Icon(Icons.filter_list),
+                  label: Text("FILTRES"),
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  onPressed: () {_scaffoldKey.currentState.openDrawer();},
+                ),
+                Padding(padding: EdgeInsets.only(left: 10)),
+                RaisedButton.icon(
+                  icon: PopupMenuButton(
+                    padding: EdgeInsets.all(0),
+                    icon: Icon(Icons.arrow_drop_down),
+                    onSelected: (newValue){
+                      setState(() {
+                        _selectedField = newValue;
+                      });
+                      _setSortField(newValue);
+                    },
+                    itemBuilder: (BuildContext context) => _dropDownFieldsMenu,
+                  ),
+                  label: Text(_selectedField),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  elevation: 2.0,
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  onPressed: () {},
+                ),
+                Padding(padding: EdgeInsets.only(left: 10)),
+                RaisedButton.icon(
+                  icon: (_sortOrder == 1) ? Icon(Icons.arrow_upward) : Icon(Icons.arrow_downward),
+                  label: (_sortOrder == 1) ? Text('CROISSANT') : Text('DECROISSANT'),
+                  shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(18.0)),
+                  elevation: 2.0,
+                  color: Colors.blueAccent,
+                  textColor: Colors.white,
+                  onPressed: () => _toggleSortOrder(),
+                ),
+              ],
             ),
           ),
           snap: true,
@@ -298,6 +478,19 @@ class _SearchResultPageState extends State<SearchResultPage>{
 
               Center(
                 child: RaisedButton.icon(
+                  label: Text(getLocationText()),
+                  icon: Icon(Icons.gps_fixed),
+                  textColor: Colors.blueAccent,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                  ),
+                  onPressed: () => _showAlert(context)
+                ),
+              ),
+
+              Center(
+                child: RaisedButton.icon(
                   label: Text("Appliquer"),
                   icon: Icon(Icons.search),
                   textColor: Colors.blueAccent,
@@ -405,6 +598,9 @@ class _SearchResultPageState extends State<SearchResultPage>{
       _priceMaxController.text = PRICE_MAX.toString();
       _priceRange = RangeValues(0.0,1.0);
       _resetCategories(_categories);
+      _city = DEFAULT_CITY;
+      _distance = DEFAULT_DISTANCE;
+      _selectedLocation = null;
     });
   }
 
@@ -418,7 +614,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     loadAdverts();
   }
 
-  void _pickDateTime() async {
+/*  void _pickDateTime() async {
     DateTime firstDate; //Variable to allow us to reput the dates picked in the date picker if done previously
     DateTime lastDate;
 
@@ -441,7 +637,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     if(returnedDates != null){ //Allow to handle the cancel button that pop the context
       picked = returnedDates;
     }
-  }
+  }*/
 }
 
 void _applyValueToSubcategories(TropsCategory cat, bool value){
