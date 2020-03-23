@@ -23,7 +23,7 @@ enum SourceType {gallery, camera} //enum for the different sources of the images
 
 class _AdminAdvertViewState extends State<AdminAdvertView> {
 
-  //List<TropsCategory> _categories = new List<TropsCategory>();
+  List<TropsCategory> _categories = new List<TropsCategory>();
 
   TextEditingController _titleController;
   TextEditingController _descriptionController;
@@ -55,8 +55,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
 
     getCategories().then( (List<TropsCategory> res) {
       setState(() {
-        //_categories = res;
-        _categorySelector = widget.advert.getCategory();
+        _categories = res;
       });
     });
 
@@ -194,7 +193,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text("Choississez une nouvelle catégorie"),
         children: <Widget>[
-          CategorySelector(key: _categorySelectorState),
+          CategorySelector(key: _categorySelectorState,categories: _categories),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.end,

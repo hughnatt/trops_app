@@ -171,7 +171,7 @@ Future<AuthResult> getSession(String token) async {
             json['name'],
             json['email'],
             json['phoneNumber'],
-            json['favorites']
+            List<String>.from(json['favorites'])
         );
         authResult.isAuthenticated = true;
         authResult.user = user;
