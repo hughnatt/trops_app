@@ -26,15 +26,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:trops_app/api/auth.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/interactor/auth_interactor.dart';
 import 'package:trops_app/utils/bubble_indication_painter.dart';
-import 'package:trops_app/style/theme.dart' as Theme;
-import 'package:trops_app/widgets/trops_scaffold.dart';
+
+import 'style/theme.dart' as Theme;
+import 'widgets/trops_scaffold.dart';
 
 
 class AuthPage extends StatefulWidget {
-  AuthPage({Key key}) : super(key: key);
+
+  final SessionRepository sessionRepository;
+  final AuthInteractor authInteractor;
+
+  const AuthPage({
+    Key key,
+    @required this.sessionRepository,
+    @required this.authInteractor
+  }) : super(key: key);
 
   @override
   _AuthPageState createState() => new _AuthPageState();
@@ -162,6 +171,7 @@ class _AuthPageState extends State<AuthPage>
           ),
         ),
       ),
+      sessionRepository: widget.sessionRepository,
     );
   }
 
@@ -725,11 +735,16 @@ class _AuthPageState extends State<AuthPage>
       FocusScope.of(context).requestFocus(_focusLoginEmail);
     }
     else{
-      AuthResult authResult = await register(_ctrlRegisterName.text, _ctrlRegisterEmail.text, _ctrlRegisterPassword.text, _ctrlRegisterPhone.text);
-      if(authResult.isAuthenticated && authResult != null){
+      try {
+        await widget.authInteractor.register(
+            _ctrlRegisterName.text,
+            _ctrlRegisterEmail.text,
+            _ctrlRegisterPassword.text,
+            _ctrlRegisterPhone.text
+        );
         Navigator.pop(context);
         Navigator.pushNamed(context, ModalRoute.of(context).settings.arguments);
-      } else {
+      } catch (error) {
         _displayAlert("Echec de l'inscription.");
         FocusScope.of(context).requestFocus(_focusRegisterName);
       }
@@ -737,33 +752,23 @@ class _AuthPageState extends State<AuthPage>
   }
 
   void _handleLogin() async {
-    AuthResult authResult = await login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
-    if (authResult.isAuthenticated && authResult.user != null){
-
+    try {
+      await widget.authInteractor.login(_ctrlLoginEmail.text, _ctrlLoginPassword.text);
       String _futureRoute = ModalRoute.of(context).settings.arguments;
       if(_futureRoute == null) _futureRoute = "/home";
       Navigator.pop(context);
       Navigator.pushNamed(context, _futureRoute);
-    } else {
-      _displayAlert("Les identifiants fournis sont incorrects.");
+    } catch (error) {
+      _displayAlert("Erreur de connexion");
     }
   }
 
   void _handleGoogle() async {
-    GoogleSignInAuthentication googleSignInAuthentication;
     try {
-      await googleSignIn.signIn();
-      googleSignInAuthentication = await googleSignIn.currentUser.authentication;
-    } catch(error) {
-      print(error);
-      _displayAlert("Echec de l'authentification");
-    }
-
-    AuthResult authResult = await socialLoginWithGoogle(googleSignInAuthentication.idToken);
-    if (authResult.isAuthenticated && authResult.user != null) {
+      await widget.authInteractor.googleLogin();
       Navigator.popAndPushNamed(context, ModalRoute.of(context).settings.arguments);
-    } else {
-      _displayAlert("Echec de l'authentification");
+    } catch (error) {
+      _displayAlert("Erreur de connexion");
     }
   }
 }

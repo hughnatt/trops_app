@@ -2,25 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/advert.dart';
-import 'package:trops_app/models/TropsCategory.dart';
-import 'package:trops_app/utils/session.dart';
-import 'package:trops_app/widgets/autocompleteSearch.dart';
-import 'package:trops_app/widgets/availabilityList.dart';
-import 'package:trops_app/widgets/imageSelector.dart';
-import 'package:trops_app/widgets/trops_bottom_bar.dart';
-import 'package:trops_app/widgets/advertField.dart';
-import 'package:trops_app/widgets/categorySelector.dart';
+import 'package:trops_app/core/data/advert_repository.dart';
+import 'package:trops_app/core/data/category_repository.dart';
+import 'package:trops_app/core/data/location_repository.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/entity/advert_upload_status.dart';
+import 'package:trops_app/core/entity/trops_category.dart';
+
+import 'widgets/advertField.dart';
+import 'widgets/autocompleteSearch.dart';
+import 'widgets/availabilityList.dart';
+import 'widgets/categorySelector.dart';
+import 'widgets/imageSelector.dart';
+import 'widgets/trops_bottom_bar.dart';
+
 
 
 class CreateAdvertPage extends StatefulWidget  {
+
+  final CategoryRepository categoryRepository;
+  final SessionRepository sessionRepository;
+  final AdvertRepository advertRepository;
+  final LocationRepository locationRepository;
+
+  const CreateAdvertPage({
+    Key key,
+    @required this.categoryRepository,
+    @required this.sessionRepository,
+    @required this.advertRepository,
+    @required this.locationRepository
+  });
 
   @override
   _CreateAdvertPage createState() => _CreateAdvertPage();
 }
 
-enum _AlertType {success, failure, denied, eulaNotAccepted} //enum for the different case of the creation of an advert
+enum _AlertType { success, failure, denied, eulaNotAccepted } //enum for the different case of the creation of an advert
 
 class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProviderStateMixin {
 
@@ -63,7 +80,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
 
 
     _loadingCategory = true;
-    getCategories().then( (List<TropsCategory> res) {
+    widget.categoryRepository.getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _loadingCategory = false;
         _categorySelector = CategorySelector(key: _categorySelectorState,categories: res);
@@ -177,7 +194,10 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
-                child: Autocomplete(key: _autocomplete),
+                child: Autocomplete(
+                  key: _autocomplete,
+                  locationRepository: widget.locationRepository
+                ),
               )
             ],
           ),
@@ -341,18 +361,18 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
     });
 
     try {
-      var response = await uploadAdvert(
-          Session.token,
-          _titleController.text,
-          double.parse(_priceController.text),
-          _descriptionController.text,
-          _selectedCategory(),
-          Session.currentUser.getId(),
-          _imageSelector.currentState.getAllPaths(),
-          _availabilityList.availability,
-          _autocomplete.currentState.getSelectedLocation()); // we try to contact the API to add the advert
+      AdvertUploadStatus advertUploadStatus = await widget.advertRepository.uploadAdvert(
+        title: _titleController.text,
+        price: double.parse(_priceController.text),
+        description: _descriptionController.text,
+        category: _selectedCategory(),
+        owner: widget.sessionRepository.currentUser().id,
+        photos: _imageSelector.currentState.getAllPaths(),
+        availability: _availabilityList.availability,
+        location: _autocomplete.currentState.getSelectedLocation()
+      ); // we try to contact the API to add the advert
 
-      switch(response){
+      switch (advertUploadStatus) {
         case AdvertUploadStatus.FAILURE:
           _showUploadResult(context,_AlertType.failure); //we warn the user that the process failed
           return;
@@ -468,7 +488,7 @@ class _CreateAdvertPage extends State<CreateAdvertPage> with SingleTickerProvide
         centerTitle: true,
         title: Text("Création d'une annonce", style: TextStyle(fontSize: 25.0)),
       ),
-      bottomNavigationBar: TropsBottomAppBar(),
+      bottomNavigationBar: TropsBottomAppBar(sessionRepository: widget.sessionRepository),
       floatingActionButton: Visibility(
         visible: _dockedFabVisibility(context),
         child:FloatingActionButton(

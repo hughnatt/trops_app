@@ -1,25 +1,36 @@
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/advert.dart';
-import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/Location.dart';
 import 'package:http/http.dart' as Http;
-import 'package:trops_app/models/TropsCategory.dart';
-import 'package:trops_app/api/category.dart';
-import 'package:trops_app/utils/session.dart';
-import 'package:trops_app/widgets/availabilityList.dart';
-import 'package:trops_app/widgets/categorySelector.dart';
-import 'package:trops_app/widgets/imageSelector.dart';
-import 'package:trops_app/widgets/autocompleteSearch.dart';
+import 'package:trops_app/core/data/advert_repository.dart';
+import 'package:trops_app/core/data/category_repository.dart';
+import 'package:trops_app/core/data/location_repository.dart';
+import 'package:trops_app/core/entity/advert.dart';
+import 'package:trops_app/core/entity/advert_upload_status.dart';
+import 'package:trops_app/core/entity/location.dart';
+import 'package:trops_app/core/entity/trops_category.dart';
+import 'package:trops_app/ui/widgets/availabilityList.dart';
+
+import 'widgets/autocompleteSearch.dart';
+import 'widgets/categorySelector.dart';
+import 'widgets/imageSelector.dart';
 
 class AdminAdvertView extends StatefulWidget {
   final Advert advert;
+  final CategoryRepository categoryRepository;
+  final AdvertRepository advertRepository;
+  final LocationRepository locationRepository;
 
-  const AdminAdvertView({Key key, @required this.advert}) : super(key : key);
+  const AdminAdvertView({
+    Key key,
+    @required this.advert,
+    @required this.categoryRepository,
+    @required this.advertRepository,
+    @required this.locationRepository
+  }) : super(key : key);
 
   _AdminAdvertViewState createState() => _AdminAdvertViewState();
 }
 
-enum SourceType {gallery, camera} //enum for the different sources of the images picked by the user
+enum SourceType { GALLERY, CAMERA } //enum for the different sources of the images picked by the user
 
 class _AdminAdvertViewState extends State<AdminAdvertView> {
 
@@ -41,36 +52,31 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.advert.getTitle());
-    _descriptionController = TextEditingController(text: widget.advert.getDescription());
-    _priceController = TextEditingController(text: widget.advert.getPrice().toString());
-
-    _categorySelector = widget.advert.getCategory();
-    _locationSelector = widget.advert.getLocation();
-    _availabilityList = AvailabilityList(availability: widget.advert.getAvailability(),);
-
+    _titleController = TextEditingController(text: widget.advert.title);
+    _descriptionController = TextEditingController(text: widget.advert.description);
+    _priceController = TextEditingController(text: "${widget.advert.price}");
+    _categorySelector = widget.advert.category;
+    _locationSelector = widget.advert.location;
+    _availabilityList = AvailabilityList(availability: widget.advert.availability);
 
     WidgetsBinding.instance.addPostFrameCallback((_) => loadImages()); //wait the build method to be done (avoid calling currentState on null ImageSelector in loadImages)
 
-
-    getCategories().then( (List<TropsCategory> res) {
+    widget.categoryRepository.getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
       });
     });
-
   }
 
-
   void loadImages(){
-    for(int i=0;i < widget.advert.getAllImages().length;i++){
-      _imageSelectorState.currentState.addLink(i, widget.advert.getAllImages()[i]);
+    for(int i=0;i < widget.advert.photos.length;i++){
+      _imageSelectorState.currentState.addLink(i, widget.advert.photos[i]);
     }
   }
 
   Future<void> _deleteFromDB(BuildContext context) async {
 
-    Http.Response res = await deleteAdvert(widget.advert.getId(), Session.token);
+    Http.Response res = await widget.advertRepository.deleteAdvert(widget.advert.id);
 
     if(res.statusCode == 202){
       Navigator.pop(context);
@@ -134,7 +140,17 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
     String description = _descriptionController.text;
     String price = _priceController.text;
 
-    AdvertUploadStatus advertUploadStatus = await modifyAdvert(title,double.parse(price),description,getIDByCategoryName(_categorySelector),widget.advert.getOwner(),widget.advert.getId(), Session.token,_imageSelectorState.currentState.getAllPaths(),_availabilityList.availability,_locationSelector);
+    AdvertUploadStatus advertUploadStatus = await widget.advertRepository.modifyAdvert(
+        id: widget.advert.id,
+        title: title,
+        price: double.parse(price),
+        description: description,
+        category: widget.categoryRepository.getIDByCategoryName(_categorySelector),
+        owner: widget.advert.owner,
+        photos: _imageSelectorState.currentState.getAllPaths(),
+        availability: _availabilityList.availability,
+        location: _locationSelector
+    );
 
     switch(advertUploadStatus){
     case AdvertUploadStatus.SUCCESS:
@@ -178,7 +194,7 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
   }
 
   void updateCategory(BuildContext context){
-    String cat = getCategoryNameByID(_categorySelectorState.currentState.selectedCategory());
+    String cat = widget.categoryRepository.getCategoryNameByID(_categorySelectorState.currentState.selectedCategory());
     if(cat != ""){
       setState(() {
         _categorySelector = cat;
@@ -231,7 +247,10 @@ class _AdminAdvertViewState extends State<AdminAdvertView> {
       builder: (BuildContext context) => SimpleDialog(
         title: Text("choisissez une nouvelle location"),
         children: <Widget>[
-          Autocomplete(key: _autocompleteState),
+          Autocomplete(
+            key: _autocompleteState,
+            locationRepository: widget.locationRepository,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[

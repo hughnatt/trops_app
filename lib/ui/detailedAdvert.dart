@@ -1,21 +1,41 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_pro/carousel_pro.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_pro/carousel_pro.dart';
-import 'package:trops_app/api/user.dart';
-import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/DateRange.dart';
-import 'package:trops_app/models/User.dart';
-import 'package:trops_app/ui/adminAdvertView.dart';
 import 'package:intl/intl.dart';
-import 'package:trops_app/utils/session.dart';
+import 'package:trops_app/core/data/advert_repository.dart';
+import 'package:trops_app/core/data/category_repository.dart';
+import 'package:trops_app/core/data/favorite_repository.dart';
+import 'package:trops_app/core/data/location_repository.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/data/user_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:trops_app/core/entity/advert.dart';
+import 'package:trops_app/core/entity/date_range.dart';
+import 'package:trops_app/core/entity/user.dart';
+import 'package:trops_app/ui/adminAdvertView.dart';
+
 
 class DetailedAdvertPage extends StatefulWidget {
 
   final Advert advert;
+  final UserRepository userRepository;
+  final FavoriteRepository favoriteRepository;
+  final SessionRepository sessionRepository;
+  final AdvertRepository advertRepository;
+  final CategoryRepository categoryRepository;
+  final LocationRepository locationRepository;
 
-  const DetailedAdvertPage({ Key key, @required this.advert }) : super(key: key);
+  const DetailedAdvertPage({
+    Key key,
+    @required this.advert,
+    @required this.userRepository,
+    @required this.favoriteRepository,
+    @required this.sessionRepository,
+    @required this.advertRepository,
+    @required this.categoryRepository,
+    @required this.locationRepository
+  }) : super(key: key);
 
   @override
   _DetailedAdvertPageState createState() => _DetailedAdvertPageState();
@@ -26,11 +46,10 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
   int _index = 0;
   User _owner;
 
-
   @override
   void initState() {
     super.initState();
-    getUser(widget.advert.getOwner()).then((User user) {
+    widget.userRepository.getUser(widget.advert.owner).then((User user) {
       setState(() {
         this._owner = user;
       });
@@ -39,7 +58,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   List<Widget> getImagesWidget(){
 
-    List<String> images = widget.advert.getAllImages();
+    List<String> images = widget.advert.photos;
     List<Widget> imagesWidget = new List<Widget>();
 
     if(images != null){
@@ -73,9 +92,9 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
   }*/
 
   void _addFavoriteProcess(String advertId) async {
-    addFavorite(advertId).then((listFavorite) {
+    widget.favoriteRepository.addFavorite(advertId).then((listFavorite) {
       setState(() {
-        Session.currentUser.setFavorites(listFavorite);
+        widget.sessionRepository.currentUser().setFavorites(listFavorite);
       });
     }).catchError((onError){
       _showErrorAlert(context,"Impossible d'ajouter l'annonce aux favoris ");
@@ -83,9 +102,9 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
   }
 
   void _deleteFavoriteProcess(String advertId) async {
-    deleteFavorite(advertId).then((listFavorite) {
+    widget.favoriteRepository.deleteFavorite(advertId).then((listFavorite) {
       setState(() {
-        Session.currentUser.setFavorites(listFavorite);
+        widget.sessionRepository.currentUser().setFavorites(listFavorite);
       });
     }).catchError((onError){
       _showErrorAlert(context,"Impossible de supprimer l'annonce des favoris ");
@@ -95,24 +114,36 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
 
   Widget trailingIcon(BuildContext context){
-
-    if(Session.currentUser != null && Session.currentUser.getId() == widget.advert.getOwner()){
-      return IconButton(icon: Icon(Icons.mode_edit),onPressed: () => Navigator.push(context, MaterialPageRoute(builder : (context) => AdminAdvertView(advert : widget.advert))),);
-    }
-    else if (Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && Session.currentUser.isInFavorites(widget.advert.getId())) { //&& isInUserFavorite(widget.advert.getId())
-      return IconButton(icon: Icon(Icons.star),onPressed: () => _deleteFavoriteProcess(widget.advert.getId())); //display a star if the current advert is in the user's favorites
-    }
-    else if(Session.currentUser != null && Session.currentUser.getId() != widget.advert.getOwner() && !Session.currentUser.isInFavorites(widget.advert.getId())) {
-      return IconButton(icon: Icon(Icons.star_border),onPressed: () => _addFavoriteProcess(widget.advert.getId())); //display a empty star if the current advert is not in the user's favorites
-    }
-    else{ //the user is not logged
+    User currentUser = widget.sessionRepository.currentUser();
+    if (currentUser != null) {
+      if (currentUser.id == widget.advert.owner){
+        return IconButton(
+          icon: Icon(Icons.mode_edit),
+          onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder : (context) => AdminAdvertView(
+                advert : widget.advert,
+                advertRepository: widget.advertRepository,
+                categoryRepository: widget.categoryRepository,
+                locationRepository: widget.locationRepository,
+              ))
+          )
+        );
+      } else {
+        if (currentUser.id != widget.advert.owner && currentUser.isInFavorites(widget.advert.id)) { //&& isInUserFavorite(widget.advert.getId())
+          return IconButton(icon: Icon(Icons.star), onPressed: () => _deleteFavoriteProcess(widget.advert.id)); //display a star if the current advert is in the user's favorites
+        } else {
+          return IconButton(icon: Icon(Icons.star_border), onPressed: () => _addFavoriteProcess(widget.advert.id)); //display a empty star if the current advert is not in the user's favorites
+        }
+      }
+    } else {
       return IconButton(icon: Icon(null),onPressed: () => null);
     }
   }
 
   _showAvailibityCalendar(BuildContext context){
 
-    List<DateRange> allAvailibility = widget.advert.getAvailability();
+    List<DateRange> allAvailibility = widget.advert.availability;
 
      showDialog(
         context: context,
@@ -166,7 +197,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
 
   _onPhoneTapped(BuildContext context) async {
     try{
-      var url = "tel:"+_owner.getPhoneNumber().toString();
+      var url = "tel:"+_owner.phoneNumber.toString();
       if(await canLaunch(url)){
         await launch(url);
       }
@@ -184,7 +215,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
           height: 250.0,
           width: MediaQuery.of(context).size.width,
           child: Hero(
-            tag: 'heroAdvertImage_${widget.advert.getId()}',
+            tag: 'heroAdvertImage_${widget.advert.id}',
             child:Carousel(
               images: getImagesWidget(),
               autoplay: false,
@@ -203,7 +234,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
                   child: Container(
                     padding: EdgeInsets.only(left: 10.0, top: 10.0),
                     child: Text(
-                      widget.advert.getTitle(),
+                      widget.advert.title,
                       style: TextStyle(
                           fontSize: 20.0,
                           fontWeight: FontWeight.bold
@@ -214,7 +245,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
                 Container(
                   padding: EdgeInsets.only(right: 10.0, top: 10.0),
                   child: Text(
-                    widget.advert.getPrice().toString() + "€",
+                    "${widget.advert.price} €",
                     maxLines: 1,
                     textAlign: TextAlign.left,
                     style: TextStyle(
@@ -231,7 +262,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
                 Container(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
-                    this._owner.getName(),
+                    this._owner.name,
                     style: TextStyle(
                       fontSize: 13.0,
                       color: Colors.black54,
@@ -241,7 +272,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
                 Container(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
-                    widget.advert.getCategory(),
+                    widget.advert.category,
                     style: TextStyle(
                       fontSize: 13.0,
                       color: Colors.black54,
@@ -260,7 +291,7 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
             Container(
               padding: EdgeInsets.all(10.0),
               child: Text(
-                widget.advert.getDescription(),
+                widget.advert.description,
                 textAlign: TextAlign.left,
               ),
             ),
@@ -320,11 +351,14 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
         ],
         selectedItemColor: Colors.black54,
         unselectedItemColor: Colors.black54,
-        onTap: (int index){
-          switch(index){
+        onTap: (int index) {
+          switch(index) {
             case 0:
-              if(_owner.getPhoneNumber() != null) _onPhoneTapped(context);
-              else _showErrorAlert(context, "Aucun numéro de téléphone renseigné");
+              if (_owner.phoneNumber != null) {
+                _onPhoneTapped(context);
+              } else {
+                _showErrorAlert(context, "Aucun numéro de téléphone renseigné");
+              }
               break;
             case 1:
               _onCalendarTapped(context);
@@ -332,7 +366,6 @@ class _DetailedAdvertPageState extends State<DetailedAdvertPage> {
             case 2:
               break;
           }
-
         },
         currentIndex: _index,
       ),

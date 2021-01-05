@@ -2,18 +2,41 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/advert.dart';
-import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/TropsCategory.dart';
-import 'package:trops_app/ui/search.dart';
-import 'package:trops_app/widgets/advertTile.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:trops_app/widgets/monetization.dart';
-import 'package:trops_app/widgets/trops_scaffold.dart';
+import 'package:trops_app/core/data/advert_repository.dart';
+import 'package:trops_app/core/data/category_repository.dart';
+import 'package:trops_app/core/data/favorite_repository.dart';
+import 'package:trops_app/core/data/location_repository.dart';
+import 'package:trops_app/core/data/search_repository.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/data/user_repository.dart';
+import 'package:trops_app/core/entity/advert.dart';
+import 'package:trops_app/core/entity/trops_category.dart';
+import 'package:trops_app/ui/search.dart';
+
+import 'widgets/advertTile.dart';
+import 'widgets/monetization.dart';
+import 'widgets/trops_scaffold.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({ Key key }) : super(key: key);
+  final CategoryRepository categoryRepository;
+  final AdvertRepository advertRepository;
+  final SessionRepository sessionRepository;
+  final LocationRepository locationRepository;
+  final UserRepository userRepository;
+  final FavoriteRepository favoriteRepository;
+  final SearchRepository searchRepository;
+
+  const HomePage({
+    Key key,
+    @required this.categoryRepository,
+    @required this.advertRepository,
+    @required this.sessionRepository,
+    @required this.locationRepository,
+    @required this.userRepository,
+    @required this.favoriteRepository,
+    @required this.searchRepository,
+  }) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -34,11 +57,11 @@ class _HomePageState extends State<HomePage> {
     loadCategories();
   }
 
-  loadCategories() async {
+  void loadCategories() async {
     setState(() {
       _loadingCategories = true;
     });
-    getCategories().then( (List<TropsCategory> res) {
+    widget.categoryRepository.getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
         _loadingCategories = false;
@@ -47,11 +70,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  loadAdverts() async {
+  void loadAdverts() async {
     setState(() {
       _loadingAdverts = true;
     });
-    getAllAdverts().then( (List<Advert> res) {
+    widget.advertRepository.getAllAdverts().then( (List<Advert> res) {
       setState(() {
         _adverts = res;
         _loadingAdverts = false;
@@ -70,6 +93,12 @@ class _HomePageState extends State<HomePage> {
         }
         return AdvertTile(
           advert: _adverts[index-1],
+          advertRepository: widget.advertRepository,
+          favoriteRepository: widget.favoriteRepository,
+          userRepository: widget.userRepository,
+          categoryRepository: widget.categoryRepository,
+          locationRepository: widget.locationRepository,
+          sessionRepository: widget.sessionRepository,
         );
       },
     );
@@ -123,7 +152,16 @@ class _HomePageState extends State<HomePage> {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => SearchResultPage(preSelectedCategories: [_categories[index].id],),
+              builder: (context) => SearchResultPage(
+                preSelectedCategories: [_categories[index].id],
+                sessionRepository: widget.sessionRepository,
+                locationRepository: widget.locationRepository,
+                categoryRepository: widget.categoryRepository,
+                userRepository: widget.userRepository,
+                favoriteRepository: widget.favoriteRepository,
+                advertRepository: widget.advertRepository,
+                searchRepository: widget.searchRepository,
+              ),
             ),
           );
         },
@@ -249,6 +287,7 @@ class _HomePageState extends State<HomePage> {
     return WillPopScope(
       onWillPop: () async => false,
       child: TropsScaffold(
+        sessionRepository: widget.sessionRepository,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

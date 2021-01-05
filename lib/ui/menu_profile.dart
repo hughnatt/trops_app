@@ -1,24 +1,29 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:trops_app/api/auth.dart';
-import 'package:trops_app/utils/session.dart';
-import 'package:trops_app/api/user.dart';
-import 'package:http/http.dart' as Http;
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/data/user_repository.dart';
 
 class MenuProfile extends StatefulWidget{
+
+  final SessionRepository sessionRepository;
+  final UserRepository userRepository;
+
+  const MenuProfile({
+    Key key,
+    @required this.sessionRepository,
+    @required this.userRepository
+  }) : super(key: key);
 
   @override
   _MenuProfileState createState() => _MenuProfileState();
 
 }
 
-class _MenuProfileState extends State<MenuProfile>{
+class _MenuProfileState extends State<MenuProfile> {
 
-  TextEditingController _emailController = TextEditingController(text: Session.currentUser.getEmail());
-  TextEditingController _phoneNumberController = TextEditingController(text: Session.currentUser.getPhoneNumber());
-  TextEditingController _nameController = TextEditingController(text: Session.currentUser.getName());
+  TextEditingController _emailController;
+  TextEditingController _phoneNumberController;
+  TextEditingController _nameController;
 
   TextEditingController _currentPassword = TextEditingController();
   TextEditingController _newPassword = TextEditingController();
@@ -31,6 +36,14 @@ class _MenuProfileState extends State<MenuProfile>{
   bool _isUpdatingEmail = false;
   bool _isUpdatingPhoneNumber = false;
   bool _isUpdatingName = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.sessionRepository.currentUser().email);
+    _phoneNumberController = TextEditingController(text: widget.sessionRepository.currentUser().phoneNumber);
+    _nameController = TextEditingController(text: widget.sessionRepository.currentUser().name);
+  }
 
   Future<void> showError(String message){
     return showDialog<String>(
@@ -52,78 +65,46 @@ class _MenuProfileState extends State<MenuProfile>{
     setState(() {
       _isUpdatingEmail = true;
     });
-    Http.Response res;
-    try{
-      res = await modifyUser("email",_emailController.text);
-    } catch(Err){
+    try {
+      await widget.userRepository.modifyUser("email", _emailController.text);
+    } catch (exception) {
       showError("Impossible de modifier le mail, réessayer plus tard");
     }
     setState(() {
       _isUpdatingEmail = false;
     });
-    if(res.statusCode != 200){
-      showError("Impossible de modifier le mail, réessayer plus tard");
-    }
   }
 
   void changePassword() async {
-
     setState(() {
       _isUpdatingPassword = true;
+      _backgroundCurrentPassword = Colors.white;
     });
-    AuthResult resLogin;
-    try{
-      resLogin = await login(Session.currentUser.getEmail(),_currentPassword.text);
-    } catch(Err){
-      showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
+    if (_newPassword.text == _confirmationPassword.text) {
       setState(() {
-        _isUpdatingPassword = false;
-      });
-      return;
-    }
-
-
-    if(resLogin.token != null){
-      setState(() {
+        _backgroundNewPassword = Colors.white;
         _backgroundCurrentPassword = Colors.white;
       });
-      if(_newPassword.text == _confirmationPassword.text){
+      try {
+        await widget.userRepository.modifyPassword(_newPassword.text);
+      } catch (Err) {
+        showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
         setState(() {
-          _backgroundNewPassword = Colors.white;
-          _backgroundCurrentPassword = Colors.white;
+          _isUpdatingPassword = false;
         });
-        Http.Response resModif;
-        try{
-          resModif = await modifyPassword(_newPassword.text);
-        } catch(Err){
-          showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
-          setState(() {
-            _isUpdatingPassword = false;
-          });
-          return;
-        }
-
-        print(resModif.statusCode);
-        if(resModif.statusCode == 200){
-          setState(() {
-            _confirmationPassword.text = "";
-            _newPassword.text = "";
-            _currentPassword.text = "";
-          });
-        } else {
-          showError("Impossible de modifier le mot de passe, veuillez réessayer plus tard");
-        }
-      } else {
+        return;
+      } finally {
         setState(() {
-          _backgroundNewPassword = Colors.redAccent;
+          _confirmationPassword.text = "";
+          _newPassword.text = "";
+          _currentPassword.text = "";
         });
       }
     } else {
       setState(() {
-        _backgroundCurrentPassword = Colors.redAccent;
+        _backgroundNewPassword = Colors.redAccent;
       });
     }
-
     setState(() {
       _isUpdatingPassword = false;
     });
@@ -133,48 +114,30 @@ class _MenuProfileState extends State<MenuProfile>{
     setState(() {
       _isUpdatingPhoneNumber = true;
     });
-    Http.Response res;
-    try{
-      res= await modifyUser("phoneNumber",_phoneNumberController.text);
-    } catch(Err){
+    try {
+      await widget.userRepository.modifyUser("phoneNumber", _phoneNumberController.text);
+    } catch(exception) {
       showError("Impossible de modifiez le numéro de téléphone, veuillez réessayer plus tard");
+    } finally {
       setState(() {
         _isUpdatingPhoneNumber = false;
       });
-      return;
     }
-
-    setState(() {
-      _isUpdatingPhoneNumber = false;
-    });
-    if(res.statusCode != 200){
-      showError("Impossible de modifiez le numéro de téléphone, veuillez réessayer plus tard");
-    }
-    print(res.statusCode);
   }
 
   void changeName() async {
     setState(() {
       _isUpdatingName= true;
     });
-    Http.Response res;
-    try{
-      res = await modifyUser("name",_nameController.text);
+    try {
+      await widget.userRepository.modifyUser("name", _nameController.text);
     } catch(Err){
       showError("Impossible de modifiez le pseudo, veuillez réessayer plus tard");
+    } finally {
       setState(() {
         _isUpdatingName= false;
       });
-      return;
     }
-
-    setState(() {
-      _isUpdatingName= false;
-    });
-    if(res.statusCode != 200){
-      showError("Impossible de modifiez le pseudo, veuillez réessayer plus tard");
-    }
-    print(res.statusCode);
   }
 
   Widget _confirmEmail(){
@@ -211,7 +174,7 @@ class _MenuProfileState extends State<MenuProfile>{
   }
 
   Widget _confirmName(){
-    if(_isUpdatingPhoneNumber){
+    if(_isUpdatingName){
       return CircularProgressIndicator();
     } else {
       return FlatButton(
@@ -227,13 +190,9 @@ class _MenuProfileState extends State<MenuProfile>{
       appBar: AppBar(
         title: Text("Menu"),
       ),
-
       body: SingleChildScrollView(
-
         child: Column(
-
           children: <Widget>[
-
             Padding(
               padding: EdgeInsets.all(25),
               child: Material(
@@ -253,7 +212,6 @@ class _MenuProfileState extends State<MenuProfile>{
                 ),
               ),
             ),
-
            Padding(
              padding: EdgeInsets.all(25),
              child: Material(
@@ -297,7 +255,6 @@ class _MenuProfileState extends State<MenuProfile>{
                 ),
               ),
             ),
-
             Padding(
               padding: EdgeInsets.all(25),
               child: Material(
@@ -318,7 +275,6 @@ class _MenuProfileState extends State<MenuProfile>{
                 ),
               ),
             ),
-
             Padding(
               padding: EdgeInsets.all(25),
               child: Material(
@@ -338,10 +294,6 @@ class _MenuProfileState extends State<MenuProfile>{
                 ),
               ),
             ),
-
-
-
-
             ExpansionTile(
               leading: Icon(Icons.attach_file),
               title: Text("Conditions Généréles d'Utilisation"),
@@ -349,7 +301,6 @@ class _MenuProfileState extends State<MenuProfile>{
                 Text("CGU"),
               ],
             ),
-
             ExpansionTile(
               leading: Icon(Icons.info),
               title: Text("A propos"),
@@ -359,10 +310,7 @@ class _MenuProfileState extends State<MenuProfile>{
             ),
           ],
         ),
-
       ),
     );
   }
-
-
 }

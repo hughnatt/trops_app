@@ -1,57 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:trops_app/api/category.dart';
-import 'package:trops_app/api/search.dart';
-import 'package:trops_app/models/Advert.dart';
-import 'package:trops_app/models/Location.dart';
-import 'package:trops_app/models/TropsCategory.dart';
-import 'package:trops_app/widgets/advertTile.dart';
-import 'package:trops_app/widgets/autocompleteSearch.dart';
-import 'package:trops_app/widgets/trops_scaffold.dart';
+import 'package:trops_app/core/data/advert_repository.dart';
+import 'package:trops_app/core/data/category_repository.dart';
+import 'package:trops_app/core/data/favorite_repository.dart';
+import 'package:trops_app/core/data/location_repository.dart';
+import 'package:trops_app/core/data/search_repository.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+import 'package:trops_app/core/data/user_repository.dart';
+import 'package:trops_app/core/entity/advert.dart';
+import 'package:trops_app/core/entity/location.dart';
+import 'package:trops_app/core/entity/search_body.dart';
+import 'package:trops_app/core/entity/trops_category.dart';
+
+import 'widgets/advertTile.dart';
+import 'widgets/autocompleteSearch.dart';
+import 'widgets/trops_scaffold.dart';
 
 class SearchResultPage extends StatefulWidget {
 
   final List<String> preSelectedCategories;
-  SearchResultPage({this.preSelectedCategories, Key key}) : super(key: key);
+  final CategoryRepository categoryRepository;
+  final SearchRepository searchRepository;
+  final SessionRepository sessionRepository;
+  final LocationRepository locationRepository;
+  final UserRepository userRepository;
+  final FavoriteRepository favoriteRepository;
+  final AdvertRepository advertRepository;
 
+  const SearchResultPage({
+    Key key,
+    this.preSelectedCategories,
+    @required this.categoryRepository,
+    @required this.searchRepository,
+    @required this.sessionRepository,
+    @required this.locationRepository,
+    @required this.userRepository,
+    @required this.favoriteRepository,
+    @required this.advertRepository
+  }) : super(key: key);
 
   @override
   _SearchResultPageState createState() => _SearchResultPageState();
-
 }
 
 Map<String,bool> _categorySelected = Map<String,bool>();
 
-class _SearchResultPageState extends State<SearchResultPage>{
+class _SearchResultPageState extends State<SearchResultPage> {
+  static const int PRICE_MAX = 500;
+  static const int PRICE_MIN = 0;
+  static const String DEFAULT_CITY = "Toute la France";
+  static const int DEFAULT_DISTANCE = 5;
+
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   GlobalKey<AutocompleteState> _autocomplete = GlobalKey<AutocompleteState>();
-
   List<Advert> _adverts = new List<Advert>();
-
   List<DateTime> picked;
-
   TextEditingController _keywordController = TextEditingController();
   TextEditingController _priceMinController = TextEditingController();
   TextEditingController _priceMaxController = TextEditingController();
   RangeValues _priceRange = RangeValues(0.0,1.0);
-
-
-
-  static const int PRICE_MAX = 500;
-  static const int PRICE_MIN = 0;
-
-  static const String DEFAULT_CITY = "Toute la France";
-  static const int DEFAULT_DISTANCE = 5;
-
   String _city = DEFAULT_CITY;
   int _distance = DEFAULT_DISTANCE;
   Location _selectedLocation;
-
   String _sortField = "creationDate";
   int _sortOrder = -1;
-
   String _selectedField = "DATE DE CREATION";
-
 
   List<TropsCategory> _categories = List<TropsCategory>();
 
@@ -67,6 +80,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
     'DATE DE CREATION',
     'PRIX'
   ];
+
   final List<PopupMenuItem<String>> _dropDownFieldsMenu = _sortFields.map(
       (String value) => PopupMenuItem<String>(
         value : value,
@@ -110,7 +124,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
   }
 
   void loadCategories() async {
-    getCategories().then( (List<TropsCategory> res) {
+    widget.categoryRepository.getCategories().then( (List<TropsCategory> res) {
       setState(() {
         _categories = res;
         _resetCategories(_categories);
@@ -146,7 +160,18 @@ class _SearchResultPageState extends State<SearchResultPage>{
       }
     });
 
-    getResults(_keywordController.text, priceMin, priceMax, categories, _selectedLocation?.getCoordinates(), _distance, _sortField, _sortOrder).then((res) {
+    widget.searchRepository.getResults(
+      searchBody: SearchBody(
+        text: _keywordController.text,
+        priceMin: priceMin,
+        priceMax: priceMax,
+        categories: categories,
+        location: _selectedLocation?.getCoordinates(),
+        distance: _distance
+      ),
+      sortField: _sortField,
+      sortOrder: _sortOrder
+    ).then((res) {
       setState(() {
         _adverts = res;
       });
@@ -183,7 +208,10 @@ class _SearchResultPageState extends State<SearchResultPage>{
                     ),
                     child: Padding(
                       padding: EdgeInsets.only(left: 5.0, right: 5.0),
-                      child: Autocomplete(key: _autocomplete),
+                      child: Autocomplete(
+                        key: _autocomplete,
+                        locationRepository: widget.locationRepository,
+                      ),
                     ),
                   ),
                   Padding(
@@ -255,6 +283,12 @@ class _SearchResultPageState extends State<SearchResultPage>{
               (BuildContext context, int index) {
             return AdvertTile(
               advert: _adverts[index],
+              advertRepository: widget.advertRepository,
+              locationRepository: widget.locationRepository,
+              categoryRepository: widget.categoryRepository,
+              sessionRepository: widget.sessionRepository,
+              userRepository: widget.userRepository,
+              favoriteRepository: widget.favoriteRepository,
             );
           },
           childCount: _adverts.length,
@@ -554,6 +588,7 @@ class _SearchResultPageState extends State<SearchResultPage>{
       drawer: Drawer(
         child: _buildFiltersDrawer(),
       ),
+      sessionRepository: widget.sessionRepository,
 
     );
   }

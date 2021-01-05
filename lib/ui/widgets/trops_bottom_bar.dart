@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:trops_app/core/data/session_repository.dart';
+
+class TropsBottomAppBar extends StatelessWidget {
+
+  final SessionRepository sessionRepository;
+
+  const TropsBottomAppBar({@required this.sessionRepository});
+
+  void _onHomePressed(BuildContext context){
+    if(ModalRoute.of(context).settings.name != "/"){
+      Navigator.pushNamed(context, "/");
+    }
+  }
+
+  void _onSearchPressed(BuildContext context){
+    if(ModalRoute.of(context).settings.name != "/search"){
+      Navigator.pushNamed(context, "/search");
+    }
+  }
+
+  void _onNotificationsPressed(BuildContext context){
+  }
+
+  void _onProfilePressed(BuildContext context){
+    if (sessionRepository.isAuthenticated()){
+      if(ModalRoute.of(context).settings.name != "/profile"){
+        Navigator.pushNamed(context, "/profile");
+      }
+    } else {
+      if(ModalRoute.of(context).settings.name != "/auth"){
+        Navigator.pushNamed(context, "/auth", arguments: "/profile");
+      }
+    }
+  }
+
+  Color _whatColorToPaint(BuildContext context, String path){
+    if(ModalRoute.of(context).settings.name == path){
+      return Colors.blue;
+    } else {
+      return Colors.black54;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      child: Container(
+        height: 50.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            SizedBox(width: 1),
+            IconButton(icon: Icon(Icons.home,size: 30,color: _whatColorToPaint(context, "/"),), onPressed: () => _onHomePressed(context),),
+            IconButton(icon: Icon(Icons.search,size: 30,color: _whatColorToPaint(context, "/search")), onPressed: () => _onSearchPressed(context),),
+            SizedBox(width: 40), // The dummy child
+            IconButton(icon: Icon(FontAwesomeIcons.bell,color: _whatColorToPaint(context, "")), onPressed: () => _onNotificationsPressed(context),),
+            IconButton(icon: Icon(FontAwesomeIcons.user,color: _whatColorToPaint(context, "/profile")), onPressed: ()=> _onProfilePressed(context),),
+            SizedBox(width: 1),
+          ],
+        ),
+      ),
+    );
+  }
+}

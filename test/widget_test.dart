@@ -9,11 +9,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:trops_app/main.dart';
+import 'package:trops_app/utils/DependencyManager.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(TropsApp());
+    await tester.pumpWidget(TropsApp(
+      userRepository: DependencyManager.shared.userRepository(),
+      favoriteRepository: DependencyManager.shared.favoriteRepository(),
+      searchRepository: DependencyManager.shared.searchRepository(),
+      categoryRepository: DependencyManager.shared.categoryRepository(),
+      sessionRepository: DependencyManager.shared.sessionRepository(),
+      advertRepository: DependencyManager.shared.advertRepository(),
+      locationRepository: DependencyManager.shared.locationRepository(),
+      authInteractor: DependencyManager.shared.authInteractor(),
+    ));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);
